@@ -1,0 +1,10 @@
+---
+- name: AI patching bootstrap
+  hosts: all
+  gather_facts: false
+  vars:
+    ai_message: "Bootstrap playbook reached successfully. Replace or extend this with generated remediation logic."
+  tasks:
+    - name: Show bootstrap message
+      ansible.builtin.debug:
+        msg: "{{ ai_message }}"
