@@ -1,0 +1,8 @@
+---
+- name: Test playbook from local GitHub MCP server
+  hosts: all
+  gather_facts: false
+  tasks:
+    - name: Hello from local GitHub MCP
+      ansible.builtin.debug:
+        msg: "Hello from local GitHub MCP"
