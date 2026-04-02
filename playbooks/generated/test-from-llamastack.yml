@@ -1,0 +1,8 @@
+---
+- name: Test playbook from Llama Stack GitHub MCP
+  hosts: all
+  gather_facts: false
+  tasks:
+    - name: Hello from GitHub MCP
+      ansible.builtin.debug:
+        msg: "Hello from GitHub MCP"
