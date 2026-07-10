@@ -1,0 +1,9 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+resources:
+  - insights-mcp-deployment.yaml
+  - insights-mcp-service.yaml
+  # Optional — uncomment after building/pushing ansible MCP image
+  # - ansible-mcp-deployment.yaml
+  # - ansible-mcp-service.yaml

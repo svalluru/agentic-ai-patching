@@ -1,0 +1,38 @@
+# --- OpenShift cluster secrets ---
+src/openshift/.env.openshift
+
+# --- Local dev secrets / env (see src/local/README.md) ---
+src/local/cve_console/.env
+src/local/.env
+src/local/.env.*
+!src/local/.env.example
+
+# --- Local runtime ---
+src/local/*.log
+src/local/*.pid
+src/local/cve_console/state.json
+
+# --- Generated playbooks (local checkout; AAP uses repo playbooks/ at root) ---
+src/local/playbooks/generated/
+
+# --- Nested clone of playbook repo ---
+src/local/agentic-ai-patching/
+src/local/agentic-ai-patching.bak/
+
+# --- Python ---
+__pycache__/
+*.py[cod]
+src/local/__pycache__/
+.Python
+.venv/
+venv/
+
+# --- OS / editor ---
+.DS_Store
+.idea/
+*.swp
+*~
+
+# --- Runtime leftovers ---
+*.log
+*.pid

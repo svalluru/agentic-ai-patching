@@ -1,0 +1,9 @@
+# In-cluster Llama Stack HTTP URL. Verify on your cluster:
+#   oc get svc -n agentic-patching | grep -E 'llama|llsd'
+# Common operator names: agentic-patching-llsd-service, agentic-patching-llsd-llama-stack
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: agentic-patching-llamastack-endpoint
+data:
+  LLAMA_STACK_URL: "http://agentic-patching-llsd-service:8321"

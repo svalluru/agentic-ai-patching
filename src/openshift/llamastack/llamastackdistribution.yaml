@@ -1,0 +1,89 @@
+apiVersion: llamastack.io/v1alpha1
+kind: LlamaStackDistribution
+metadata:
+  name: agentic-patching-llsd
+spec:
+  replicas: 1
+  server:
+    distribution:
+      name: rh-dev
+    containerSpec:
+      name: llama-stack
+      port: 8321
+      command:
+        - /bin/bash
+        - /etc/llama-stack/lsd-startup.sh
+      resources:
+        requests:
+          cpu: 500m
+          memory: 2Gi
+        limits:
+          cpu: "4"
+          memory: 12Gi
+      env:
+        # PostgreSQL metadata store (required RHOAI 3.2+ / llama-stack 0.7.x rh config)
+        - name: POSTGRES_HOST
+          value: llamastack-postgres
+        - name: POSTGRES_PORT
+          value: "5432"
+        - name: POSTGRES_DB
+          value: llamastack
+        - name: POSTGRES_USER
+          value: llamastack
+        - name: POSTGRES_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: llamastack-postgres-secret
+              key: password
+        - name: ENABLE_SENTENCE_TRANSFORMERS
+          value: "true"
+        - name: INFERENCE_MODEL
+          valueFrom:
+            secretKeyRef:
+              name: llama-stack-inference-model-secret
+              key: INFERENCE_MODEL
+        - name: VLLM_MAX_TOKENS
+          value: "4096"
+        - name: VLLM_URL
+          valueFrom:
+            secretKeyRef:
+              name: llama-stack-inference-model-secret
+              key: VLLM_URL
+        - name: VLLM_TLS_VERIFY
+          valueFrom:
+            secretKeyRef:
+              name: llama-stack-inference-model-secret
+              key: VLLM_TLS_VERIFY
+        - name: VLLM_API_TOKEN
+          valueFrom:
+            secretKeyRef:
+              name: llama-stack-inference-model-secret
+              key: VLLM_API_TOKEN
+        - name: MILVUS_ENDPOINT
+          valueFrom:
+            secretKeyRef:
+              name: milvus-secret
+              key: MILVUS_ENDPOINT
+        - name: MILVUS_TOKEN
+          valueFrom:
+            secretKeyRef:
+              name: milvus-secret
+              key: MILVUS_TOKEN
+        - name: MILVUS_CONSISTENCY_LEVEL
+          valueFrom:
+            secretKeyRef:
+              name: milvus-secret
+              key: MILVUS_CONSISTENCY_LEVEL
+    userConfig:
+      configMapName: agentic-patching-llamastack-config
+      configMapNamespace: agentic-patching
+    # server.storage triggers operator 0.4.0 bug (emptyDir + PVC on same volume).
+    # Persist uploaded RAG files via a dedicated PVC at .../rh/files only.
+    podOverrides:
+      volumes:
+        - name: lsd-files-data
+          persistentVolumeClaim:
+            claimName: agentic-patching-llsd-files
+      volumeMounts:
+        - name: lsd-files-data
+          mountPath: /opt/app-root/src/.llama/distributions/rh/files

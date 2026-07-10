@@ -1,0 +1,66 @@
+# Alternative: use the operator's built-in rh-dev config (no custom config.yaml).
+# Recommended first try if you only need remote Milvus + vLLM and can adapt
+# the app to 0.7 APIs. Copy over llamastackdistribution.yaml and delete
+# spec.server.userConfig, then remove llamastack/ from kustomization resources
+# (or delete the configMapGenerator in llamastack/kustomization.yaml).
+#
+# See openshift/README.md section "Llama Stack 0.7 vs local 0.3.x".
+apiVersion: llamastack.io/v1alpha1
+kind: LlamaStackDistribution
+metadata:
+  name: agentic-patching-llsd
+spec:
+  replicas: 1
+  server:
+    distribution:
+      name: rh-dev
+    containerSpec:
+      name: llama-stack
+      port: 8321
+      resources:
+        requests:
+          cpu: 500m
+          memory: 2Gi
+        limits:
+          cpu: "4"
+          memory: 12Gi
+      env:
+        - name: VLLM_MAX_TOKENS
+          value: "4096"
+        - name: INFERENCE_MODEL
+          valueFrom:
+            secretKeyRef:
+              name: llama-stack-inference-model-secret
+              key: INFERENCE_MODEL
+        - name: VLLM_URL
+          valueFrom:
+            secretKeyRef:
+              name: llama-stack-inference-model-secret
+              key: VLLM_URL
+        - name: VLLM_TLS_VERIFY
+          valueFrom:
+            secretKeyRef:
+              name: llama-stack-inference-model-secret
+              key: VLLM_TLS_VERIFY
+        - name: VLLM_API_TOKEN
+          valueFrom:
+            secretKeyRef:
+              name: llama-stack-inference-model-secret
+              key: VLLM_API_TOKEN
+        - name: MILVUS_ENDPOINT
+          valueFrom:
+            secretKeyRef:
+              name: milvus-secret
+              key: MILVUS_ENDPOINT
+        - name: MILVUS_TOKEN
+          valueFrom:
+            secretKeyRef:
+              name: milvus-secret
+              key: MILVUS_TOKEN
+        - name: MILVUS_CONSISTENCY_LEVEL
+          valueFrom:
+            secretKeyRef:
+              name: milvus-secret
+              key: MILVUS_CONSISTENCY_LEVEL
+  storage:
+    size: 20Gi

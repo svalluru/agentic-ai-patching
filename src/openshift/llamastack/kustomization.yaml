@@ -1,0 +1,21 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+resources:
+  - llamastackdistribution.yaml
+  - lsd-files-pvc.yaml
+  - postgres-pvc.yaml
+  - postgres-deployment.yaml
+  - postgres-service.yaml
+  - service-endpoint-configmap.yaml
+
+configMapGenerator:
+  - name: agentic-patching-llamastack-config
+    files:
+      # Operator mounts userConfig at /etc/llama-stack/ (read-only).
+      - config.yaml=run.yaml
+      - lsd-startup.sh
+      - patch-milvus-openai-cache.py
+
+generatorOptions:
+  disableNameSuffixHash: true

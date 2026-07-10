@@ -1,0 +1,185 @@
+#llama stack run --enable-ui librun.yaml
+apis:
+- agents
+- batches
+- datasetio
+- eval
+- files
+- inference
+- post_training
+- safety
+- scoring
+- tool_runtime
+- vector_io
+container_image: null
+external_apis_dir: null
+external_providers_dir: null
+image_name: starter
+logging: null
+providers:
+  agents:
+  - config:
+      persistence:
+        agent_state:
+          backend: kv_default
+          namespace: agents
+        responses:
+          backend: sql_default
+          max_write_queue_size: 10000
+          num_writers: 4
+          table_name: responses
+    module: null
+    provider_id: meta-reference
+    provider_type: inline::meta-reference
+  batches:
+  - config:
+      kvstore:
+        backend: kv_default
+        namespace: batches
+    module: null
+    provider_id: reference
+    provider_type: inline::reference
+  datasetio:
+  - config:
+      kvstore:
+        backend: kv_default
+        namespace: datasetio::localfs
+    module: null
+    provider_id: localfs
+    provider_type: inline::localfs
+  eval:
+  - config:
+      kvstore:
+        backend: kv_default
+        namespace: eval
+    module: null
+    provider_id: meta-reference
+    provider_type: inline::meta-reference
+  files:
+  - config:
+      metadata_store:
+        backend: sql_default
+        table_name: files_metadata
+      storage_dir: /Users/svalluru/.llama/distributions/starter/files
+    module: null
+    provider_id: meta-reference-files
+    provider_type: inline::localfs
+  inference:
+  - provider_id: llama-17b
+    provider_type: remote::vllm
+    config:
+      url: https://maas-rhdp.apps.maas.redhatworkshops.io/v1
+      max_tokens: 36000
+      api_token: sk-xxxxxx
+      tls_verify: false
+  - config: {}
+    module: null
+    provider_id: sentence-transformers
+    provider_type: inline::sentence-transformers
+  post_training:
+  - config:
+      checkpoint_format: meta
+    module: null
+    provider_id: torchtune-cpu
+    provider_type: inline::torchtune-cpu
+  safety:
+  - config:
+      excluded_categories: []
+    module: null
+    provider_id: llama-guard
+    provider_type: inline::llama-guard
+  - config: {}
+    module: null
+    provider_id: code-scanner
+    provider_type: inline::code-scanner
+  scoring:
+  - config: {}
+    module: null
+    provider_id: basic
+    provider_type: inline::basic
+  tool_runtime:                                                                                                
+  - config: {}                                                                                                 
+    provider_id: rag-runtime                                                                                   
+    provider_type: inline::rag-runtime                                                                         
+  - config: {}                                                                                                 
+    provider_id: model-context-protocol                                                                        
+    provider_type: remote::model-context-protocol                                                              
+  vector_io:
+  - config:
+      uri: http://localhost:19530
+      token: ""
+      persistence:
+        backend: kv_default
+        namespace: vector_io::milvus_remote
+    provider_id: milvus
+    provider_type: remote::milvus
+registered_resources:
+  benchmarks: []
+  datasets: []
+  models: []
+  scoring_fns: []
+  shields:
+  - params: null
+    provider_id: null
+    provider_shield_id: null
+    shield_id: llama-guard
+  - params: null
+    provider_id: null
+    provider_shield_id: null
+    shield_id: code-scanner
+  tool_groups:
+  - toolgroup_id: builtin::rag
+    provider_id: rag-runtime
+  - toolgroup_id: mcp::insights-sse
+    provider_id: model-context-protocol
+    mcp_endpoint:
+      uri: http://localhost:8000/mcp
+  - toolgroup_id: mcp::github-remote
+    provider_id: model-context-protocol
+    mcp_endpoint:
+      # Local SSE bridge (mcp-proxy): http://localhost:9800/sse
+      # GitHub Remote MCP (no local server): https://api.githubcopilot.com/mcp/
+      uri: "https://api.githubcopilot.com/mcp/"
+  - toolgroup_id: mcp::ansible
+    provider_id: model-context-protocol
+    mcp_endpoint:
+      uri: "http://localhost:9787/mcp"
+  vector_stores:
+  - vector_store_id: vs_83ad9da7-beaf-49de-ba47-c19da320d7db
+    embedding_model: nomic-ai/nomic-embed-text-v1.5
+    embedding_dimension: 768
+    provider_id: milvus
+    provider_vector_store_id: vs_83ad9da7-beaf-49de-ba47-c19da320d7db
+server:
+  port: 8321
+  workers: 1
+storage:
+  backends:
+    kv_default:
+      type: kv_sqlite
+      db_path: ${env.SQLITE_STORE_DIR:=~/.llama/distributions/ollama}/kvstore.db
+    sql_default:
+      type: sql_sqlite
+      db_path: ${env.SQLITE_STORE_DIR:=~/.llama/distributions/ollama}/sqlstore.db
+  stores:
+    conversations:
+      backend: sql_default
+      table_name: openai_conversations
+    inference:
+      backend: sql_default
+      max_write_queue_size: 10000
+      num_writers: 4
+      table_name: inference_store
+    metadata:
+      backend: kv_default
+      namespace: registry
+    responses: null
+telemetry:
+  enabled: true
+vector_stores:
+  default_embedding_model:
+    model_id: nomic-ai/nomic-embed-text-v1.5
+    provider_id: sentence-transformers
+  default_provider_id: milvus
+version: 2
+

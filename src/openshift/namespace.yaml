@@ -1,0 +1,7 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: agentic-patching
+  labels:
+    app.kubernetes.io/part-of: agentic-patching-console
+    openshift.io/user-monitoring: "true"

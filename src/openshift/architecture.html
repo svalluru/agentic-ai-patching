@@ -1,0 +1,1086 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Agentic Patching Console — Architecture</title>
+  <style>
+    :root {
+      --bg: #0b1020;
+      --panel: #151c33;
+      --panel-2: #1c2547;
+      --text: #e7ecff;
+      --muted: #9aa7d1;
+      --accent: #6ea8fe;
+      --accent-2: #4ecdc4;
+      --border: #2a355f;
+      --step-bg: #243056;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: Inter, system-ui, -apple-system, Segoe UI, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.5;
+    }
+    .wrap {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 32px 24px 48px;
+    }
+    header {
+      margin-bottom: 32px;
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 24px;
+    }
+    h1 {
+      margin: 0 0 8px;
+      font-size: 1.75rem;
+      font-weight: 700;
+      color: var(--text);
+    }
+    .subtitle {
+      color: var(--muted);
+      font-size: 1rem;
+      margin: 0;
+    }
+    .badges {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 16px;
+    }
+    .badge {
+      font-size: 0.75rem;
+      font-weight: 600;
+      padding: 4px 10px;
+      border-radius: 999px;
+      background: var(--panel);
+      border: 1px solid var(--border);
+      color: var(--muted);
+    }
+    h2 {
+      font-size: 1.15rem;
+      color: var(--accent);
+      margin: 0 0 16px;
+      font-weight: 600;
+    }
+    section {
+      margin-bottom: 40px;
+    }
+
+    /* Architecture diagram */
+    .arch-grid {
+      display: grid;
+      grid-template-columns: 1fr auto 1fr;
+      gap: 16px;
+      align-items: center;
+    }
+    @media (max-width: 900px) {
+      .arch-grid { grid-template-columns: 1fr; }
+      .arch-arrow { display: none; }
+    }
+    .arch-col {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+    .arch-box {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 14px 16px;
+      position: relative;
+    }
+    .arch-box.highlight {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 1px rgba(110, 168, 254, 0.2);
+    }
+    .arch-box h3 {
+      margin: 0 0 4px;
+      font-size: 0.9rem;
+      font-weight: 700;
+      color: var(--accent-2);
+    }
+    .arch-box p {
+      margin: 0;
+      font-size: 0.8rem;
+      color: var(--muted);
+    }
+    .arch-center {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+      min-width: 120px;
+    }
+    .arch-arrow {
+      color: var(--accent);
+      font-size: 1.5rem;
+      opacity: 0.7;
+    }
+    .hub {
+      background: linear-gradient(135deg, var(--panel-2), var(--panel));
+      border: 2px solid var(--accent);
+      border-radius: 16px;
+      padding: 20px;
+      text-align: center;
+      min-width: 160px;
+    }
+    .hub h3 {
+      margin: 0;
+      font-size: 1rem;
+      color: var(--accent);
+    }
+    .hub p {
+      margin: 6px 0 0;
+      font-size: 0.75rem;
+      color: var(--muted);
+    }
+
+    /* Numbered flow */
+    .flow {
+      display: flex;
+      flex-direction: column;
+      gap: 0;
+    }
+    .flow-step {
+      display: grid;
+      grid-template-columns: 48px 1fr;
+      gap: 16px;
+      align-items: start;
+      position: relative;
+    }
+    .flow-step:not(:last-child)::after {
+      content: '';
+      position: absolute;
+      left: 23px;
+      top: 48px;
+      bottom: -8px;
+      width: 2px;
+      background: var(--border);
+    }
+    .step-num {
+      width: 48px;
+      height: 48px;
+      border-radius: 50%;
+      background: var(--step-bg);
+      border: 2px solid var(--accent);
+      color: var(--accent);
+      font-weight: 800;
+      font-size: 1.1rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      z-index: 1;
+    }
+    .step-body {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 16px 18px;
+      margin-bottom: 16px;
+    }
+    .step-body h3 {
+      margin: 0 0 6px;
+      font-size: 1rem;
+      font-weight: 600;
+    }
+    .step-body p {
+      margin: 0 0 8px;
+      font-size: 0.875rem;
+      color: var(--muted);
+    }
+    .step-meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 8px;
+    }
+    .tag {
+      font-size: 0.7rem;
+      font-weight: 600;
+      padding: 3px 8px;
+      border-radius: 6px;
+      background: var(--panel-2);
+      color: var(--accent-2);
+      border: 1px solid var(--border);
+    }
+    .tag.external { color: #ffb86c; }
+    .tag.ui { color: #bd93f9; }
+
+    /* Two column layout for flow + legend */
+    .two-col {
+      display: grid;
+      grid-template-columns: 1fr 280px;
+      gap: 32px;
+      align-items: start;
+    }
+    @media (max-width: 800px) {
+      .two-col { grid-template-columns: 1fr; }
+    }
+    .legend {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 18px;
+      position: sticky;
+      top: 16px;
+    }
+    .legend h3 {
+      margin: 0 0 12px;
+      font-size: 0.85rem;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+    .legend ul {
+      margin: 0;
+      padding: 0;
+      list-style: none;
+    }
+    .legend li {
+      font-size: 0.8rem;
+      color: var(--muted);
+      padding: 6px 0;
+      border-bottom: 1px solid var(--border);
+    }
+    .legend li:last-child { border-bottom: none; }
+    .legend strong { color: var(--text); }
+
+    footer {
+      margin-top: 32px;
+      padding-top: 20px;
+      border-top: 1px solid var(--border);
+      font-size: 0.8rem;
+      color: var(--muted);
+    }
+    footer a { color: var(--accent); }
+
+    /* Compact slide block — light rectangle for copy/paste into decks */
+    .slide-section { margin-top: 48px; }
+    .slide-hint {
+      font-size: 0.8rem;
+      color: var(--muted);
+      margin: 0 0 12px;
+    }
+    .flow-slide {
+      background: #ffffff;
+      color: #1a1a2e;
+      border: 2px solid #2a5298;
+      border-radius: 8px;
+      padding: 20px 24px;
+      max-width: 960px;
+      box-shadow: 0 4px 24px rgba(0, 0, 0, 0.35);
+    }
+    .flow-slide-title {
+      margin: 0 0 14px;
+      font-size: 0.95rem;
+      font-weight: 700;
+      color: #1a3a6b;
+      text-align: center;
+      letter-spacing: 0.02em;
+    }
+    .flow-slide-grid {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 10px 8px;
+    }
+    @media (max-width: 800px) {
+      .flow-slide-grid { grid-template-columns: repeat(2, 1fr); }
+    }
+    .flow-slide-cell {
+      border: 1px solid #c5d4ef;
+      border-radius: 6px;
+      padding: 10px 8px;
+      min-height: 72px;
+      background: #f4f7fc;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      position: relative;
+    }
+    @media (min-width: 801px) {
+      .flow-slide-cell:not(:nth-child(5n))::after {
+        content: '→';
+        position: absolute;
+        right: -10px;
+        top: 50%;
+        transform: translateY(-50%);
+        color: #2e7d32;
+        font-size: 0.85rem;
+        font-weight: 800;
+        z-index: 1;
+      }
+      .flow-slide-cell:nth-child(5)::after,
+      .flow-slide-cell:nth-child(10)::after {
+        content: none;
+      }
+    }
+    .flow-slide-cell .num {
+      width: 26px;
+      height: 26px;
+      border-radius: 50%;
+      background: #1a3a6b;
+      color: #fff;
+      font-size: 0.8rem;
+      font-weight: 800;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 6px;
+      flex-shrink: 0;
+    }
+    .flow-slide-cell .label {
+      font-size: 0.68rem;
+      font-weight: 700;
+      color: #1a3a6b;
+      line-height: 1.25;
+    }
+    .flow-slide-cell .sub {
+      font-size: 0.58rem;
+      color: #5a6a8a;
+      margin-top: 4px;
+      line-height: 1.2;
+    }
+    .flow-slide-footer {
+      margin-top: 12px;
+      padding-top: 10px;
+      border-top: 1px solid #dde5f5;
+      font-size: 0.6rem;
+      color: #5a6a8a;
+      text-align: center;
+    }
+
+    /* PoC reference diagram — numbered, slide-ready rectangle */
+    .poc-block {
+      background: #ffffff;
+      color: #1a1a2e;
+      border: 2px solid #333;
+      border-radius: 10px;
+      padding: 24px 28px 28px;
+      max-width: 1000px;
+      box-shadow: 0 4px 24px rgba(0, 0, 0, 0.35);
+    }
+    .poc-block > h3 {
+      margin: 0 0 20px;
+      text-align: center;
+      font-size: 1.05rem;
+      font-weight: 700;
+      color: #222;
+    }
+    .poc-stage {
+      position: relative;
+    }
+    .poc-lines-svg {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 3;
+      overflow: visible;
+    }
+    .poc-stage > :not(.poc-lines-svg) {
+      position: relative;
+      z-index: 2;
+    }
+    .poc-flow-path {
+      fill: none;
+      stroke: #2e7d32;
+      stroke-width: 2.5;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+    .poc-flow-step-circle {
+      fill: #c62828;
+      stroke: #fff;
+      stroke-width: 1.5;
+    }
+    .poc-flow-step-text {
+      fill: #fff;
+      font-size: 11px;
+      font-weight: 800;
+      text-anchor: middle;
+      dominant-baseline: central;
+      font-family: inherit;
+    }
+    .poc-flow-label {
+      fill: #2e7d32;
+      font-size: 10px;
+      font-weight: 700;
+      font-family: inherit;
+    }
+    .poc-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 16px;
+      margin-bottom: 12px;
+      padding: 0 8px;
+    }
+    .poc-ext {
+      text-align: center;
+      font-size: 0.65rem;
+      font-weight: 700;
+      color: #333;
+      max-width: 120px;
+    }
+    .poc-ext .icon {
+      font-size: 1.8rem;
+      display: block;
+      margin-bottom: 4px;
+    }
+    .poc-openshift {
+      border: 3px solid #c62828;
+      border-radius: 24px;
+      padding: 20px 16px 16px;
+      position: relative;
+      margin-bottom: 8px;
+    }
+    .poc-openshift-label {
+      position: absolute;
+      top: -12px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: #fff;
+      padding: 0 14px;
+      font-size: 0.75rem;
+      font-weight: 800;
+      color: #c62828;
+      white-space: nowrap;
+    }
+    .poc-inner-wrap {
+      position: relative;
+    }
+    .poc-inner {
+      display: grid;
+      grid-template-columns: 1fr 1.1fr 0.9fr;
+      gap: 12px;
+      align-items: center;
+      min-height: 200px;
+    }
+    @media (max-width: 750px) {
+      .poc-inner { grid-template-columns: 1fr; }
+      .poc-top { flex-wrap: wrap; justify-content: center; }
+    }
+    .poc-models {
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+    .poc-model-card {
+      border: 1px solid #90caf9;
+      border-radius: 12px;
+      padding: 10px;
+      background: #e3f2fd;
+      text-align: center;
+      position: relative;
+    }
+    .poc-model-card .brain { font-size: 1.6rem; }
+    .poc-model-card .name {
+      font-size: 0.62rem;
+      font-weight: 800;
+      color: #1565c0;
+      margin-top: 4px;
+    }
+    .poc-model-card .rag {
+      font-size: 0.55rem;
+      color: #555;
+      margin-top: 4px;
+    }
+    .poc-badge {
+      position: absolute;
+      top: -8px;
+      left: -8px;
+      width: 22px;
+      height: 22px;
+      border-radius: 50%;
+      background: #c62828;
+      color: #fff;
+      font-size: 0.7rem;
+      font-weight: 800;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border: 2px solid #fff;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+    }
+    .poc-agent {
+      text-align: center;
+      padding: 8px;
+    }
+    .poc-agent .chip {
+      font-size: 3rem;
+      line-height: 1;
+    }
+    .poc-agent .name {
+      font-size: 0.72rem;
+      font-weight: 800;
+      color: #222;
+      margin-top: 4px;
+    }
+    .poc-agent .sub {
+      font-size: 0.58rem;
+      color: #666;
+      margin-top: 2px;
+    }
+    .poc-flow-label {
+      font-size: 0.55rem;
+      font-weight: 700;
+      color: #2e7d32;
+      margin-top: 8px;
+      line-height: 1.3;
+    }
+    .poc-right-col {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      align-items: center;
+    }
+    .poc-data {
+      text-align: center;
+      font-size: 0.62rem;
+      font-weight: 700;
+    }
+    .poc-data .cyl { font-size: 1.5rem; }
+    .poc-registry {
+      font-size: 0.58rem;
+      color: #1565c0;
+      font-weight: 700;
+      text-align: center;
+    }
+    .poc-bottom {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 12px;
+      align-items: start;
+      justify-content: center;
+      padding: 0 4px;
+      margin-top: 8px;
+    }
+    @media (max-width: 750px) {
+      .poc-bottom { grid-template-columns: 1fr; justify-items: center; }
+    }
+    .poc-bottom-item {
+      text-align: center;
+      font-size: 0.6rem;
+      font-weight: 700;
+      color: #333;
+      position: relative;
+    }
+    .poc-bottom-item .icon { font-size: 1.6rem; display: block; margin-bottom: 2px; }
+    .poc-bottom-item .badge-inline {
+      display: inline-flex;
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      background: #c62828;
+      color: #fff;
+      font-size: 0.6rem;
+      font-weight: 800;
+      align-items: center;
+      justify-content: center;
+      margin-right: 3px;
+      vertical-align: middle;
+    }
+    .poc-h-flow {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 4px;
+      font-size: 0.55rem;
+      font-weight: 700;
+      color: #2e7d32;
+      flex-wrap: wrap;
+    }
+    .poc-h-flow .arr { color: #888; }
+    .poc-legend-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      justify-content: center;
+      margin-top: 14px;
+      padding-top: 12px;
+      border-top: 1px solid #ddd;
+      font-size: 0.58rem;
+      color: #555;
+    }
+    .poc-legend-row span {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+    }
+    .poc-legend-row .dot {
+      width: 16px;
+      height: 16px;
+      border-radius: 50%;
+      background: #c62828;
+      color: #fff;
+      font-size: 0.55rem;
+      font-weight: 800;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <header>
+      <h1>Agentic Patching Console</h1>
+      <p class="subtitle">OpenShift architecture and numbered execution flow</p>
+      <div class="badges">
+        <span class="badge">namespace: agentic-patching</span>
+        <span class="badge">RHOAI Llama Stack 0.7.x</span>
+        <span class="badge">MCP via /v1/responses</span>
+        <span class="badge">cve-console</span>
+      </div>
+    </header>
+
+    <section>
+      <h2>Platform architecture</h2>
+      <div class="arch-grid">
+        <div class="arch-col">
+          <div class="arch-box">
+            <h3>Operator</h3>
+            <p>Browser → OpenShift Route (TLS edge)</p>
+          </div>
+          <div class="arch-box highlight">
+            <h3>cve-console Pod</h3>
+            <p>cve_console.py · Threading HTTP :8787 · state.json on PVC</p>
+          </div>
+          <div class="arch-box">
+            <h3>cve_flow.py</h3>
+            <p>Subprocess spawned on Start Patch — logs to pod stderr</p>
+          </div>
+        </div>
+
+        <div class="arch-center">
+          <span class="arch-arrow">→</span>
+          <div class="hub">
+            <h3>Llama Stack</h3>
+            <p>LlamaStackDistribution<br>MCP · RAG · LLM</p>
+          </div>
+          <span class="arch-arrow">↔</span>
+        </div>
+
+        <div class="arch-col">
+          <div class="arch-box">
+            <h3>Milvus</h3>
+            <p>Vector store — host patch history (RAG)</p>
+          </div>
+          <div class="arch-box">
+            <h3>insights-mcp</h3>
+            <p>Red Hat Insights / Lightspeed tools</p>
+          </div>
+          <div class="arch-box">
+            <h3>vLLM / KServe</h3>
+            <p>llama-scout-17b inference</p>
+          </div>
+          <div class="arch-box">
+            <h3>GitHub</h3>
+            <p>Playbook repo — MCP or git push</p>
+          </div>
+          <div class="arch-box">
+            <h3>AAP Controller</h3>
+            <p>Templates · workflow · approval · job execution</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section>
+      <h2>Numbered execution flow</h2>
+      <div class="two-col">
+        <div class="flow">
+          <div class="flow-step">
+            <div class="step-num">1</div>
+            <div class="step-body">
+              <h3>Operator triggers patch</h3>
+              <p>User enters CVE ID or picks from CVE tab → <strong>Start Patch Process</strong>. Console creates an in-progress run row immediately.</p>
+              <div class="step-meta">
+                <span class="tag ui">Console UI</span>
+                <span class="tag">POST /api/start</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="flow-step">
+            <div class="step-num">2</div>
+            <div class="step-body">
+              <h3>Load CVE from Insights</h3>
+              <p>Fetch CVE metadata and list of affected systems via Insights MCP (routed through Llama Stack <code>/v1/responses</code>).</p>
+              <div class="step-meta">
+                <span class="tag">vulnerability__get_cve</span>
+                <span class="tag external">insights-mcp</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="flow-step">
+            <div class="step-num">3</div>
+            <div class="step-body">
+              <h3>Score hosts &amp; RAG analysis</h3>
+              <p>Compute risk score per host (CVSS, age, blast radius). For hosts above threshold: search Milvus for patch history, then LLM summarizes operational context.</p>
+              <div class="step-meta">
+                <span class="tag">vector_stores/search</span>
+                <span class="tag">/v1/responses</span>
+                <span class="tag external">Milvus</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="flow-step">
+            <div class="step-num">4</div>
+            <div class="step-body">
+              <h3>Generate Ansible playbook</h3>
+              <p>Build remediation playbook YAML using Insights remediation tools and review-host UUIDs.</p>
+              <div class="step-meta">
+                <span class="tag">remediations__create_vuln_playbook</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="flow-step">
+            <div class="step-num">5</div>
+            <div class="step-body">
+              <h3>Publish playbook to GitHub</h3>
+              <p>Push generated YAML to <code>agentic-ai-patching</code> repo. Small payloads via Llama Stack MCP; large playbooks (&gt;8KB) use direct GitHub MCP.</p>
+              <div class="step-meta">
+                <span class="tag">PLAYBOOK_PUSH_METHOD=mcp|git</span>
+                <span class="tag external">GitHub</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="flow-step">
+            <div class="step-num">6</div>
+            <div class="step-body">
+              <h3>Sync AAP project</h3>
+              <p>Trigger AAP project update so the controller pulls the latest playbook from Git.</p>
+              <div class="step-meta">
+                <span class="tag external">AAP REST API</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="flow-step">
+            <div class="step-num">7</div>
+            <div class="step-body">
+              <h3>Create AAP templates</h3>
+              <p>Create job template (playbook run) and workflow job template with an approval node before execution.</p>
+              <div class="step-meta">
+                <span class="tag external">AAP REST API</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="flow-step">
+            <div class="step-num">8</div>
+            <div class="step-body">
+              <h3>Launch workflow job</h3>
+              <p>Start workflow job from template. Workflow runs until it hits the approval gate (status remains <code>running</code>).</p>
+              <div class="step-meta">
+                <span class="tag external">AAP</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="flow-step">
+            <div class="step-num">9</div>
+            <div class="step-body">
+              <h3>Operator approval</h3>
+              <p>Console polls <code>workflow_approvals</code> and shows <strong>Approve</strong> / <strong>Deny</strong> in the Patch Runs table.</p>
+              <div class="step-meta">
+                <span class="tag ui">Console UI</span>
+                <span class="tag">POST /api/approve</span>
+                <span class="tag external">AAP</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="flow-step">
+            <div class="step-num">10</div>
+            <div class="step-body">
+              <h3>Execute remediation job</h3>
+              <p>After approval, workflow continues and launches the playbook job against target inventory. Console polls job status until complete.</p>
+              <div class="step-meta">
+                <span class="tag external">AAP playbook job</span>
+                <span class="tag ui">Status in UI</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <aside class="legend">
+          <h3>Quick reference</h3>
+          <ul>
+            <li><strong>Route</strong> cve-console</li>
+            <li><strong>PVC</strong> cve-console-data</li>
+            <li><strong>Logs</strong> oc logs deploy/cve-console</li>
+            <li><strong>State</strong> /data/workspace/cve_console/state.json</li>
+            <li><strong>Flow script</strong> cve_flow.py</li>
+          </ul>
+          <h3 style="margin-top: 20px;">MCP routing</h3>
+          <ul>
+            <li>Insights → Llama Stack</li>
+            <li>GitHub small → Llama Stack</li>
+            <li>GitHub large → direct MCP</li>
+            <li>AAP → direct REST</li>
+          </ul>
+        </aside>
+      </div>
+    </section>
+
+    <section class="slide-section">
+      <h2>Compact execution flow (for slides)</h2>
+      <p class="slide-hint">Select the white rectangle below and copy (or screenshot) into PowerPoint / Google Slides.</p>
+      <div class="flow-slide" id="flow-slide-block">
+        <p class="flow-slide-title">Agentic Patching — Numbered Execution Flow</p>
+        <div class="flow-slide-grid">
+          <div class="flow-slide-cell"><span class="num">1</span><span class="label">Trigger patch</span><span class="sub">Console UI</span></div>
+          <div class="flow-slide-cell"><span class="num">2</span><span class="label">Load CVE</span><span class="sub">Insights MCP</span></div>
+          <div class="flow-slide-cell"><span class="num">3</span><span class="label">Score &amp; RAG</span><span class="sub">Milvus + LLM</span></div>
+          <div class="flow-slide-cell"><span class="num">4</span><span class="label">Gen playbook</span><span class="sub">Ansible YAML</span></div>
+          <div class="flow-slide-cell"><span class="num">5</span><span class="label">Push GitHub</span><span class="sub">MCP / git</span></div>
+          <div class="flow-slide-cell"><span class="num">6</span><span class="label">Sync AAP</span><span class="sub">Project update</span></div>
+          <div class="flow-slide-cell"><span class="num">7</span><span class="label">Create templates</span><span class="sub">Job + workflow</span></div>
+          <div class="flow-slide-cell"><span class="num">8</span><span class="label">Launch workflow</span><span class="sub">Approval gate</span></div>
+          <div class="flow-slide-cell"><span class="num">9</span><span class="label">Approve / Deny</span><span class="sub">Operator UI</span></div>
+          <div class="flow-slide-cell"><span class="num">10</span><span class="label">Run playbook</span><span class="sub">AAP execute</span></div>
+        </div>
+        <p class="flow-slide-footer">OpenShift · agentic-patching · Llama Stack MCP · cve-console</p>
+      </div>
+    </section>
+
+    <section class="slide-section">
+      <h2>PoC architecture — numbered flow (reference layout)</h2>
+      <p class="slide-hint">Matches the PoC diagram style — select the rectangle below to copy or screenshot into slides.</p>
+      <div class="poc-block" id="poc-diagram-block">
+        <h3>Next Step — PoC (Single CVE Use Case)</h3>
+
+        <div class="poc-stage" id="poc-stage">
+          <svg class="poc-lines-svg" aria-hidden="true">
+            <defs>
+              <marker id="poc-arrow-end" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto" markerUnits="strokeWidth">
+                <path d="M0,0 L8,4 L0,8 Z" fill="#2e7d32"/>
+              </marker>
+              <marker id="poc-arrow-start" markerWidth="8" markerHeight="8" refX="1" refY="4" orient="auto" markerUnits="strokeWidth">
+                <path d="M8,0 L0,4 L8,8 Z" fill="#2e7d32"/>
+              </marker>
+            </defs>
+            <g id="poc-flow-paths"></g>
+            <g id="poc-flow-labels"></g>
+          </svg>
+
+          <div class="poc-top">
+            <div class="poc-ext" data-flow-anchor="insights">
+              <span class="icon">🔴</span>
+              Red Hat<br>Insights
+            </div>
+            <div class="poc-ext" style="opacity:0;">spacer</div>
+            <div class="poc-ext">
+              <span class="icon">📁</span>
+              Public Model<br>Repo / vLLM
+            </div>
+          </div>
+
+          <div class="poc-openshift">
+            <span class="poc-openshift-label">Red Hat OpenShift / AI</span>
+            <div class="poc-inner-wrap">
+              <div class="poc-inner">
+                <div class="poc-models">
+                  <div class="poc-model-card" data-flow-anchor="scheduler">
+                    <span class="poc-badge">4</span>
+                    <div class="brain">🧠</div>
+                    <div class="name">Scheduler Model</div>
+                    <div class="rag">RAG DB (Milvus)<br>Host patch history</div>
+                  </div>
+                  <div class="poc-model-card" data-flow-anchor="risk">
+                    <span class="poc-badge">3</span>
+                    <div class="brain">🧠</div>
+                    <div class="name">Risk Score Model</div>
+                  </div>
+                </div>
+
+                <div class="poc-agent" data-flow-anchor="agent">
+                  <div class="chip">⬛</div>
+                  <div class="name">AI AGENT</div>
+                  <div class="sub">cve_flow.py<br>Llama Stack orchestration</div>
+                </div>
+
+                <div class="poc-right-col">
+                  <div class="poc-data" data-flow-anchor="data">
+                    <div class="cyl">🗄️</div>
+                    Data / Results<br>
+                    <span style="font-weight:400;color:#666;">Context · state.json</span>
+                  </div>
+                  <div class="poc-registry">Model Registry<br><span style="font-weight:400;">KServe · Llama Stack</span></div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="poc-bottom">
+            <div class="poc-bottom-item" data-flow-anchor="tools">
+              <span class="icon">⚙️</span>
+              Tools / API<br>
+              <span style="font-weight:400;">MCP · AAP REST · GitHub</span>
+            </div>
+            <div class="poc-bottom-item" data-flow-anchor="human">
+              <span class="icon">👤</span>
+              Human in loop<br>
+              <span style="font-weight:400;">Approve / Deny</span>
+            </div>
+            <div class="poc-bottom-item" data-flow-anchor="ansible">
+              <span class="icon">🅰️</span>
+              Ansible (AAP)<br>
+              <span style="font-weight:400;">Schedule tasks</span>
+            </div>
+            <div class="poc-bottom-item" data-flow-anchor="rhel">
+              <span class="icon">🖥️</span>
+              RHEL Servers<br>
+              <span style="font-weight:400;">Remediation</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="poc-legend-row">
+          <span><span class="dot">1</span> CVE from Insights</span>
+          <span><span class="dot">2</span> Agent + data</span>
+          <span><span class="dot">3</span> Risk scoring</span>
+          <span><span class="dot">4</span> RAG + schedule</span>
+          <span><span class="dot">5</span> Tools / API</span>
+          <span><span class="dot">6</span> Human approval</span>
+          <span><span class="dot">7</span> AAP launch</span>
+          <span><span class="dot">8</span> Remediation</span>
+          <span><span class="dot">9</span> Status feedback</span>
+        </div>
+      </div>
+    </section>
+
+    <footer>
+      Agentic Patching Console bundle · Open in any browser (static file).
+      See <code>openshift/README.md</code> for deployment and troubleshooting.
+    </footer>
+  </div>
+  <script>
+    (function () {
+      var FLOWS = [
+        { step: 1, from: 'insights', fromSide: 'bottom', to: 'agent', toSide: 'top', route: 'down-elbow', label: 'CVE Information' },
+        { step: 2, from: 'data', fromSide: 'left', to: 'agent', toSide: 'right', route: 'straight', label: 'Results / Data' },
+        { step: 3, from: 'risk', fromSide: 'right', to: 'agent', toSide: 'left', route: 'straight' },
+        { step: 4, from: 'scheduler', fromSide: 'right', to: 'agent', toSide: 'left', route: 'straight' },
+        { step: 5, from: 'agent', fromSide: 'bottom', to: 'tools', toSide: 'top', route: 'down-elbow' },
+        { step: 6, from: 'tools', fromSide: 'right', to: 'human', toSide: 'left', route: 'straight', bidirectional: true },
+        { step: 7, from: 'human', fromSide: 'right', to: 'ansible', toSide: 'left', route: 'straight' },
+        { step: 8, from: 'ansible', fromSide: 'right', to: 'rhel', toSide: 'left', route: 'straight' },
+        { step: 9, from: 'rhel', fromSide: 'top', to: 'tools', toSide: 'bottom', route: 'curve', label: 'Success / Failure' }
+      ];
+
+      function anchorPoint(el, side, stageRect, yHint) {
+        var r = el.getBoundingClientRect();
+        var x = function (v) { return v - stageRect.left; };
+        var y = function (v) { return v - stageRect.top; };
+        switch (side) {
+          case 'top': return { x: x(r.left + r.width / 2), y: y(r.top) };
+          case 'bottom': return { x: x(r.left + r.width / 2), y: y(r.bottom) };
+          case 'left': return { x: x(r.left), y: yHint != null ? yHint : y(r.top + r.height / 2) };
+          case 'right': return { x: x(r.right), y: yHint != null ? yHint : y(r.top + r.height / 2) };
+          default: return { x: x(r.left + r.width / 2), y: y(r.top + r.height / 2) };
+        }
+      }
+
+      function buildPath(p1, p2, route) {
+        if (route === 'straight') {
+          return 'M ' + p1.x + ' ' + p1.y + ' L ' + p2.x + ' ' + p2.y;
+        }
+        if (route === 'curve') {
+          var cx = (p1.x + p2.x) / 2;
+          var cy = Math.min(p1.y, p2.y) - Math.max(50, Math.abs(p1.x - p2.x) * 0.15);
+          return 'M ' + p1.x + ' ' + p1.y + ' Q ' + cx + ' ' + cy + ' ' + p2.x + ' ' + p2.y;
+        }
+        var midY = (p1.y + p2.y) / 2;
+        return 'M ' + p1.x + ' ' + p1.y +
+          ' L ' + p1.x + ' ' + midY +
+          ' L ' + p2.x + ' ' + midY +
+          ' L ' + p2.x + ' ' + p2.y;
+      }
+
+      function drawPocFlowLines() {
+        var stage = document.getElementById('poc-stage');
+        if (!stage) return;
+
+        var svg = stage.querySelector('.poc-lines-svg');
+        var pathsG = document.getElementById('poc-flow-paths');
+        var labelsG = document.getElementById('poc-flow-labels');
+        pathsG.innerHTML = '';
+        labelsG.innerHTML = '';
+
+        var w = stage.offsetWidth;
+        var h = stage.offsetHeight;
+        svg.setAttribute('viewBox', '0 0 ' + w + ' ' + h);
+        svg.setAttribute('width', w);
+        svg.setAttribute('height', h);
+
+        var stageRect = stage.getBoundingClientRect();
+
+        FLOWS.forEach(function (flow) {
+          var fromEl = stage.querySelector('[data-flow-anchor="' + flow.from + '"]');
+          var toEl = stage.querySelector('[data-flow-anchor="' + flow.to + '"]');
+          if (!fromEl || !toEl) return;
+
+          var p1 = anchorPoint(fromEl, flow.fromSide, stageRect);
+          var yHint = (flow.toSide === 'left' || flow.toSide === 'right') ? p1.y : null;
+          var p2 = anchorPoint(toEl, flow.toSide, stageRect, yHint);
+          var d = buildPath(p1, p2, flow.route || 'straight');
+
+          var path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+          path.setAttribute('d', d);
+          path.setAttribute('class', 'poc-flow-path');
+          path.setAttribute('marker-end', 'url(#poc-arrow-end)');
+          if (flow.bidirectional) {
+            path.setAttribute('marker-start', 'url(#poc-arrow-start)');
+          }
+          pathsG.appendChild(path);
+
+          var mid = path.getPointAtLength(path.getTotalLength() / 2);
+          var circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+          circle.setAttribute('cx', mid.x);
+          circle.setAttribute('cy', mid.y);
+          circle.setAttribute('r', 10);
+          circle.setAttribute('class', 'poc-flow-step-circle');
+          labelsG.appendChild(circle);
+
+          var num = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+          num.setAttribute('x', mid.x);
+          num.setAttribute('y', mid.y);
+          num.setAttribute('class', 'poc-flow-step-text');
+          num.textContent = String(flow.step);
+          labelsG.appendChild(num);
+
+          if (flow.label) {
+            var lbl = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+            lbl.setAttribute('x', mid.x);
+            lbl.setAttribute('y', mid.y + 18);
+            lbl.setAttribute('class', 'poc-flow-label');
+            lbl.setAttribute('text-anchor', 'middle');
+            lbl.textContent = flow.label;
+            labelsG.appendChild(lbl);
+          }
+        });
+      }
+
+      window.addEventListener('load', drawPocFlowLines);
+      window.addEventListener('resize', drawPocFlowLines);
+      if (document.fonts && document.fonts.ready) {
+        document.fonts.ready.then(drawPocFlowLines);
+      }
+    })();
+  </script>
+</body>
+</html>

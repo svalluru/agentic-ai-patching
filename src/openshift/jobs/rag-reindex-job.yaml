@@ -1,0 +1,28 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: rag-reindex
+spec:
+  backoffLimit: 1
+  template:
+    spec:
+      restartPolicy: Never
+      containers:
+        - name: reindex
+          image: image-registry.openshift-image-registry.svc:5000/agentic-patching/agentic-patching-console:latest
+          imagePullPolicy: Always
+          command: ["/bin/bash", "/scripts/reindex.sh"]
+          env:
+            - name: SOURCE_STORE_ID
+              value: "vs_23a00d7e-6314-4460-9c28-2bbdf9df3771"
+          envFrom:
+            - configMapRef:
+                name: agentic-patching-llamastack-endpoint
+          volumeMounts:
+            - name: scripts
+              mountPath: /scripts
+      volumes:
+        - name: scripts
+          configMap:
+            name: rag-ingest-scripts
+            defaultMode: 0755

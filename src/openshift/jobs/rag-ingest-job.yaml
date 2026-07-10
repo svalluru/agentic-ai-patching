@@ -1,0 +1,43 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: rag-ingest
+spec:
+  backoffLimit: 2
+  activeDeadlineSeconds: 7200
+  template:
+    spec:
+      restartPolicy: Never
+      containers:
+        - name: ingest
+          image: image-registry.openshift-image-registry.svc:5000/agentic-patching/agentic-patching-console:latest
+          imagePullPolicy: Always
+          command: ["/bin/bash", "/scripts/ingest.sh"]
+          envFrom:
+            - configMapRef:
+                name: agentic-patching-llamastack-endpoint
+          env:
+            - name: BATCH_SIZE
+              value: "5"
+            - name: WAIT_SECONDS
+              value: "180"
+            - name: LLAMA_HTTP_TIMEOUT
+              value: "300"
+            - name: LLAMA_HTTP_RETRIES
+              value: "8"
+            - name: CURL_OPTS
+              value: "--http1.1 --connect-timeout 30 --max-time 600"
+          resources:
+            requests:
+              cpu: 100m
+              memory: 256Mi
+            limits:
+              memory: 512Mi
+          volumeMounts:
+            - name: scripts
+              mountPath: /scripts
+      volumes:
+        - name: scripts
+          configMap:
+            name: rag-ingest-scripts
+            defaultMode: 0755

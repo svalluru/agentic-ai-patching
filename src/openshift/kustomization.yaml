@@ -1,0 +1,20 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+namespace: agentic-patching
+
+resources:
+  - namespace.yaml
+  - milvus/
+  - mcp/
+  - llamastack/
+  # Secrets: openshift/scripts/apply-secrets.sh (from .env.openshift)
+  # Console + RAG jobs: after build-console-image.sh (see deploy.sh / setup-openshift.sh).
+
+labels:
+  - pairs:
+      app.kubernetes.io/part-of: agentic-patching-console
+      app.kubernetes.io/managed-by: kustomize
+    includeSelectors: false
+
+# Console image: agentic-patching-console:latest (ImageStream local lookup).

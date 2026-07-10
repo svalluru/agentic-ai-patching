@@ -1,0 +1,40 @@
+# Optional Ansible / AAP MCP — enable in mcp/kustomization.yaml after supplying an image.
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ansible-mcp
+  labels:
+    app: ansible-mcp
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: ansible-mcp
+  template:
+    metadata:
+      labels:
+        app: ansible-mcp
+    spec:
+      containers:
+        - name: ansible-mcp
+          image: REPLACE-WITH-YOUR-REGISTRY/aap-enterprise-mcp-server:latest
+          ports:
+            - containerPort: 9787
+          env:
+            - name: AAP_URL
+              valueFrom:
+                secretKeyRef:
+                  name: agentic-patching-app-secret
+                  key: AAP_BASE_URL
+            - name: AAP_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: agentic-patching-app-secret
+                  key: AAP_TOKEN
+          resources:
+            requests:
+              cpu: 100m
+              memory: 256Mi
+            limits:
+              cpu: "1"
+              memory: 1Gi
