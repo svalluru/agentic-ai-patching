@@ -241,6 +241,7 @@ Permanent: rebuild image + optional `FORCE_SCRIPT_REFRESH=true` once (see below)
 | RAG ingest 404 on `rag-tool` | Re-apply `oc apply -k openshift/jobs/` — uses Files API on 0.7 |
 | CVE tab 502 / slow | `CVE_CONSOLE_CVE_LIST_SOURCE=direct_mcp` |
 | AAP ping fails from pod | Network/firewall to remote AAP; `AAP_VERIFY_TLS=false` |
+| `Playbook not found for project` | AAP project missing/wrong SCM or not synced — run `./openshift/scripts/setup-aap-project.sh` then set `AAP_DEFAULT_PROJECT_ID` |
 | Approve HTTP 400 | Empty POST body; check token RBAC |
 | Pod OOM during flow | Memory limit 2Gi; try `PLAYBOOK_PUSH_METHOD=git` |
 | `POST /api/start` 500 | Hot-fix both `.py` files; check `oc logs` |

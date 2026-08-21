@@ -13,6 +13,7 @@ CVE patching workflow: **Insights → RAG → LLM → playbook → GitHub → AA
 | Script | Purpose |
 |--------|---------|
 | **`scripts/setup-openshift.sh`** | **Full automation** — secrets from `.env.openshift` → infra → build → RAG → route |
+| `scripts/setup-aap-project.sh` | Create/update AAP project + GitHub SCM sync (no AAP UI) |
 | `scripts/apply-secrets.sh` | Apply secrets only (from `.env.openshift`) |
 | `scripts/deploy.sh` | Partial deploy (infra + build + console; manual RAG steps) |
 | `scripts/cleanup-openshift.sh` | Remove stack from OpenShift cluster only |

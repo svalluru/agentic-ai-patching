@@ -8,4 +8,6 @@ spec:
   resources:
     requests:
       storage: 20Gi
-  storageClassName: ocs-external-storagecluster-ceph-rbd
+  # Use cluster default StorageClass (gp3-csi on OpenTLC sandboxes).
+  # Do not hardcode ocs-* — many clusters do not have OpenShift Data Foundation.
+  volumeMode: Filesystem
