@@ -861,8 +861,8 @@ def run_post_approval(state=None, speed=1.0):
                 'training_events_generated': T + C + P,
             },
             '_a2a': [
-                {'from': 'patch_manager', 'to': 'risk', 'action': 'update_training', 'type': 'request', 'message': f'Patch Manager → Risk Agent: generate {T+C+P} training records for continuous learning'},
-                {'from': 'risk', 'to': 'patch_manager', 'action': 'training_complete', 'type': 'response', 'message': 'Risk Agent → Patch Manager: training data updated — drain timeout pattern added to model'},
+                {'from': 'patch_manager', 'to': 'learning', 'action': 'update_training', 'type': 'request', 'message': f'Patch Manager → Learning Agent: generate {T+C+P} training records for continuous learning'},
+                {'from': 'learning', 'to': 'patch_manager', 'action': 'training_complete', 'type': 'response', 'message': 'Learning Agent → Patch Manager: training data updated — drain timeout pattern added to model'},
                 {'from': 'patch_manager', 'to': 'console', 'action': 'flow_complete', 'type': 'event', 'message': f'Patch Manager → Console: flow complete — {T+C+P}/{T+C+P} systems patched, model updated'},
             ],
         }),
