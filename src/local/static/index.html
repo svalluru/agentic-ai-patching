@@ -558,6 +558,125 @@
       0%, 100% { transform: translateY(0); }
       50% { transform: translateY(-6px); }
     }
+
+    /* ── Unified Flow Layout ── */
+    .uflow-phase { margin-bottom: 20px; border-radius: 14px; overflow: hidden; box-shadow: var(--card-shadow); }
+    .uflow-phase:hover { box-shadow: var(--card-shadow-hover); }
+    .uflow-phase-head {
+      padding: 12px 20px; display: flex; align-items: center; gap: 12px;
+      font-weight: 800; color: #fff; font-size: 13px; letter-spacing: 0.3px;
+    }
+    .uflow-phase-num {
+      width: 28px; height: 28px; border-radius: 8px; display: flex; align-items: center; justify-content: center;
+      font-size: 13px; font-weight: 900; background: rgba(255,255,255,0.25); flex-shrink: 0;
+    }
+    .uflow-phase-agents { margin-left: auto; display: flex; gap: 6px; }
+    .uflow-phase-agent-tag {
+      font-size: 9px; font-weight: 700; padding: 3px 8px; border-radius: 6px;
+      background: rgba(255,255,255,0.2); letter-spacing: 0.3px; text-transform: uppercase;
+    }
+    .uflow-steps {
+      display: flex; gap: 12px; padding: 16px; overflow-x: auto; -webkit-overflow-scrolling: touch;
+      background: var(--white); border: 1px solid var(--border); border-top: none;
+      scroll-snap-type: x mandatory;
+    }
+    .uflow-steps::-webkit-scrollbar { height: 6px; }
+    .uflow-steps::-webkit-scrollbar-thumb { background: #d1d5db; border-radius: 3px; }
+    .uflow-step {
+      min-width: 250px; max-width: 280px; flex-shrink: 0; border-radius: 10px;
+      border: 1px solid var(--border); background: var(--white);
+      transition: all 0.25s cubic-bezier(0.4,0,0.2,1); scroll-snap-align: start;
+    }
+    .uflow-step:hover { transform: translateY(-3px); box-shadow: 0 6px 20px rgba(0,0,0,0.08); }
+    .uflow-step.llama-stack {
+      border-color: rgba(139,92,246,0.35);
+      box-shadow: 0 0 16px rgba(139,92,246,0.08), inset 0 0 0 1px rgba(139,92,246,0.08);
+    }
+    .uflow-step.llama-stack:hover {
+      box-shadow: 0 6px 24px rgba(139,92,246,0.15), inset 0 0 0 1px rgba(139,92,246,0.15);
+      border-color: rgba(139,92,246,0.5);
+    }
+    .uflow-step-head {
+      padding: 10px 14px; display: flex; align-items: center; gap: 8px;
+      border-bottom: 1px solid var(--border);
+    }
+    .uflow-step-num {
+      width: 22px; height: 22px; border-radius: 6px; display: flex; align-items: center; justify-content: center;
+      font-size: 10px; font-weight: 900; color: #fff; flex-shrink: 0;
+    }
+    .uflow-step-title { font-size: 11px; font-weight: 700; color: var(--text); flex: 1; line-height: 1.3; }
+    .uflow-llama-badge {
+      background: linear-gradient(135deg,#6366f1,#8b5cf6); color: #fff;
+      font-size: 8px; padding: 2px 6px; border-radius: 4px; font-weight: 800;
+      letter-spacing: 0.3px; white-space: nowrap; flex-shrink: 0;
+      animation: aiPulse 3s ease-in-out infinite;
+    }
+    .uflow-step-body { padding: 10px 14px; }
+    .uflow-step-api {
+      font-size: 10px; font-family: 'SF Mono','Fira Code',monospace; color: var(--muted);
+      margin-bottom: 8px; line-height: 1.4;
+    }
+    .uflow-step-api code { color: var(--text); background: #f3f4f6; padding: 1px 4px; border-radius: 3px; font-size: 10px; }
+    .uflow-io { display: flex; gap: 6px; }
+    .uflow-io-box {
+      flex: 1; padding: 6px 8px; border-radius: 6px; font-size: 10px; line-height: 1.4;
+    }
+    .uflow-io-label {
+      font-size: 8px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px;
+      margin-bottom: 2px;
+    }
+    .uflow-io-box code { font-size: 9px; background: rgba(0,0,0,0.05); padding: 0 3px; border-radius: 2px; }
+    .uflow-gate {
+      text-align: center; padding: 18px 24px; margin: 0 0 20px;
+      background: linear-gradient(135deg,#fffbeb,#fef3c7);
+      border-radius: 14px; border: 2px dashed #d97706;
+      box-shadow: 0 0 20px rgba(217,119,6,0.08);
+    }
+    .uflow-gate-title { font-size: 15px; font-weight: 900; color: #92400e; margin-bottom: 4px; }
+    .uflow-gate-sub { font-size: 11px; color: #92400e; line-height: 1.5; }
+    .uflow-gate-api { font-size: 10px; color: #b45309; font-family: monospace; margin-top: 4px; opacity: 0.8; }
+    .uflow-interactive { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 24px; }
+    .uflow-int-card {
+      border-radius: 14px; overflow: hidden; border: 1px solid rgba(139,92,246,0.25);
+      box-shadow: 0 0 16px rgba(139,92,246,0.06); transition: all 0.25s;
+      background: var(--white);
+    }
+    .uflow-int-card:hover { transform: translateY(-3px); box-shadow: 0 8px 28px rgba(139,92,246,0.12); border-color: rgba(139,92,246,0.4); }
+    .uflow-int-head {
+      padding: 14px 18px; display: flex; align-items: center; gap: 12px;
+      border-bottom: 1px solid var(--border);
+    }
+    .uflow-int-icon {
+      width: 36px; height: 36px; border-radius: 10px; display: flex; align-items: center; justify-content: center;
+      font-size: 16px; color: #fff; flex-shrink: 0;
+    }
+    .uflow-int-info { flex: 1; }
+    .uflow-int-title { font-size: 13px; font-weight: 800; color: var(--text); }
+    .uflow-int-sub { font-size: 10px; color: var(--muted); font-weight: 600; }
+    .uflow-int-body { padding: 14px 18px; }
+    .uflow-int-body p { margin: 0 0 10px; font-size: 12px; color: var(--text-secondary); line-height: 1.6; }
+
+    /* Architecture with Llama Stack sidebar */
+    .arch-layout { display: flex; gap: 20px; align-items: stretch; margin: 20px 0; }
+    .arch-main { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 0; }
+    .arch-llama-sidebar {
+      width: 180px; flex-shrink: 0; display: flex; flex-direction: column; align-items: center;
+      padding: 16px 12px; border-radius: 16px; position: relative;
+      background: linear-gradient(135deg, rgba(15,23,42,0.03), rgba(30,27,75,0.06));
+      border: 2px dashed rgba(139,92,246,0.25);
+    }
+    .arch-llama-sidebar::before {
+      content: 'CROSS-CUTTING AI'; position: absolute; top: -10px; left: 50%; transform: translateX(-50%);
+      font-size: 8px; font-weight: 800; letter-spacing: 1px; color: #7c3aed;
+      background: var(--bg); padding: 2px 10px; border-radius: 4px;
+    }
+    .arch-llama-connects { margin-top: 12px; width: 100%; }
+    .arch-llama-conn {
+      font-size: 10px; padding: 5px 8px; margin-bottom: 4px; border-radius: 6px;
+      background: rgba(139,92,246,0.08); color: #6b21a8; font-weight: 600;
+      border-left: 3px solid rgba(139,92,246,0.4); line-height: 1.3;
+    }
+
     .ai-hero {
       background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 40%, #312e81 70%, #1e293b 100%);
       color: #fff; border-radius: 16px; padding: 32px 28px; margin-bottom: 28px;
@@ -1124,109 +1243,459 @@
       </div>
 
       <div class="guide-tabs">
-        <button class="guide-tab active" data-gtab="overview"><span class="gt-icon">&#9878;</span>Overview</button>
+        <button class="guide-tab active" data-gtab="overview"><span class="gt-icon">&#9878;</span>Architecture &amp; Flow</button>
         <button class="guide-tab" data-gtab="stages"><span class="gt-icon">&#9733;</span>Stages</button>
-        <button class="guide-tab" data-gtab="workflow"><span class="gt-icon">&#9776;</span>API Workflow</button>
         <button class="guide-tab" data-gtab="integration"><span class="gt-icon">&#8644;</span>Integration</button>
-        <button class="guide-tab" data-gtab="ai"><span class="gt-icon">&#10024;</span>AI Engine</button>
         <button class="guide-tab" data-gtab="quickstart"><span class="gt-icon">&#9889;</span>Quick Start</button>
       </div>
 
       <div class="guide-tab-panel active" id="gtab_overview">
-      <!-- ── Architecture ── -->
+
+      <!-- ══ SECTION 1: Architecture with Llama Stack sidebar ══ -->
       <div class="guide-section-title">
         <span class="gs-icon" style="background:linear-gradient(135deg,#6366f1,#8b5cf6);">&#9878;</span>
         System Architecture
       </div>
 
-      <div class="arch-grid">
-        <div class="arch-box" style="background:linear-gradient(135deg,#1e293b,#334155); color:#fff; min-width:200px;">
-          CVE Console UI &nbsp;&#8226;&nbsp; Port 8787
-        </div>
-        <div class="arch-connector"></div>
-        <div class="arch-box" style="background:linear-gradient(135deg,#7c3aed,#a78bfa); color:#fff; min-width:240px;">
-          A2A Agent Message Bus
-        </div>
-        <div class="arch-connector"></div>
-        <div class="arch-box" style="background:linear-gradient(135deg,#d97706,#f59e0b); color:#fff; min-width:260px; padding:12px 24px; box-shadow:0 4px 16px rgba(217,119,6,0.25);">
-          <div style="font-size:14px; font-weight:800; letter-spacing:-0.2px;">Patch Manager Agent</div>
-          <div style="font-size:10px; opacity:0.85; margin-top:2px; letter-spacing:0.3px;">CENTRAL ORCHESTRATOR &mdash; coordinates all agents</div>
-        </div>
-        <div class="arch-connector"></div>
-        <div class="arch-fan">
-          <div class="arch-fan-line"></div>
-          <div class="arch-fan-line"></div>
-          <div class="arch-fan-line"></div>
-          <div class="arch-fan-line"></div>
-          <div class="arch-fan-line"></div>
-        </div>
-        <div class="arch-agents-row">
-          <div class="arch-agent-col">
-            <div class="arch-agent-box" style="background:var(--red-light); color:var(--red); border:1px solid rgba(224,0,0,0.15);">Discovery<br>Agent</div>
-            <div class="arch-connector"></div>
-            <div class="arch-backend-box" style="background:#fee2e2; color:#991b1b;">Red Hat Insights<br>(MCP)</div>
+      <div class="arch-layout">
+        <!-- Main architecture column -->
+        <div class="arch-main">
+          <div class="arch-box" style="background:linear-gradient(135deg,#1e293b,#334155); color:#fff; min-width:200px;">
+            CVE Console UI &nbsp;&#8226;&nbsp; Port 8787
           </div>
-          <div class="arch-agent-col">
-            <div class="arch-agent-box" style="background:#fef3c7; color:#b45309; border:1px solid rgba(180,83,9,0.15);">Risk<br>Agent</div>
-            <div class="arch-connector"></div>
-            <div class="arch-backend-box" style="background:#fef9c3; color:#854d0e;">RHOAI KServe<br>ML Model</div>
+          <div class="arch-connector"></div>
+          <div class="arch-box" style="background:linear-gradient(135deg,#7c3aed,#a78bfa); color:#fff; min-width:240px;">
+            A2A Agent Message Bus
           </div>
-          <div class="arch-agent-col">
-            <div class="arch-agent-box" style="background:var(--blue-light); color:var(--blue); border:1px solid rgba(37,99,235,0.15);">Reason<br>Agent</div>
-            <div class="arch-connector"></div>
-            <div class="arch-backend-box" style="background:#dbeafe; color:#1e40af;">Llama Stack<br>LLM + RAG</div>
+          <div class="arch-connector"></div>
+          <div class="arch-box" style="background:linear-gradient(135deg,#d97706,#f59e0b); color:#fff; min-width:260px; padding:12px 24px; box-shadow:0 4px 16px rgba(217,119,6,0.25);">
+            <div style="font-size:14px; font-weight:800; letter-spacing:-0.2px;">Patch Manager Agent</div>
+            <div style="font-size:10px; opacity:0.85; margin-top:2px; letter-spacing:0.3px;">CENTRAL ORCHESTRATOR</div>
           </div>
-          <div class="arch-agent-col">
-            <div class="arch-agent-box" style="background:var(--purple-light); color:var(--purple); border:1px solid rgba(124,58,237,0.15);">Automation<br>Agent</div>
-            <div class="arch-connector"></div>
-            <div class="arch-backend-box" style="background:#f3e8ff; color:#6b21a8;">Ansible AAP<br>Controller</div>
+          <div class="arch-connector"></div>
+          <div class="arch-fan">
+            <div class="arch-fan-line"></div>
+            <div class="arch-fan-line"></div>
+            <div class="arch-fan-line"></div>
+            <div class="arch-fan-line"></div>
+            <div class="arch-fan-line"></div>
           </div>
-          <div class="arch-agent-col">
-            <div class="arch-agent-box" style="background:var(--green-light); color:var(--green); border:1px solid rgba(5,150,105,0.15);">Learning<br>Agent</div>
-            <div class="arch-connector"></div>
-            <div class="arch-backend-box" style="background:#ecfdf5; color:#065f46;">Vector Store<br>RAG DB</div>
+          <div class="arch-agents-row">
+            <div class="arch-agent-col">
+              <div class="arch-agent-box" style="background:var(--red-light); color:var(--red); border:1px solid rgba(224,0,0,0.15);">Discovery<br>Agent</div>
+              <div class="arch-connector"></div>
+              <div class="arch-backend-box" style="background:#fee2e2; color:#991b1b;">Red Hat Insights<br>(MCP)</div>
+            </div>
+            <div class="arch-agent-col">
+              <div class="arch-agent-box" style="background:#fef3c7; color:#b45309; border:1px solid rgba(180,83,9,0.15);">Risk<br>Agent</div>
+              <div class="arch-connector"></div>
+              <div class="arch-backend-box" style="background:#fef9c3; color:#854d0e;">RHOAI KServe<br>ML Model</div>
+            </div>
+            <div class="arch-agent-col">
+              <div class="arch-agent-box" style="background:var(--blue-light); color:var(--blue); border:2px solid rgba(139,92,246,0.35);">Reason<br>Agent</div>
+              <div class="arch-connector"></div>
+              <div class="arch-backend-box" style="background:#dbeafe; color:#1e40af;">Llama Stack<br>LLM + RAG</div>
+            </div>
+            <div class="arch-agent-col">
+              <div class="arch-agent-box" style="background:var(--purple-light); color:var(--purple); border:1px solid rgba(124,58,237,0.15);">Automation<br>Agent</div>
+              <div class="arch-connector"></div>
+              <div class="arch-backend-box" style="background:#f3e8ff; color:#6b21a8;">Ansible AAP<br>Controller</div>
+            </div>
+            <div class="arch-agent-col">
+              <div class="arch-agent-box" style="background:var(--green-light); color:var(--green); border:1px solid rgba(5,150,105,0.15);">Learning<br>Agent</div>
+              <div class="arch-connector"></div>
+              <div class="arch-backend-box" style="background:#ecfdf5; color:#065f46;">Vector Store<br>RAG DB</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Llama Stack cross-cutting sidebar -->
+        <div class="arch-llama-sidebar">
+          <div class="ai-hub" style="transform:scale(0.75); margin:-8px 0;">
+            <div class="ai-hub-inner" style="padding:16px 20px;">
+              <span class="ai-hub-icon" style="font-size:24px;">&#129302;</span>
+              <div class="ai-hub-title" style="font-size:14px;">Llama Stack</div>
+              <div class="ai-hub-sub" style="font-size:9px;">AI Gateway</div>
+            </div>
+          </div>
+          <div style="font-size:10px; color:#6b21a8; font-weight:700; margin:10px 0 6px; text-align:center; letter-spacing:0.3px;">CONNECTS TO</div>
+          <div class="arch-llama-connects">
+            <div class="arch-llama-conn">&#128270; Risk Agent<br><span style="font-size:9px; opacity:0.7;">RAG summaries</span></div>
+            <div class="arch-llama-conn">&#128214; Reason Agent<br><span style="font-size:9px; opacity:0.7;">LLM + RAG analysis</span></div>
+            <div class="arch-llama-conn">&#128301; Diagnosis Agent<br><span style="font-size:9px; opacity:0.7;">Root cause analysis</span></div>
+            <div class="arch-llama-conn">&#128161; Console UI<br><span style="font-size:9px; opacity:0.7;">What If &amp; Why</span></div>
           </div>
         </div>
       </div>
 
-      <!-- ── Pipeline Visual ── -->
+      <!-- ══ SECTION 2: Config + API ══ -->
+      <div style="display:flex; gap:16px; margin:24px 0; flex-wrap:wrap;">
+        <div class="ai-config-bar" style="flex:1; min-width:300px; margin:0;">
+          <div class="ai-config-item">
+            <div class="aci-label">Gateway URL</div>
+            <div class="aci-code">LLAMA_STACK_URL</div>
+            <div class="aci-desc">Default: http://127.0.0.1:8321</div>
+          </div>
+          <div class="ai-config-item">
+            <div class="aci-label">Model</div>
+            <div class="aci-code">DEFAULT_LLM_MODEL</div>
+            <div class="aci-desc">vllm-inference/llama-scout-17b</div>
+          </div>
+          <div class="ai-config-item">
+            <div class="aci-label">Vector DB</div>
+            <div class="aci-code">VECTOR_DB_ID</div>
+            <div class="aci-desc">RAG store for patch history</div>
+          </div>
+        </div>
+        <div class="ai-api-block" style="flex:0 0 auto; min-width:300px; margin:0; align-self:stretch;">
+          <span class="api-method">POST</span> <span class="api-url">{LLAMA_STACK_URL}/v1/chat/completions</span><br>
+          {<span class="api-key">"model"</span>: <span class="api-val">"llama-scout-17b"</span>,<br>
+          &nbsp;<span class="api-key">"messages"</span>: [{<span class="api-key">"role"</span>: <span class="api-val">"user"</span>, <span class="api-key">"content"</span>: <span class="api-val">"..."</span>}],<br>
+          &nbsp;<span class="api-key">"max_tokens"</span>: <span class="api-val">1024</span>}<br>
+          <span class="api-comment">// Response: choices[0].message.content</span>
+        </div>
+      </div>
+
+      <!-- ══ SECTION 3: End-to-End Flow ══ -->
       <div class="guide-section-title">
         <span class="gs-icon" style="background:linear-gradient(135deg,#e00000,#ff3333);">&#9654;</span>
-        5-Stage Pipeline
+        End-to-End Flow &mdash; 16 Steps, 6 Llama Stack Calls
       </div>
 
-      <div class="guide-pipeline">
-        <div class="guide-pipe-box" style="background:var(--red-light); box-shadow:0 2px 8px var(--red-glow);">
-          <div class="gp-num" style="background:var(--red);">1</div>
-          <div class="gp-title" style="color:var(--red);">DISCOVER</div>
-          <div class="gp-sub" style="color:#991b1b;">Insights fetches<br>CVE &amp; systems</div>
+      <!-- ─── PHASE 1: DISCOVER ─── -->
+      <div class="uflow-phase">
+        <div class="uflow-phase-head" style="background:linear-gradient(135deg,#dc2626,#ef4444);">
+          <div class="uflow-phase-num">1</div>
+          DISCOVER
+          <div class="uflow-phase-agents">
+            <span class="uflow-phase-agent-tag">Discovery Agent</span>
+            <span class="uflow-phase-agent-tag">Risk Agent</span>
+          </div>
         </div>
-        <div class="guide-pipe-arrow">&#10132;</div>
-        <div class="guide-pipe-box" style="background:#fef3c7; box-shadow:0 2px 8px rgba(180,83,9,0.1);">
-          <div class="gp-num" style="background:#d97706;">2</div>
-          <div class="gp-title" style="color:#b45309;">PREDICT</div>
-          <div class="gp-sub" style="color:#92400e;">ML model scores<br>risk per host</div>
-        </div>
-        <div class="guide-pipe-arrow">&#10132;</div>
-        <div class="guide-pipe-box" style="background:var(--blue-light); box-shadow:0 2px 8px rgba(37,99,235,0.1);">
-          <div class="gp-num" style="background:var(--blue);">3</div>
-          <div class="gp-title" style="color:var(--blue);">REASON</div>
-          <div class="gp-sub" style="color:#1e40af;">LLM + RAG<br>analyzes &amp; plans</div>
-        </div>
-        <div class="guide-pipe-arrow">&#10132;</div>
-        <div class="guide-pipe-box" style="background:var(--purple-light); box-shadow:0 2px 8px rgba(124,58,237,0.1);">
-          <div class="gp-num" style="background:var(--purple);">4</div>
-          <div class="gp-title" style="color:var(--purple);">EXECUTE</div>
-          <div class="gp-sub" style="color:#6b21a8;">AAP phased<br>remediation</div>
-        </div>
-        <div class="guide-pipe-arrow">&#10132;</div>
-        <div class="guide-pipe-box" style="background:var(--green-light); box-shadow:0 2px 8px rgba(5,150,105,0.1);">
-          <div class="gp-num" style="background:var(--green);">5</div>
-          <div class="gp-title" style="color:var(--green);">LEARN</div>
-          <div class="gp-sub" style="color:#065f46;">Feedback updates<br>model &amp; store</div>
+        <div class="uflow-steps">
+          <!-- Step 1 -->
+          <div class="uflow-step">
+            <div class="uflow-step-head" style="background:linear-gradient(135deg,#fef2f2,#fee2e2);">
+              <div class="uflow-step-num" style="background:var(--red);">1</div>
+              <div class="uflow-step-title">Console &rarr; Patch Manager</div>
+            </div>
+            <div class="uflow-step-body">
+              <div class="uflow-step-api"><code>POST /api/start</code> &mdash; user clicks Start</div>
+              <div class="uflow-io">
+                <div class="uflow-io-box" style="background:#fef2f2;"><div class="uflow-io-label" style="color:var(--red);">In</div><code>cve_id</code></div>
+                <div class="uflow-io-box" style="background:#ecfdf5;"><div class="uflow-io-label" style="color:var(--green);">Out</div>Thread + state.json + A2A broadcast</div>
+              </div>
+            </div>
+          </div>
+          <!-- Step 2 -->
+          <div class="uflow-step">
+            <div class="uflow-step-head" style="background:linear-gradient(135deg,#fef2f2,#fee2e2);">
+              <div class="uflow-step-num" style="background:var(--red);">2</div>
+              <div class="uflow-step-title">Fetch CVE from Insights</div>
+            </div>
+            <div class="uflow-step-body">
+              <div class="uflow-step-api">Red Hat Insights via <code>INSIGHTS_MCP_ENDPOINT</code></div>
+              <div class="uflow-io">
+                <div class="uflow-io-box" style="background:#fef2f2;"><div class="uflow-io-label" style="color:var(--red);">In</div><code>cve_id</code> + MCP credentials</div>
+                <div class="uflow-io-box" style="background:#ecfdf5;"><div class="uflow-io-label" style="color:var(--green);">Out</div>CVSS 9.8, 37 affected hosts</div>
+              </div>
+            </div>
+          </div>
+          <!-- Step 3 -->
+          <div class="uflow-step">
+            <div class="uflow-step-head" style="background:linear-gradient(135deg,#fef2f2,#fee2e2);">
+              <div class="uflow-step-num" style="background:var(--red);">3</div>
+              <div class="uflow-step-title">Enrich Operational Context</div>
+            </div>
+            <div class="uflow-step-body">
+              <div class="uflow-step-api">CMDB + ITSM &mdash; business metadata lookup</div>
+              <div class="uflow-io">
+                <div class="uflow-io-box" style="background:#fef2f2;"><div class="uflow-io-label" style="color:var(--red);">In</div><code>affected_systems[]</code></div>
+                <div class="uflow-io-box" style="background:#ecfdf5;"><div class="uflow-io-label" style="color:var(--green);">Out</div>Env, app, criticality, maintenance window</div>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
-      </div><!-- end TAB: Overview -->
+
+      <!-- ─── PHASE 2: PREDICT & REASON ─── -->
+      <div class="uflow-phase">
+        <div class="uflow-phase-head" style="background:linear-gradient(135deg,#b45309,#2563eb);">
+          <div class="uflow-phase-num">2</div>
+          PREDICT &amp; REASON
+          <div class="uflow-phase-agents">
+            <span class="uflow-phase-agent-tag">Risk Agent</span>
+            <span class="uflow-phase-agent-tag">Reason Agent</span>
+          </div>
+        </div>
+        <div class="uflow-steps">
+          <!-- Step 4 -->
+          <div class="uflow-step">
+            <div class="uflow-step-head" style="background:linear-gradient(135deg,#fffbeb,#fef3c7);">
+              <div class="uflow-step-num" style="background:#d97706;">4</div>
+              <div class="uflow-step-title">ML Risk Scoring</div>
+            </div>
+            <div class="uflow-step-body">
+              <div class="uflow-step-api">RHOAI KServe at <code>RISK_URL</code></div>
+              <div class="uflow-io">
+                <div class="uflow-io-box" style="background:#fffbeb;"><div class="uflow-io-label" style="color:#b45309;">In</div>CVSS, age, host metadata per host</div>
+                <div class="uflow-io-box" style="background:#ecfdf5;"><div class="uflow-io-label" style="color:var(--green);">Out</div><code>risk_score</code> 0-100, <code>ok</code>/<code>review</code></div>
+              </div>
+            </div>
+          </div>
+          <!-- Step 5 — Llama Stack -->
+          <div class="uflow-step llama-stack">
+            <div class="uflow-step-head" style="background:linear-gradient(135deg,#f5f3ff,#ede9fe);">
+              <div class="uflow-step-num" style="background:#7c3aed;">5</div>
+              <div class="uflow-step-title">RAG Host Summaries</div>
+              <span class="uflow-llama-badge">&#9889; Llama Stack</span>
+            </div>
+            <div class="uflow-step-body">
+              <div class="uflow-step-api"><code>/v1/tool-runtime/invoke</code> &mdash; vector store search + LLM</div>
+              <div class="uflow-io">
+                <div class="uflow-io-box" style="background:#f5f3ff;"><div class="uflow-io-label" style="color:#7c3aed;">In</div>12 review hosts, prior patch IDs</div>
+                <div class="uflow-io-box" style="background:#ecfdf5;"><div class="uflow-io-label" style="color:var(--green);">Out</div><code>decision_support</code> per host</div>
+              </div>
+            </div>
+          </div>
+          <!-- Step 6 — Llama Stack -->
+          <div class="uflow-step llama-stack">
+            <div class="uflow-step-head" style="background:linear-gradient(135deg,#f5f3ff,#ede9fe);">
+              <div class="uflow-step-num" style="background:#7c3aed;">6</div>
+              <div class="uflow-step-title">Patch History Analysis</div>
+              <span class="uflow-llama-badge">&#9889; Llama Stack</span>
+            </div>
+            <div class="uflow-step-body">
+              <div class="uflow-step-api"><code>/v1/chat/completions</code> + RAG context</div>
+              <div class="uflow-io">
+                <div class="uflow-io-box" style="background:#f5f3ff;"><div class="uflow-io-label" style="color:#7c3aed;">In</div>CVE + hosts + vector DB query</div>
+                <div class="uflow-io-box" style="background:#ecfdf5;"><div class="uflow-io-label" style="color:var(--green);">Out</div>3 similar records, pattern analysis</div>
+              </div>
+            </div>
+          </div>
+          <!-- Step 7 -->
+          <div class="uflow-step">
+            <div class="uflow-step-head" style="background:linear-gradient(135deg,#eff6ff,#dbeafe);">
+              <div class="uflow-step-num" style="background:var(--blue);">7</div>
+              <div class="uflow-step-title">Generate Phased Strategy</div>
+            </div>
+            <div class="uflow-step-body">
+              <div class="uflow-step-api">Strategy engine &mdash; risk scores + history</div>
+              <div class="uflow-io">
+                <div class="uflow-io-box" style="background:#eff6ff;"><div class="uflow-io-label" style="color:var(--blue);">In</div>25 ok + 12 review hosts</div>
+                <div class="uflow-io-box" style="background:#ecfdf5;"><div class="uflow-io-label" style="color:var(--green);">Out</div>Test(25) &rarr; Canary(3) &rarr; Prod(9)</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ─── PHASE 3: GENERATE & PUBLISH ─── -->
+      <div class="uflow-phase">
+        <div class="uflow-phase-head" style="background:linear-gradient(135deg,#2563eb,#7c3aed);">
+          <div class="uflow-phase-num">3</div>
+          GENERATE &amp; PUBLISH
+          <div class="uflow-phase-agents">
+            <span class="uflow-phase-agent-tag">Automation Agent</span>
+          </div>
+        </div>
+        <div class="uflow-steps">
+          <!-- Step 8 — Llama Stack -->
+          <div class="uflow-step llama-stack">
+            <div class="uflow-step-head" style="background:linear-gradient(135deg,#f5f3ff,#ede9fe);">
+              <div class="uflow-step-num" style="background:#7c3aed;">8</div>
+              <div class="uflow-step-title">Lightspeed Playbook</div>
+              <span class="uflow-llama-badge">&#9889; Llama Stack</span>
+            </div>
+            <div class="uflow-step-body">
+              <div class="uflow-step-api">Insights MCP &rarr; Lightspeed &rarr; LLM YAML gen</div>
+              <div class="uflow-io">
+                <div class="uflow-io-box" style="background:#f5f3ff;"><div class="uflow-io-label" style="color:#7c3aed;">In</div><code>cve_id</code>, UUIDs, risk profiles</div>
+                <div class="uflow-io-box" style="background:#ecfdf5;"><div class="uflow-io-label" style="color:var(--green);">Out</div>YAML: drain 120s + patch + health check</div>
+              </div>
+            </div>
+          </div>
+          <!-- Step 9 -->
+          <div class="uflow-step">
+            <div class="uflow-step-head" style="background:linear-gradient(135deg,#f5f3ff,#ede9fe);">
+              <div class="uflow-step-num" style="background:var(--purple);">9</div>
+              <div class="uflow-step-title">Publish to GitHub</div>
+            </div>
+            <div class="uflow-step-body">
+              <div class="uflow-step-api">Git push or MCP at <code>GITHUB_MCP_ENDPOINT</code></div>
+              <div class="uflow-io">
+                <div class="uflow-io-box" style="background:#f5f3ff;"><div class="uflow-io-label" style="color:var(--purple);">In</div>playbook YAML + <code>GITHUB_TOKEN</code></div>
+                <div class="uflow-io-box" style="background:#ecfdf5;"><div class="uflow-io-label" style="color:var(--green);">Out</div><code>playbooks/generated/CVE-*.yml</code></div>
+              </div>
+            </div>
+          </div>
+          <!-- Step 10 -->
+          <div class="uflow-step">
+            <div class="uflow-step-head" style="background:linear-gradient(135deg,#f5f3ff,#ede9fe);">
+              <div class="uflow-step-num" style="background:var(--purple);">10</div>
+              <div class="uflow-step-title">Sync AAP &amp; Templates</div>
+            </div>
+            <div class="uflow-step-body">
+              <div class="uflow-step-api">AAP Controller at <code>AAP_BASE_URL</code></div>
+              <div class="uflow-io">
+                <div class="uflow-io-box" style="background:#f5f3ff;"><div class="uflow-io-label" style="color:var(--purple);">In</div>playbook path + AAP credentials</div>
+                <div class="uflow-io-box" style="background:#ecfdf5;"><div class="uflow-io-label" style="color:var(--green);">Out</div>job_template(98), workflow(99)</div>
+              </div>
+            </div>
+          </div>
+          <!-- Step 11 -->
+          <div class="uflow-step">
+            <div class="uflow-step-head" style="background:linear-gradient(135deg,#f5f3ff,#ede9fe);">
+              <div class="uflow-step-num" style="background:var(--purple);">11</div>
+              <div class="uflow-step-title">Launch AAP Workflow</div>
+            </div>
+            <div class="uflow-step-body">
+              <div class="uflow-step-api">Starts workflow, pauses at approval node</div>
+              <div class="uflow-io">
+                <div class="uflow-io-box" style="background:#f5f3ff;"><div class="uflow-io-label" style="color:var(--purple);">In</div><code>workflow_template_id</code> (99)</div>
+                <div class="uflow-io-box" style="background:#ecfdf5;"><div class="uflow-io-label" style="color:var(--green);">Out</div>job(1001), status: waiting</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ─── APPROVAL GATE ─── -->
+      <div class="uflow-gate">
+        <div class="uflow-gate-title">&#9888; Human Approval Gate</div>
+        <div class="uflow-gate-sub">Operator reviews risk scores, host analysis, and patch strategy &mdash; then clicks <strong>Approve</strong> or <strong>Deny</strong></div>
+        <div class="uflow-gate-api">POST /api/approve &rarr; tries real AAP approval, falls back to local simulation</div>
+      </div>
+
+      <!-- ─── PHASE 4: EXECUTE & HEAL ─── -->
+      <div class="uflow-phase">
+        <div class="uflow-phase-head" style="background:linear-gradient(135deg,#7c3aed,#dc2626);">
+          <div class="uflow-phase-num">4</div>
+          EXECUTE &amp; HEAL
+          <div class="uflow-phase-agents">
+            <span class="uflow-phase-agent-tag">Automation</span>
+            <span class="uflow-phase-agent-tag">Diagnosis</span>
+          </div>
+        </div>
+        <div class="uflow-steps">
+          <!-- Step 12 -->
+          <div class="uflow-step">
+            <div class="uflow-step-head" style="background:linear-gradient(135deg,#f5f3ff,#ede9fe);">
+              <div class="uflow-step-num" style="background:var(--purple);">12</div>
+              <div class="uflow-step-title">Phased Execution</div>
+            </div>
+            <div class="uflow-step-body">
+              <div style="display:flex; gap:4px; margin-bottom:6px; text-align:center;">
+                <div style="flex:1; padding:4px; background:#eff6ff; border-radius:6px; font-size:9px; font-weight:700; color:var(--blue);">Test 25</div>
+                <div style="color:#d1d5db; font-size:10px; display:flex; align-items:center;">&#10132;</div>
+                <div style="flex:1; padding:4px; background:#fef3c7; border-radius:6px; font-size:9px; font-weight:700; color:#b45309;">Canary 3</div>
+                <div style="color:#d1d5db; font-size:10px; display:flex; align-items:center;">&#10132;</div>
+                <div style="flex:1; padding:4px; background:#f5f3ff; border-radius:6px; font-size:9px; font-weight:700; color:var(--purple);">Prod 9</div>
+              </div>
+              <div class="uflow-step-api">Drain(120s) &rarr; patch &rarr; restart &rarr; health check</div>
+            </div>
+          </div>
+          <!-- Step 13 -->
+          <div class="uflow-step" style="border-color:rgba(224,0,0,0.3);">
+            <div class="uflow-step-head" style="background:linear-gradient(135deg,#fef2f2,#fee2e2);">
+              <div class="uflow-step-num" style="background:var(--red);">13</div>
+              <div class="uflow-step-title">Failure &amp; Auto-Rollback</div>
+            </div>
+            <div class="uflow-step-body">
+              <div class="uflow-step-api">PAY-APP-07 health check fails &rarr; rollout paused</div>
+              <div class="uflow-io">
+                <div class="uflow-io-box" style="background:#fef2f2;"><div class="uflow-io-label" style="color:var(--red);">Signal</div>HTTP 503 after 5 retries</div>
+                <div class="uflow-io-box" style="background:#fef2f2;"><div class="uflow-io-label" style="color:var(--red);">Action</div>Ansible revert + health verify</div>
+              </div>
+            </div>
+          </div>
+          <!-- Step 14 — Llama Stack -->
+          <div class="uflow-step llama-stack">
+            <div class="uflow-step-head" style="background:linear-gradient(135deg,#f5f3ff,#ede9fe);">
+              <div class="uflow-step-num" style="background:#7c3aed;">14</div>
+              <div class="uflow-step-title">Root Cause Analysis</div>
+              <span class="uflow-llama-badge">&#9889; Llama Stack</span>
+            </div>
+            <div class="uflow-step-body">
+              <div class="uflow-step-api"><code>/v1/chat/completions</code> + RAG failure records</div>
+              <div class="uflow-io">
+                <div class="uflow-io-box" style="background:#f5f3ff;"><div class="uflow-io-label" style="color:#7c3aed;">In</div>PAY-APP-07 failure context</div>
+                <div class="uflow-io-box" style="background:#ecfdf5;"><div class="uflow-io-label" style="color:var(--green);">Out</div>Cause: drain 30s&rarr;120s needed</div>
+              </div>
+            </div>
+          </div>
+          <!-- Step 15 -->
+          <div class="uflow-step">
+            <div class="uflow-step-head" style="background:linear-gradient(135deg,#f5f3ff,#ede9fe);">
+              <div class="uflow-step-num" style="background:var(--purple);">15</div>
+              <div class="uflow-step-title">Execute Remediation</div>
+            </div>
+            <div class="uflow-step-body">
+              <div class="uflow-step-api">Retry with AI-discovered fix applied</div>
+              <div class="uflow-io">
+                <div class="uflow-io-box" style="background:#f5f3ff;"><div class="uflow-io-label" style="color:var(--purple);">In</div>drain 30s&rarr;120s, 3 evidence records</div>
+                <div class="uflow-io-box" style="background:#ecfdf5;"><div class="uflow-io-label" style="color:var(--green);">Out</div>PAY-APP-07 patched, rollout resumes</div>
+              </div>
+            </div>
+          </div>
+          <!-- Step 16 -->
+          <div class="uflow-step" style="border-color:rgba(5,150,105,0.3);">
+            <div class="uflow-step-head" style="background:linear-gradient(135deg,#ecfdf5,#d1fae5);">
+              <div class="uflow-step-num" style="background:var(--green);">16</div>
+              <div class="uflow-step-title">Learn &amp; Close</div>
+            </div>
+            <div class="uflow-step-body">
+              <div class="uflow-step-api">37/37 patched &mdash; training records generated</div>
+              <div class="uflow-io">
+                <div class="uflow-io-box" style="background:#ecfdf5;"><div class="uflow-io-label" style="color:var(--green);">Vector DB</div>37 outcomes + drain lesson</div>
+                <div class="uflow-io-box" style="background:#ecfdf5;"><div class="uflow-io-label" style="color:var(--green);">Retrain</div>RHOAI model update queued</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ─── INTERACTIVE AI ─── -->
+      <div class="guide-section-title">
+        <span class="gs-icon" style="background:linear-gradient(135deg,#059669,#ea580c);">&#10024;</span>
+        Interactive AI &mdash; On-Demand LLM Analysis
+      </div>
+      <div class="uflow-interactive">
+        <div class="uflow-int-card">
+          <div class="uflow-int-head" style="background:linear-gradient(135deg,#ecfdf5,#d1fae5);">
+            <div class="uflow-int-icon" style="background:linear-gradient(135deg,#059669,#10b981);">&#127912;</div>
+            <div class="uflow-int-info">
+              <div class="uflow-int-title">What If? Scenario Analysis</div>
+              <div class="uflow-int-sub">Direct LLM Call &bull; <span class="uflow-llama-badge" style="animation:none;">&#9889; Llama Stack</span></div>
+            </div>
+          </div>
+          <div class="uflow-int-body">
+            <p>Generates 4 scenarios: maintenance window change, drain timeout increase, DBA availability, skip canary &mdash; each with impact % and confidence level.</p>
+            <div class="ai-api-block" style="margin:0;">
+              <span class="api-method">POST</span> <span class="api-url">/v1/chat/completions</span><br>
+              <span class="api-comment">// CVE + risk + ops context &rarr; 4 JSON scenarios</span>
+            </div>
+          </div>
+        </div>
+        <div class="uflow-int-card">
+          <div class="uflow-int-head" style="background:linear-gradient(135deg,#fff7ed,#ffedd5);">
+            <div class="uflow-int-icon" style="background:linear-gradient(135deg,#ea580c,#f97316);">&#128161;</div>
+            <div class="uflow-int-info">
+              <div class="uflow-int-title">Why? Risk Explanation</div>
+              <div class="uflow-int-sub">Direct LLM Call &bull; <span class="uflow-llama-badge" style="animation:none;">&#9889; Llama Stack</span></div>
+            </div>
+          </div>
+          <div class="uflow-int-body">
+            <p>Explains 5 weighted factors behind a host's risk score: CVSS, patch lag, operational context, historical patterns, workload sensitivity &mdash; with a recommendation.</p>
+            <div class="ai-api-block" style="margin:0;">
+              <span class="api-method">POST</span> <span class="api-url">/v1/chat/completions</span><br>
+              <span class="api-comment">// Host profile &rarr; 5 factors + recommendation</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      </div><!-- end TAB: Architecture & Flow -->
 
       <div class="guide-tab-panel" id="gtab_stages">
       <!-- ── Stage Details ── -->
@@ -1345,482 +1814,6 @@
         </div>
       </div>
       </div><!-- end TAB: Stages -->
-
-      <div class="guide-tab-panel" id="gtab_workflow">
-      <!-- ── Detailed Animated Workflow ── -->
-      <div class="guide-section-title">
-        <span class="gs-icon" style="background:linear-gradient(135deg,#1e293b,#475569);">&#9776;</span>
-        Detailed API Workflow &mdash; Communication &amp; Data Flow
-      </div>
-      <p style="font-size:13px; color:var(--text-secondary); line-height:1.6; margin-bottom:16px;">
-        Each step below shows which agent calls which API, what inputs are sent, and what outputs are returned. Data flows forward &mdash; outputs from one step become inputs to the next. The animated timeline shows the real execution order.
-      </p>
-
-      <div class="wf-timeline" id="wfTimeline">
-
-        <!-- ─── STEP 1: Console triggers flow ─── -->
-        <div class="wf-node">
-          <div class="wf-dot" style="background:var(--red); color:var(--red);"></div>
-          <div class="wf-card">
-            <div class="wf-card-head" style="background:linear-gradient(135deg,#fef2f2,#fee2e2); color:var(--red-dark);">
-              <span class="wf-step-label" style="background:var(--red); color:#fff;">STEP 1</span>
-              Console &rarr; Patch Manager: Initiate Flow
-            </div>
-            <div class="wf-card-body">
-              <div class="wf-arrow-row">
-                <span class="wf-ar-icon" style="background:var(--blue);">&#8594;</span>
-                <span class="wf-ar-label">POST /api/start</span>
-                <span class="wf-ar-detail">&mdash; User clicks "Start Patch Flow"</span>
-              </div>
-              <div class="wf-io">
-                <div class="wf-io-box" style="background:#fef2f2;">
-                  <div class="wf-io-label" style="color:var(--red);"><span class="wf-data-pulse" style="background:var(--red);"></span>Input</div>
-                  <div class="wf-io-val"><code>cve_id</code> e.g. <code>CVE-2026-31337</code></div>
-                </div>
-                <div class="wf-io-box" style="background:#ecfdf5;">
-                  <div class="wf-io-label" style="color:var(--green);"><span class="wf-data-pulse" style="background:var(--green);"></span>Output</div>
-                  <div class="wf-io-val">Thread spawned, <code>state.json</code> created with <code>status: in_progress</code>, A2A message broadcast</div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- ─── STEP 2: Fetch CVE from Insights ─── -->
-        <div class="wf-node">
-          <div class="wf-dot" style="background:var(--red); color:var(--red);"></div>
-          <div class="wf-card">
-            <div class="wf-card-head" style="background:linear-gradient(135deg,#fef2f2,#fee2e2); color:var(--red-dark);">
-              <span class="wf-step-label" style="background:var(--red); color:#fff;">STEP 2</span>
-              Patch Manager &rarr; Discovery Agent: Fetch CVE
-            </div>
-            <div class="wf-card-body">
-              <div class="wf-arrow-row">
-                <span class="wf-ar-icon" style="background:var(--blue);">&#8594;</span>
-                <span class="wf-ar-label">Red Hat Insights API</span>
-                <span class="wf-ar-detail">&mdash; via MCP server at <code>INSIGHTS_MCP_ENDPOINT</code></span>
-              </div>
-              <div class="wf-io">
-                <div class="wf-io-box" style="background:#fef2f2;">
-                  <div class="wf-io-label" style="color:var(--red);"><span class="wf-data-pulse" style="background:var(--red);"></span>Input</div>
-                  <div class="wf-io-val"><code>cve_id</code>, MCP credentials (<code>LIGHTSPEED_CLIENT_ID</code>, <code>LIGHTSPEED_CLIENT_SECRET</code>)</div>
-                </div>
-                <div class="wf-io-box" style="background:#ecfdf5;">
-                  <div class="wf-io-label" style="color:var(--green);"><span class="wf-data-pulse" style="background:var(--green);"></span>Output</div>
-                  <div class="wf-io-val"><code>cvss_score</code> (9.8), <code>description</code>, <code>affected_systems[]</code> (37 hosts with UUIDs, hostnames, first_reported dates)</div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- ─── STEP 3: Enrich operational context ─── -->
-        <div class="wf-node">
-          <div class="wf-dot" style="background:var(--red); color:var(--red);"></div>
-          <div class="wf-card">
-            <div class="wf-card-head" style="background:linear-gradient(135deg,#fef2f2,#fee2e2); color:var(--red-dark);">
-              <span class="wf-step-label" style="background:var(--red); color:#fff;">STEP 3</span>
-              Patch Manager &rarr; Risk Agent: Enrich Context
-            </div>
-            <div class="wf-card-body">
-              <div class="wf-arrow-row">
-                <span class="wf-ar-icon" style="background:var(--yellow);">&#9881;</span>
-                <span class="wf-ar-label">CMDB + ITSM Lookup</span>
-                <span class="wf-ar-detail">&mdash; enriches hosts with business metadata</span>
-              </div>
-              <div class="wf-io">
-                <div class="wf-io-box" style="background:#fef2f2;">
-                  <div class="wf-io-label" style="color:var(--red);"><span class="wf-data-pulse" style="background:var(--red);"></span>Input</div>
-                  <div class="wf-io-val"><code>affected_systems[]</code> from Step 2</div>
-                </div>
-                <div class="wf-io-box" style="background:#ecfdf5;">
-                  <div class="wf-io-label" style="color:var(--green);"><span class="wf-data-pulse" style="background:var(--green);"></span>Output</div>
-                  <div class="wf-io-val"><code>operational_context</code>: environment (Production), app (Payments), criticality (Tier 1), maintenance window, historical patch success (91%)</div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- ─── STEP 4: Risk scoring ─── -->
-        <div class="wf-node">
-          <div class="wf-dot" style="background:#d97706; color:#d97706;"></div>
-          <div class="wf-card">
-            <div class="wf-card-head" style="background:linear-gradient(135deg,#fffbeb,#fef3c7); color:#92400e;">
-              <span class="wf-step-label" style="background:#d97706; color:#fff;">STEP 4</span>
-              Patch Manager &rarr; Risk Agent: Score Hosts
-            </div>
-            <div class="wf-card-body">
-              <div class="wf-arrow-row">
-                <span class="wf-ar-icon" style="background:#d97706;">&#8594;</span>
-                <span class="wf-ar-label">RHOAI KServe Model</span>
-                <span class="wf-ar-detail">&mdash; ML inference at <code>RISK_URL</code></span>
-              </div>
-              <div class="wf-io">
-                <div class="wf-io-box" style="background:#fffbeb;">
-                  <div class="wf-io-label" style="color:#b45309;"><span class="wf-data-pulse" style="background:#d97706;"></span>Input (per host)</div>
-                  <div class="wf-io-val"><code>cvss</code> (9.8), <code>age_days</code>, <code>affected_count</code> (37), host metadata from CMDB</div>
-                </div>
-                <div class="wf-io-box" style="background:#ecfdf5;">
-                  <div class="wf-io-label" style="color:var(--green);"><span class="wf-data-pulse" style="background:var(--green);"></span>Output (per host)</div>
-                  <div class="wf-io-val"><code>risk_score</code> (0-100), <code>decision</code>: <code>review</code> (&gt;30) or <code>ok</code> (&le;30), failure probability 27%, risk class HIGH</div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- ─── STEP 5: RAG summaries ─── -->
-        <div class="wf-node">
-          <div class="wf-dot" style="background:#d97706; color:#d97706;"></div>
-          <div class="wf-card">
-            <div class="wf-card-head" style="background:linear-gradient(135deg,#fffbeb,#fef3c7); color:#92400e;">
-              <span class="wf-step-label" style="background:#d97706; color:#fff;">STEP 5</span>
-              Risk Agent: RAG Summaries for Review Hosts
-            </div>
-            <div class="wf-card-body">
-              <div class="wf-arrow-row">
-                <span class="wf-ar-icon" style="background:var(--blue);">&#8594;</span>
-                <span class="wf-ar-label">Llama Stack &rarr; Vector Store</span>
-                <span class="wf-ar-detail">&mdash; <code>LLAMA_STACK_URL</code> + <code>VECTOR_DB_ID</code></span>
-              </div>
-              <div class="wf-io">
-                <div class="wf-io-box" style="background:#fffbeb;">
-                  <div class="wf-io-label" style="color:#b45309;"><span class="wf-data-pulse" style="background:#d97706;"></span>Input</div>
-                  <div class="wf-io-val">12 hosts with <code>decision: review</code>, host names, prior patch IDs</div>
-                </div>
-                <div class="wf-io-box" style="background:#ecfdf5;">
-                  <div class="wf-io-label" style="color:var(--green);"><span class="wf-data-pulse" style="background:var(--green);"></span>Output</div>
-                  <div class="wf-io-val"><code>decision_support.summary</code> per host &mdash; e.g. "pay-app-07 has worst patch history, last failure: drain timeout only 30s vs required 120s"</div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- ─── STEP 6: LLM History Analysis ─── -->
-        <div class="wf-node">
-          <div class="wf-dot" style="background:var(--blue); color:var(--blue);"></div>
-          <div class="wf-card">
-            <div class="wf-card-head" style="background:linear-gradient(135deg,#eff6ff,#dbeafe); color:#1e40af;">
-              <span class="wf-step-label" style="background:var(--blue); color:#fff;">STEP 6</span>
-              Reason Agent: Analyze Patch History
-            </div>
-            <div class="wf-card-body">
-              <div class="wf-arrow-row">
-                <span class="wf-ar-icon" style="background:var(--blue);">&#8594;</span>
-                <span class="wf-ar-label">Llama Stack LLM + RAG</span>
-                <span class="wf-ar-detail">&mdash; searches vector store for similar past patches</span>
-              </div>
-              <div class="wf-io">
-                <div class="wf-io-box" style="background:#eff6ff;">
-                  <div class="wf-io-label" style="color:var(--blue);"><span class="wf-data-pulse" style="background:var(--blue);"></span>Input</div>
-                  <div class="wf-io-val">CVE details, scored hosts, operational context, vector DB search query</div>
-                </div>
-                <div class="wf-io-box" style="background:#ecfdf5;">
-                  <div class="wf-io-label" style="color:var(--green);"><span class="wf-data-pulse" style="background:var(--green);"></span>Output</div>
-                  <div class="wf-io-val"><code>patch_history[]</code> (3 similar records), <code>history_analysis</code> &mdash; "Friday patches fail more, drain timeout is critical, DBA must be present"</div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- ─── STEP 7: Generate Strategy ─── -->
-        <div class="wf-node">
-          <div class="wf-dot" style="background:var(--blue); color:var(--blue);"></div>
-          <div class="wf-card">
-            <div class="wf-card-head" style="background:linear-gradient(135deg,#eff6ff,#dbeafe); color:#1e40af;">
-              <span class="wf-step-label" style="background:var(--blue); color:#fff;">STEP 7</span>
-              Patch Manager &rarr; Automation Agent: Create Strategy
-            </div>
-            <div class="wf-card-body">
-              <div class="wf-arrow-row">
-                <span class="wf-ar-icon" style="background:var(--purple);">&#9881;</span>
-                <span class="wf-ar-label">Strategy Engine</span>
-                <span class="wf-ar-detail">&mdash; computes phased plan from risk scores + history</span>
-              </div>
-              <div class="wf-io">
-                <div class="wf-io-box" style="background:#eff6ff;">
-                  <div class="wf-io-label" style="color:var(--blue);"><span class="wf-data-pulse" style="background:var(--blue);"></span>Input</div>
-                  <div class="wf-io-val">25 <code>ok</code> hosts + 12 <code>review</code> hosts, history analysis, operational constraints</div>
-                </div>
-                <div class="wf-io-box" style="background:#ecfdf5;">
-                  <div class="wf-io-label" style="color:var(--green);"><span class="wf-data-pulse" style="background:var(--green);"></span>Output</div>
-                  <div class="wf-io-val"><code>patch_strategy.phases[]</code>: Phase 1 Test (25 hosts) &rarr; Phase 2 Canary (3 hosts) &rarr; Phase 3 Production (9 hosts)</div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- ─── STEP 8: Generate Playbook ─── -->
-        <div class="wf-node">
-          <div class="wf-dot" style="background:var(--blue); color:var(--blue);"></div>
-          <div class="wf-card">
-            <div class="wf-card-head" style="background:linear-gradient(135deg,#eff6ff,#dbeafe); color:#1e40af;">
-              <span class="wf-step-label" style="background:var(--blue); color:#fff;">STEP 8</span>
-              Automation Agent: Ansible Lightspeed Playbook
-            </div>
-            <div class="wf-card-body">
-              <div class="wf-arrow-row">
-                <span class="wf-ar-icon" style="background:var(--blue);">&#8594;</span>
-                <span class="wf-ar-label">Insights MCP &rarr; Lightspeed</span>
-                <span class="wf-ar-detail">&mdash; generates YAML playbook with drain procedure</span>
-              </div>
-              <div class="wf-io">
-                <div class="wf-io-box" style="background:#eff6ff;">
-                  <div class="wf-io-label" style="color:var(--blue);"><span class="wf-data-pulse" style="background:var(--blue);"></span>Input</div>
-                  <div class="wf-io-val"><code>cve_id</code>, <code>system_uuids[]</code> (up to 20), host risk profiles</div>
-                </div>
-                <div class="wf-io-box" style="background:#ecfdf5;">
-                  <div class="wf-io-label" style="color:var(--green);"><span class="wf-data-pulse" style="background:var(--green);"></span>Output</div>
-                  <div class="wf-io-val"><code>playbook_yaml</code> &mdash; includes connection drain (120s learned from history), kernel update, app restart, health check with retries</div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- ─── STEP 9: Publish to GitHub ─── -->
-        <div class="wf-node">
-          <div class="wf-dot" style="background:var(--purple); color:var(--purple);"></div>
-          <div class="wf-card">
-            <div class="wf-card-head" style="background:linear-gradient(135deg,#f5f3ff,#ede9fe); color:#6b21a8;">
-              <span class="wf-step-label" style="background:var(--purple); color:#fff;">STEP 9</span>
-              Automation Agent: Publish Playbook to GitHub
-            </div>
-            <div class="wf-card-body">
-              <div class="wf-arrow-row">
-                <span class="wf-ar-icon" style="background:#1f2937;">&#8594;</span>
-                <span class="wf-ar-label">GitHub API</span>
-                <span class="wf-ar-detail">&mdash; via git push or MCP at <code>GITHUB_MCP_ENDPOINT</code></span>
-              </div>
-              <div class="wf-io">
-                <div class="wf-io-box" style="background:#f5f3ff;">
-                  <div class="wf-io-label" style="color:var(--purple);"><span class="wf-data-pulse" style="background:var(--purple);"></span>Input</div>
-                  <div class="wf-io-val"><code>playbook_yaml</code>, <code>GITHUB_TOKEN</code>, repo (<code>GITHUB_REPO_OWNER/NAME</code>), branch</div>
-                </div>
-                <div class="wf-io-box" style="background:#ecfdf5;">
-                  <div class="wf-io-label" style="color:var(--green);"><span class="wf-data-pulse" style="background:var(--green);"></span>Output</div>
-                  <div class="wf-io-val"><code>playbook_path</code>: <code>playbooks/generated/CVE-2026-31337-remediation.yml</code>, push method (git or MCP)</div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- ─── STEP 10: Sync AAP + Create Templates ─── -->
-        <div class="wf-node">
-          <div class="wf-dot" style="background:var(--purple); color:var(--purple);"></div>
-          <div class="wf-card">
-            <div class="wf-card-head" style="background:linear-gradient(135deg,#f5f3ff,#ede9fe); color:#6b21a8;">
-              <span class="wf-step-label" style="background:var(--purple); color:#fff;">STEP 10</span>
-              Automation Agent: Sync AAP &amp; Create Templates
-            </div>
-            <div class="wf-card-body">
-              <div class="wf-arrow-row">
-                <span class="wf-ar-icon" style="background:var(--purple);">&#8594;</span>
-                <span class="wf-ar-label">AAP Controller API</span>
-                <span class="wf-ar-detail">&mdash; <code>AAP_BASE_URL</code> + <code>AAP_TOKEN</code></span>
-              </div>
-              <div class="wf-io">
-                <div class="wf-io-box" style="background:#f5f3ff;">
-                  <div class="wf-io-label" style="color:var(--purple);"><span class="wf-data-pulse" style="background:var(--purple);"></span>Input</div>
-                  <div class="wf-io-val"><code>playbook_path</code>, <code>cve_id</code>, AAP credentials, project sync trigger</div>
-                </div>
-                <div class="wf-io-box" style="background:#ecfdf5;">
-                  <div class="wf-io-label" style="color:var(--green);"><span class="wf-data-pulse" style="background:var(--green);"></span>Output</div>
-                  <div class="wf-io-val"><code>job_template_id</code> (98), <code>workflow_template_id</code> (99), template URLs, approval gate configured</div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- ─── STEP 11: Launch Workflow ─── -->
-        <div class="wf-node">
-          <div class="wf-dot" style="background:var(--purple); color:var(--purple);"></div>
-          <div class="wf-card">
-            <div class="wf-card-head" style="background:linear-gradient(135deg,#f5f3ff,#ede9fe); color:#6b21a8;">
-              <span class="wf-step-label" style="background:var(--purple); color:#fff;">STEP 11</span>
-              Patch Manager &rarr; Automation Agent: Launch Workflow
-            </div>
-            <div class="wf-card-body">
-              <div class="wf-arrow-row">
-                <span class="wf-ar-icon" style="background:var(--purple);">&#9654;</span>
-                <span class="wf-ar-label">AAP Workflow Launch</span>
-                <span class="wf-ar-detail">&mdash; starts workflow, pauses at approval node</span>
-              </div>
-              <div class="wf-io">
-                <div class="wf-io-box" style="background:#f5f3ff;">
-                  <div class="wf-io-label" style="color:var(--purple);"><span class="wf-data-pulse" style="background:var(--purple);"></span>Input</div>
-                  <div class="wf-io-val"><code>workflow_template_id</code> (99)</div>
-                </div>
-                <div class="wf-io-box" style="background:#ecfdf5;">
-                  <div class="wf-io-label" style="color:var(--green);"><span class="wf-data-pulse" style="background:var(--green);"></span>Output</div>
-                  <div class="wf-io-val"><code>workflow_job_id</code> (1001), <code>status: waiting</code>, <code>pending_approvals[]</code> (approval node ID 2001)</div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- ─── APPROVAL GATE ─── -->
-        <div class="wf-node">
-          <div class="wf-gate">
-            <div class="wf-dot" style="background:#d97706; color:#d97706;"></div>
-            <div style="font-size:14px; font-weight:800; color:#92400e; margin-bottom:4px;">&#9888; Human Approval Gate</div>
-            <div style="font-size:12px; color:#92400e; line-height:1.5;">
-              Workflow pauses here. Operator reviews risk scores, host analysis, and patch strategy in the UI, then clicks <strong>Approve</strong> or <strong>Deny</strong>.<br>
-              <span style="font-size:11px; opacity:0.8;">API: <code>POST /api/approve</code> &rarr; tries real <code>workflow_approval_action()</code> on AAP, falls back to local <code>run_post_approval()</code></span>
-            </div>
-          </div>
-        </div>
-
-        <!-- ─── STEP 12: Phased Execution ─── -->
-        <div class="wf-node">
-          <div class="wf-dot" style="background:var(--purple); color:var(--purple);"></div>
-          <div class="wf-card">
-            <div class="wf-card-head" style="background:linear-gradient(135deg,#f5f3ff,#ede9fe); color:#6b21a8;">
-              <span class="wf-step-label" style="background:var(--purple); color:#fff;">STEP 12</span>
-              Automation Agent: Phased Execution
-            </div>
-            <div class="wf-card-body">
-              <div style="display:flex; gap:8px; margin-bottom:8px; flex-wrap:wrap;">
-                <div style="flex:1; min-width:120px; padding:8px 10px; background:#eff6ff; border-radius:8px; text-align:center; border:1px solid rgba(37,99,235,0.15);">
-                  <div style="font-size:9px; font-weight:700; color:var(--blue); letter-spacing:0.5px;">PHASE 1</div>
-                  <div style="font-size:18px; font-weight:900; color:var(--blue);">25</div>
-                  <div style="font-size:10px; color:var(--text-secondary);">Test Systems</div>
-                </div>
-                <div style="display:flex; align-items:center; color:#d1d5db;">&#10132;</div>
-                <div style="flex:1; min-width:120px; padding:8px 10px; background:#fef3c7; border-radius:8px; text-align:center; border:1px solid rgba(217,119,6,0.15);">
-                  <div style="font-size:9px; font-weight:700; color:#b45309; letter-spacing:0.5px;">PHASE 2</div>
-                  <div style="font-size:18px; font-weight:900; color:#d97706;">3</div>
-                  <div style="font-size:10px; color:var(--text-secondary);">Canary Hosts</div>
-                </div>
-                <div style="display:flex; align-items:center; color:#d1d5db;">&#10132;</div>
-                <div style="flex:1; min-width:120px; padding:8px 10px; background:#f5f3ff; border-radius:8px; text-align:center; border:1px solid rgba(124,58,237,0.15);">
-                  <div style="font-size:9px; font-weight:700; color:var(--purple); letter-spacing:0.5px;">PHASE 3</div>
-                  <div style="font-size:18px; font-weight:900; color:var(--purple);">9</div>
-                  <div style="font-size:10px; color:var(--text-secondary);">Production</div>
-                </div>
-              </div>
-              <div class="wf-io">
-                <div class="wf-io-box" style="background:#f5f3ff;">
-                  <div class="wf-io-label" style="color:var(--purple);"><span class="wf-data-pulse" style="background:var(--purple);"></span>Per-host Execution</div>
-                  <div class="wf-io-val">AAP job template runs: drain connections (120s) &rarr; apply kernel patch &rarr; restart app &rarr; health check (retries: 5, delay: 10s)</div>
-                </div>
-                <div class="wf-io-box" style="background:#ecfdf5;">
-                  <div class="wf-io-label" style="color:var(--green);"><span class="wf-data-pulse" style="background:var(--green);"></span>Progress Tracking</div>
-                  <div class="wf-io-val"><code>exec_progress</code> updates state.json per phase: <code>{total, completed, status}</code> &mdash; UI polls and renders live</div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- ─── STEP 13: Failure & Auto-Rollback ─── -->
-        <div class="wf-node">
-          <div class="wf-failure-zone">
-            <div class="wf-dot" style="background:var(--red); color:var(--red);"></div>
-            <div style="font-size:13px; font-weight:800; color:var(--red-dark); margin-bottom:6px;">&#9888; STEP 13: Failure Detection &amp; Auto-Rollback</div>
-            <div style="font-size:12px; color:var(--red-dark); line-height:1.5; margin-bottom:8px;">
-              PAY-APP-07 post-patch health check fails &rarr; production rollout <strong>paused</strong> automatically
-            </div>
-            <div class="wf-io">
-              <div class="wf-io-box" style="background:#fff5f5;">
-                <div class="wf-io-label" style="color:var(--red);"><span class="wf-data-pulse" style="background:var(--red);"></span>Failure Signal</div>
-                <div class="wf-io-val">Health check <code>HTTP 503</code> after 5 retries &rarr; Automation Agent broadcasts <code>patch_failure</code> error event</div>
-              </div>
-              <div class="wf-io-box" style="background:#fff5f5;">
-                <div class="wf-io-label" style="color:var(--red);"><span class="wf-data-pulse" style="background:var(--red);"></span>Rollback</div>
-                <div class="wf-io-val">Ansible reverts kernel &rarr; restarts app &rarr; verifies health &rarr; <code>rollback_status: SUCCESS</code>, <code>app_status: HEALTHY</code></div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- ─── STEP 14: Diagnosis Agent ─── -->
-        <div class="wf-node">
-          <div class="wf-dot" style="background:var(--blue); color:var(--blue);"></div>
-          <div class="wf-card">
-            <div class="wf-card-head" style="background:linear-gradient(135deg,#eff6ff,#dbeafe); color:#1e40af;">
-              <span class="wf-step-label" style="background:var(--blue); color:#fff;">STEP 14</span>
-              Diagnosis Agent: Root Cause Analysis
-            </div>
-            <div class="wf-card-body">
-              <div class="wf-arrow-row">
-                <span class="wf-ar-icon" style="background:var(--blue);">&#8594;</span>
-                <span class="wf-ar-label">RAG Vector Store + LLM</span>
-                <span class="wf-ar-detail">&mdash; searches for similar failure patterns in history</span>
-              </div>
-              <div class="wf-io">
-                <div class="wf-io-box" style="background:#eff6ff;">
-                  <div class="wf-io-label" style="color:var(--blue);"><span class="wf-data-pulse" style="background:var(--blue);"></span>Input</div>
-                  <div class="wf-io-val">Failed host (PAY-APP-07), failure type (health check), app (Payments), CVE ID</div>
-                </div>
-                <div class="wf-io-box" style="background:#ecfdf5;">
-                  <div class="wf-io-label" style="color:var(--green);"><span class="wf-data-pulse" style="background:var(--green);"></span>Output</div>
-                  <div class="wf-io-val"><code>similar_records</code> (3 matches), <code>likely_cause</code>: drain timeout (30s vs 120s required), <code>recommendation</code>: increase to 120s</div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- ─── STEP 15: Remediation ─── -->
-        <div class="wf-node">
-          <div class="wf-dot" style="background:var(--purple); color:var(--purple);"></div>
-          <div class="wf-card">
-            <div class="wf-card-head" style="background:linear-gradient(135deg,#f5f3ff,#ede9fe); color:#6b21a8;">
-              <span class="wf-step-label" style="background:var(--purple); color:#fff;">STEP 15</span>
-              Automation Agent: Execute Remediation
-            </div>
-            <div class="wf-card-body">
-              <div class="wf-arrow-row">
-                <span class="wf-ar-icon" style="background:var(--purple);">&#9654;</span>
-                <span class="wf-ar-label">Retry with Fix</span>
-                <span class="wf-ar-detail">&mdash; applies AI-discovered fix, retries failed host</span>
-              </div>
-              <div class="wf-io">
-                <div class="wf-io-box" style="background:#f5f3ff;">
-                  <div class="wf-io-label" style="color:var(--purple);"><span class="wf-data-pulse" style="background:var(--purple);"></span>Input</div>
-                  <div class="wf-io-val">Remediation: drain timeout <code>30s &rarr; 120s</code>, target: PAY-APP-07, evidence count: 3 supporting records</div>
-                </div>
-                <div class="wf-io-box" style="background:#ecfdf5;">
-                  <div class="wf-io-label" style="color:var(--green);"><span class="wf-data-pulse" style="background:var(--green);"></span>Output</div>
-                  <div class="wf-io-val">PAY-APP-07 patched successfully with 120s drain &rarr; production rollout resumes &rarr; all 9/9 production hosts complete</div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- ─── STEP 16: Learning ─── -->
-        <div class="wf-node">
-          <div class="wf-success-zone">
-            <div class="wf-dot" style="background:var(--green); color:var(--green);"></div>
-            <div style="font-size:13px; font-weight:800; color:#065f46; margin-bottom:6px;">&#10003; STEP 16: Learn &amp; Close</div>
-            <div style="font-size:12px; color:#065f46; line-height:1.5; margin-bottom:8px;">
-              All 37 systems patched successfully &mdash; generating training records for future intelligence
-            </div>
-            <div class="wf-io">
-              <div class="wf-io-box" style="background:#f0fdf4;">
-                <div class="wf-io-label" style="color:var(--green);"><span class="wf-data-pulse" style="background:var(--green);"></span>Stored to Vector DB</div>
-                <div class="wf-io-val">37 host patch outcomes, 1 failure-remediation pair, drain timeout lesson (30s &rarr; 120s), Friday failure pattern</div>
-              </div>
-              <div class="wf-io-box" style="background:#f0fdf4;">
-                <div class="wf-io-label" style="color:var(--green);"><span class="wf-data-pulse" style="background:var(--green);"></span>Model Retraining</div>
-                <div class="wf-io-val">Training events exported for RHOAI model update &mdash; next CVE's PREDICT stage will score PAY-APP-07 higher automatically</div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-      </div><!-- end wf-timeline -->
-      </div><!-- end TAB: API Workflow -->
-
       <div class="guide-tab-panel" id="gtab_integration">
       <!-- ── Unified Mode ── -->
       <div class="guide-section-title">
@@ -1882,278 +1875,6 @@
         </div>
       </div>
       </div><!-- end TAB: Integration -->
-
-      <div class="guide-tab-panel" id="gtab_ai">
-
-      <!-- ── AI Engine Hero ── -->
-      <div class="ai-hero">
-        <h3>&#10024; Llama Stack AI Engine</h3>
-        <p>Llama Stack powers six intelligence points across the pipeline &mdash; from RAG-driven risk summaries to real-time What If scenario analysis. Every call flows through a single unified API, making the entire AI layer swappable, observable, and configurable.</p>
-      </div>
-
-      <!-- ── Hub Diagram ── -->
-      <div class="guide-section-title">
-        <span class="gs-icon" style="background:linear-gradient(135deg,#6366f1,#8b5cf6);">&#9878;</span>
-        Architecture &mdash; Llama Stack Hub
-      </div>
-
-      <div class="ai-hub-container">
-        <div class="ai-hub">
-          <div class="ai-hub-inner">
-            <span class="ai-hub-icon">&#129302;</span>
-            <div class="ai-hub-title">Llama Stack</div>
-            <div class="ai-hub-sub">Unified AI Gateway</div>
-          </div>
-        </div>
-        <div class="ai-connector-down"></div>
-        <div class="ai-hub-branches">
-          <div class="ai-hub-branch-line"></div>
-          <div class="ai-hub-branch-line"></div>
-        </div>
-        <div style="display:flex; justify-content:center; gap:24px; width:100%; flex-wrap:wrap;">
-          <div class="ai-hub-leaf">
-            <div class="ai-hub-leaf-box" style="background:linear-gradient(135deg,#eff6ff,#dbeafe); color:#1e40af; border-color:rgba(37,99,235,0.2);">
-              <span class="leaf-icon">&#9881;</span>
-              LLM Inference<br>
-              <span class="leaf-label">/v1/chat/completions</span>
-            </div>
-          </div>
-          <div class="ai-hub-leaf">
-            <div class="ai-hub-leaf-box" style="background:linear-gradient(135deg,#f5f3ff,#ede9fe); color:#6b21a8; border-color:rgba(124,58,237,0.2);">
-              <span class="leaf-icon">&#128218;</span>
-              Vector Store (RAG)<br>
-              <span class="leaf-label">/v1/tool-runtime/invoke</span>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- ── Configuration ── -->
-      <div class="guide-section-title">
-        <span class="gs-icon" style="background:linear-gradient(135deg,#059669,#10b981);">&#9881;</span>
-        Configuration
-      </div>
-      <div class="ai-config-bar">
-        <div class="ai-config-item">
-          <div class="aci-label">Gateway URL</div>
-          <div class="aci-code">LLAMA_STACK_URL</div>
-          <div class="aci-desc">Default: http://127.0.0.1:8321</div>
-        </div>
-        <div class="ai-config-item">
-          <div class="aci-label">Model</div>
-          <div class="aci-code">DEFAULT_LLM_MODEL</div>
-          <div class="aci-desc">Default: vllm-inference/llama-scout-17b</div>
-        </div>
-        <div class="ai-config-item">
-          <div class="aci-label">Vector DB</div>
-          <div class="aci-code">VECTOR_DB_ID</div>
-          <div class="aci-desc">RAG store for patch history &amp; lessons</div>
-        </div>
-      </div>
-
-      <!-- ── API Call Pattern ── -->
-      <div class="guide-section-title">
-        <span class="gs-icon" style="background:linear-gradient(135deg,#1e293b,#475569);">&#128268;</span>
-        API Call Pattern
-      </div>
-      <div class="ai-api-block" style="margin-bottom:24px;">
-        <span class="api-method">POST</span> <span class="api-url">{LLAMA_STACK_URL}/v1/chat/completions</span><br>
-        {<br>
-        &nbsp;&nbsp;<span class="api-key">"model"</span>: <span class="api-val">"vllm-inference/llama-scout-17b"</span>,<br>
-        &nbsp;&nbsp;<span class="api-key">"messages"</span>: [<br>
-        &nbsp;&nbsp;&nbsp;&nbsp;{<span class="api-key">"role"</span>: <span class="api-val">"system"</span>, <span class="api-key">"content"</span>: <span class="api-val">"You are a CVE patching expert..."</span>},<br>
-        &nbsp;&nbsp;&nbsp;&nbsp;{<span class="api-key">"role"</span>: <span class="api-val">"user"</span>, <span class="api-key">"content"</span>: <span class="api-val">"&lt;context + prompt&gt;"</span>}<br>
-        &nbsp;&nbsp;],<br>
-        &nbsp;&nbsp;<span class="api-key">"max_tokens"</span>: <span class="api-val">1024</span><br>
-        }<br>
-        <span class="api-comment">// Response: choices[0].message.content</span>
-      </div>
-
-      <!-- ── 6 Integration Points ── -->
-      <div class="guide-section-title">
-        <span class="gs-icon" style="background:linear-gradient(135deg,#e00000,#ff3333);">&#10024;</span>
-        6 Intelligence Points
-      </div>
-
-      <div class="ai-integrations-grid">
-
-        <!-- 1: RAG Summaries -->
-        <div class="ai-int-card">
-          <div class="ai-int-card-head" style="background:linear-gradient(135deg,#fefce8,#fef9c3);">
-            <div class="aic-icon" style="background:linear-gradient(135deg,#d97706,#f59e0b);">&#128270;</div>
-            <div class="aic-info">
-              <div class="aic-title">RAG Host Summaries</div>
-              <div class="aic-agent">Risk Agent &bull; Pipeline Step 5</div>
-            </div>
-            <div class="aic-live"></div>
-          </div>
-          <div class="ai-int-card-body">
-            <p>Searches the vector store for historical patch records matching each high-risk host. Returns a per-host decision support summary explaining <em>why</em> the host was flagged.</p>
-            <div class="ai-io-row">
-              <div class="ai-io-box" style="background:#fffbeb;">
-                <div class="aio-label" style="color:#b45309;">Input</div>
-                Host UUID, hostname, prior patch IDs
-              </div>
-              <div class="ai-io-box" style="background:#ecfdf5;">
-                <div class="aio-label" style="color:#059669;">Output</div>
-                decision_support.summary per host
-              </div>
-            </div>
-            <div class="ai-api-block">
-              <span class="api-method">POST</span> <span class="api-url">/v1/tool-runtime/invoke</span><br>
-              <span class="api-comment">// Vector store search + LLM summarization</span>
-            </div>
-          </div>
-        </div>
-
-        <!-- 2: History Analysis -->
-        <div class="ai-int-card">
-          <div class="ai-int-card-head" style="background:linear-gradient(135deg,#eff6ff,#dbeafe);">
-            <div class="aic-icon" style="background:linear-gradient(135deg,#2563eb,#3b82f6);">&#128214;</div>
-            <div class="aic-info">
-              <div class="aic-title">Patch History Analysis</div>
-              <div class="aic-agent">Reason Agent &bull; Pipeline Step 6</div>
-            </div>
-            <div class="aic-live"></div>
-          </div>
-          <div class="ai-int-card-body">
-            <p>LLM analyzes historical patch records via RAG &mdash; finds similar past patches, identifies failure patterns (e.g. "Friday patches fail more"), and extracts lessons like required drain timeouts.</p>
-            <div class="ai-io-row">
-              <div class="ai-io-box" style="background:#eff6ff;">
-                <div class="aio-label" style="color:#2563eb;">Input</div>
-                CVE details, scored hosts, RAG query
-              </div>
-              <div class="ai-io-box" style="background:#ecfdf5;">
-                <div class="aio-label" style="color:#059669;">Output</div>
-                patch_history[], history_analysis text
-              </div>
-            </div>
-            <div class="ai-api-block">
-              <span class="api-method">POST</span> <span class="api-url">/v1/chat/completions</span><br>
-              <span class="api-comment">// RAG context injected into system prompt</span>
-            </div>
-          </div>
-        </div>
-
-        <!-- 3: Playbook Generation -->
-        <div class="ai-int-card">
-          <div class="ai-int-card-head" style="background:linear-gradient(135deg,#f5f3ff,#ede9fe);">
-            <div class="aic-icon" style="background:linear-gradient(135deg,#7c3aed,#a78bfa);">&#128221;</div>
-            <div class="aic-info">
-              <div class="aic-title">Playbook Generation</div>
-              <div class="aic-agent">Automation Agent &bull; Pipeline Step 8</div>
-            </div>
-            <div class="aic-live"></div>
-          </div>
-          <div class="ai-int-card-body">
-            <p>Ansible Lightspeed generates remediation playbooks via the Insights MCP server. The LLM produces YAML with learned parameters (e.g. 120s drain timeout from history).</p>
-            <div class="ai-io-row">
-              <div class="ai-io-box" style="background:#f5f3ff;">
-                <div class="aio-label" style="color:#7c3aed;">Input</div>
-                cve_id, system_uuids[], risk profiles
-              </div>
-              <div class="ai-io-box" style="background:#ecfdf5;">
-                <div class="aio-label" style="color:#059669;">Output</div>
-                Complete YAML playbook with drain + patch + health check
-              </div>
-            </div>
-            <div class="ai-api-block">
-              <span class="api-method">MCP</span> <span class="api-url">INSIGHTS_MCP_ENDPOINT</span><br>
-              <span class="api-comment">// Lightspeed → LLM → YAML playbook</span>
-            </div>
-          </div>
-        </div>
-
-        <!-- 4: Diagnosis / RCA -->
-        <div class="ai-int-card">
-          <div class="ai-int-card-head" style="background:linear-gradient(135deg,#fef2f2,#fee2e2);">
-            <div class="aic-icon" style="background:linear-gradient(135deg,#dc2626,#ef4444);">&#128301;</div>
-            <div class="aic-info">
-              <div class="aic-title">Root Cause Analysis</div>
-              <div class="aic-agent">Diagnosis Agent &bull; Pipeline Step 14</div>
-            </div>
-            <div class="aic-live"></div>
-          </div>
-          <div class="ai-int-card-body">
-            <p>When a host patch fails, the Diagnosis Agent searches RAG for similar failure patterns, then uses the LLM to identify the likely root cause and generate a remediation recommendation.</p>
-            <div class="ai-io-row">
-              <div class="ai-io-box" style="background:#fef2f2;">
-                <div class="aio-label" style="color:#dc2626;">Input</div>
-                Failed host, failure type, app context
-              </div>
-              <div class="ai-io-box" style="background:#ecfdf5;">
-                <div class="aio-label" style="color:#059669;">Output</div>
-                likely_cause, recommendation, evidence[]
-              </div>
-            </div>
-            <div class="ai-api-block">
-              <span class="api-method">POST</span> <span class="api-url">/v1/chat/completions</span><br>
-              <span class="api-comment">// RAG failure records + LLM diagnosis</span>
-            </div>
-          </div>
-        </div>
-
-        <!-- 5: What If Analysis -->
-        <div class="ai-int-card">
-          <div class="ai-int-card-head" style="background:linear-gradient(135deg,#ecfdf5,#d1fae5);">
-            <div class="aic-icon" style="background:linear-gradient(135deg,#059669,#10b981);">&#127912;</div>
-            <div class="aic-info">
-              <div class="aic-title">What If Scenario Analysis</div>
-              <div class="aic-agent">Console UI &bull; On-demand Button</div>
-            </div>
-            <div class="aic-live"></div>
-          </div>
-          <div class="ai-int-card-body">
-            <p>Operator clicks <strong>What If?</strong> &mdash; the LLM receives the full CVE context, risk scores, and operational data, then generates 4 scenario cards showing how changes (maintenance window, drain timeout, DBA availability) would impact risk.</p>
-            <div class="ai-io-row">
-              <div class="ai-io-box" style="background:#ecfdf5;">
-                <div class="aio-label" style="color:#059669;">Input</div>
-                CVE + hosts + risk + operational context
-              </div>
-              <div class="ai-io-box" style="background:#f0fdf4;">
-                <div class="aio-label" style="color:#065f46;">Output</div>
-                4 scenario cards with impact %
-              </div>
-            </div>
-            <div class="ai-api-block">
-              <span class="api-method">POST</span> <span class="api-url">/v1/chat/completions</span><br>
-              <span class="api-comment">// Direct LLM call → JSON scenario array</span>
-            </div>
-          </div>
-        </div>
-
-        <!-- 6: Why Analysis -->
-        <div class="ai-int-card">
-          <div class="ai-int-card-head" style="background:linear-gradient(135deg,#fff7ed,#ffedd5);">
-            <div class="aic-icon" style="background:linear-gradient(135deg,#ea580c,#f97316);">&#128161;</div>
-            <div class="aic-info">
-              <div class="aic-title">Why Risk Explanation</div>
-              <div class="aic-agent">Console UI &bull; On-demand Button</div>
-            </div>
-            <div class="aic-live"></div>
-          </div>
-          <div class="ai-int-card-body">
-            <p>Operator clicks <strong>Why?</strong> on a host &mdash; the LLM explains the risk factors behind that host's score: CVSS severity, patch lag, operational context, historical patterns, and workload sensitivity, with a weighted breakdown.</p>
-            <div class="ai-io-row">
-              <div class="ai-io-box" style="background:#fff7ed;">
-                <div class="aio-label" style="color:#ea580c;">Input</div>
-                Host profile + risk score + history
-              </div>
-              <div class="ai-io-box" style="background:#f0fdf4;">
-                <div class="aio-label" style="color:#065f46;">Output</div>
-                5 weighted factors + recommendation
-              </div>
-            </div>
-            <div class="ai-api-block">
-              <span class="api-method">POST</span> <span class="api-url">/v1/chat/completions</span><br>
-              <span class="api-comment">// Direct LLM call → JSON factors array</span>
-            </div>
-          </div>
-        </div>
-
-      </div><!-- end ai-integrations-grid -->
-
-      </div><!-- end TAB: AI Engine -->
 
       <div class="guide-tab-panel" id="gtab_quickstart">
       <!-- ── Quick Start ── -->
