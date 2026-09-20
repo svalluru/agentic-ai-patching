@@ -1035,8 +1035,23 @@
       background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
       border-radius: 50%;
     }
-    .guide-hero h2 { margin: 0 0 10px; font-size: 24px; font-weight: 800; letter-spacing: -0.5px; position: relative; }
-    .guide-hero p { margin: 0; font-size: 14px; opacity: 0.9; line-height: 1.6; position: relative; max-width: 600px; }
+    .guide-hero-eyebrow {
+      font-size: 11px; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase;
+      opacity: 0.75; margin-bottom: 8px; position: relative;
+    }
+    .guide-hero h2 { margin: 0 0 12px; font-size: 28px; font-weight: 900; letter-spacing: -0.5px; position: relative; }
+    .guide-hero p { margin: 0; font-size: 14px; opacity: 0.9; line-height: 1.7; position: relative; max-width: 640px; }
+    .guide-hero-stats {
+      display: flex; gap: 24px; margin-top: 20px; position: relative;
+    }
+    .ghs {
+      display: flex; flex-direction: column; align-items: center; gap: 2px;
+      background: rgba(255,255,255,0.15); backdrop-filter: blur(4px);
+      border-radius: 10px; padding: 10px 16px; min-width: 72px;
+      border: 1px solid rgba(255,255,255,0.2);
+    }
+    .ghs-num { font-size: 20px; font-weight: 900; }
+    .ghs-label { font-size: 9px; font-weight: 600; letter-spacing: 0.8px; text-transform: uppercase; opacity: 0.8; }
 
     .guide-section-title {
       display: flex; align-items: center; gap: 10px;
@@ -1171,6 +1186,62 @@
       padding: 2px 8px; border-radius: 4px; font-size: 10px; font-weight: 700; letter-spacing: 0.3px;
     }
     .guide-unified-box .gu-text { font-size: 13px; color: var(--text-secondary); }
+
+    /* Demo Script tab */
+    .ds-intro {
+      font-size: 13px; color: var(--text-secondary); line-height: 1.7; margin: 0 0 20px;
+      padding: 14px 18px; background: linear-gradient(135deg, #fef2f2, #fff7ed);
+      border-radius: 12px; border-left: 4px solid var(--red);
+    }
+    .ds-scene {
+      border-radius: 14px; overflow: hidden; margin-bottom: 14px;
+      border: 1px solid var(--border); box-shadow: var(--card-shadow);
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+    .ds-scene:hover { transform: translateY(-2px); box-shadow: var(--card-shadow-hover); }
+    .ds-scene-highlight { border-color: rgba(224,0,0,0.3); box-shadow: 0 0 0 1px rgba(224,0,0,0.08), var(--card-shadow); }
+    .ds-scene-opening { border-style: dashed; }
+    .ds-scene-head {
+      padding: 12px 18px; display: flex; align-items: center; gap: 12px;
+      background: linear-gradient(135deg, #f9fafb, #f3f4f6);
+    }
+    .ds-scene-num {
+      width: 30px; height: 30px; border-radius: 50%; display: flex;
+      align-items: center; justify-content: center; font-size: 13px;
+      font-weight: 800; color: #fff; flex-shrink: 0;
+      background: linear-gradient(135deg, #cc0000, #e00000);
+    }
+    .ds-scene-title { font-size: 14px; font-weight: 800; color: var(--text); }
+    .ds-scene-time {
+      margin-left: auto; font-size: 10px; font-weight: 600;
+      color: var(--text-secondary); letter-spacing: 0.3px;
+      background: var(--white); padding: 3px 10px; border-radius: 6px;
+      border: 1px solid var(--border);
+    }
+    .ds-scene-body { padding: 16px 20px; background: var(--white); }
+    .ds-say {
+      font-size: 13px; line-height: 1.7; color: var(--text);
+      padding: 12px 16px; margin-bottom: 10px;
+      background: linear-gradient(135deg, #eff6ff, #f5f3ff);
+      border-radius: 10px; border-left: 3px solid var(--blue);
+      font-style: italic;
+    }
+    .ds-do, .ds-watch, .ds-tip {
+      font-size: 12px; line-height: 1.6; color: var(--text-secondary);
+      padding: 8px 12px; margin-bottom: 6px; border-radius: 8px;
+    }
+    .ds-do { background: #ecfdf5; }
+    .ds-watch { background: #fef3c7; }
+    .ds-tip { background: #f5f3ff; border-left: 3px solid var(--purple); }
+    .ds-scene-body > :last-child { margin-bottom: 0; }
+    .ds-faq { display: flex; flex-direction: column; gap: 10px; margin: 16px 0; }
+    .ds-faq-item {
+      padding: 14px 18px; background: var(--white); border-radius: 12px;
+      border: 1px solid var(--border); transition: transform 0.15s;
+    }
+    .ds-faq-item:hover { transform: translateX(4px); }
+    .ds-faq-q { font-size: 13px; font-weight: 700; color: var(--text); margin-bottom: 6px; }
+    .ds-faq-a { font-size: 12px; color: var(--text-secondary); line-height: 1.6; }
 
     .guide-diagram {
       background: #1e293b; color: #e2e8f0; border: none; border-radius: 12px;
@@ -1445,8 +1516,15 @@
 
       <!-- Hero -->
       <div class="guide-hero">
+        <div class="guide-hero-eyebrow">Red Hat &times; AI-Powered Operations</div>
         <h2>Autonomous Intelligent Patching</h2>
-        <p>AI-powered CVE remediation that orchestrates the full lifecycle &mdash; from vulnerability discovery through automated patching to continuous learning. Five specialized agents coordinate through a real-time message bus to patch your fleet intelligently.</p>
+        <p>From zero-day to fully patched in minutes, not weeks. Six AI agents discover vulnerabilities, predict risk, reason about history, execute phased rollouts, self-heal on failure, and learn from every outcome &mdash; closing the loop so each patch cycle makes the next one smarter.</p>
+        <div class="guide-hero-stats">
+          <div class="ghs"><span class="ghs-num">6</span><span class="ghs-label">AI Agents</span></div>
+          <div class="ghs"><span class="ghs-num">5</span><span class="ghs-label">Pipeline Stages</span></div>
+          <div class="ghs"><span class="ghs-num">A2A</span><span class="ghs-label">Message Bus</span></div>
+          <div class="ghs"><span class="ghs-num">&infin;</span><span class="ghs-label">Feedback Loop</span></div>
+        </div>
       </div>
 
       <div class="guide-tabs">
@@ -1454,6 +1532,7 @@
         <button class="guide-tab" data-gtab="stages"><span class="gt-icon">&#9733;</span>Stages</button>
         <button class="guide-tab" data-gtab="integration"><span class="gt-icon">&#8644;</span>Integration</button>
         <button class="guide-tab" data-gtab="quickstart"><span class="gt-icon">&#9889;</span>Quick Start</button>
+        <button class="guide-tab" data-gtab="demoscript"><span class="gt-icon">&#9658;</span>Demo Script</button>
       </div>
 
       <div class="guide-tab-panel active" id="gtab_overview">
@@ -1483,15 +1562,15 @@
 
               <!-- Data flow annotation -->
               <div class="aip-data-flow">
-                <span class="aip-data-tag" style="background:#fef2f2; color:var(--red);">CVE identified</span>
+                <span class="aip-data-tag" style="background:#fef2f2; color:var(--red);">CVE + Systems</span>
                 <span class="aip-data-arrow">&#10132;</span>
-                <span class="aip-data-tag" style="background:#fef3c7; color:#b45309;">Hosts scored</span>
+                <span class="aip-data-tag" style="background:#fef3c7; color:#b45309;">Risk Scores + CMDB</span>
                 <span class="aip-data-arrow">&#10132;</span>
-                <span class="aip-data-tag" style="background:#f5f3ff; color:#7c3aed;">LLM analysis</span>
+                <span class="aip-data-tag" style="background:#dbeafe; color:var(--blue);">RAG + LLM Reasoning</span>
                 <span class="aip-data-arrow">&#10132;</span>
-                <span class="aip-data-tag" style="background:#ecfdf5; color:var(--green);">Playbook + AAP</span>
+                <span class="aip-data-tag" style="background:#f5f3ff; color:#7c3aed;">Playbook + AAP + Rollout</span>
                 <span class="aip-data-arrow">&#10132;</span>
-                <span class="aip-data-tag" style="background:#dbeafe; color:var(--blue);">All patched</span>
+                <span class="aip-data-tag" style="background:#ecfdf5; color:var(--green);">Train + Retrain Loop</span>
               </div>
 
               <!-- Layer 4: 5 Stage Columns -->
@@ -1507,10 +1586,11 @@
                       <div class="aip-agent-name">Vulnerability Agent</div>
                       <ul class="aip-steps">
                         <li><span class="step-n">1</span> POST /api/start</li>
-                        <li><span class="step-n">2</span> Fetch CVE from Insights</li>
+                        <li><span class="step-n">2</span> Fetch CVE + affected hosts</li>
                       </ul>
                     </div>
                     <div class="aip-backend" style="background:#fee2e2; color:#991b1b;">Red Hat Insights (MCP)</div>
+                    <div class="aip-backend" style="background:#fef9c3; color:#854d0e; margin-top:4px; font-size:9px;">CVSS &bull; Errata &bull; Packages &bull; Systems</div>
                   </div>
                 </div>
 
@@ -1523,12 +1603,13 @@
                     <div class="aip-agent" style="background:#fef3c7; color:#b45309; border-color:rgba(180,83,9,0.2);">
                       <div class="aip-agent-name">Risk Agent</div>
                       <ul class="aip-steps">
-                        <li><span class="step-n">3</span> Enrich ops context</li>
+                        <li><span class="step-n">3</span> Enrich from CMDB / ITSM</li>
                         <li><span class="step-n">4</span> ML risk scoring</li>
                         <li><span class="step-n step-llama">5</span> <span class="step-llama">&#9889; RAG host summaries</span></li>
                       </ul>
                     </div>
                     <div class="aip-backend" style="background:#fef9c3; color:#854d0e;">RHOAI KServe + Llama Stack</div>
+                    <div class="aip-backend" style="background:#fef3c7; color:#92400e; margin-top:4px; font-size:9px;">CMDB &bull; ITSM &bull; SLA &bull; Maintenance Windows</div>
                   </div>
                 </div>
 
@@ -1550,7 +1631,8 @@
                         <li><span class="step-n">7</span> Generate phased strategy</li>
                       </ul>
                     </div>
-                    <div class="aip-backend" style="background:#dbeafe; color:#1e40af;">Llama Stack LLM + RAG</div>
+                    <div class="aip-backend" style="background:#dbeafe; color:#1e40af;">Llama Stack LLM + Milvus RAG</div>
+                    <div class="aip-backend" style="background:#eff6ff; color:#1e40af; margin-top:4px; font-size:9px;">Patch History &bull; Failure Patterns &bull; Vector DB</div>
                   </div>
                 </div>
 
@@ -1579,6 +1661,7 @@
                       </ul>
                     </div>
                     <div class="aip-backend" style="background:#f3e8ff; color:#6b21a8;">Ansible AAP Controller</div>
+                    <div class="aip-backend" style="background:#ede9fe; color:#6b21a8; margin-top:4px; font-size:9px;">Lightspeed &bull; GitHub &bull; Job Templates &bull; Workflow</div>
                   </div>
                 </div>
 
@@ -1605,7 +1688,7 @@
                     <div class="aip-learn-box" style="background:#f5f3ff; color:#6b21a8; border-color:rgba(124,58,237,0.2);">&#128230; Model Registry</div>
                     <div class="aip-learn-conn"><div class="aip-learn-conn-line"></div></div>
                     <div class="aip-learn-box" style="background:#ecfdf5; color:#065f46; border-color:rgba(5,150,105,0.2);">&#9889; KServe Deploy</div>
-                    <div class="aip-learn-feedback">&#8634; Replaces PREDICT model</div>
+                    <div class="aip-learn-feedback">&#8634; Replaces PREDICT model &mdash; continuous improvement loop</div>
                   </div>
                 </div>
 
@@ -1654,10 +1737,12 @@
 
           <!-- Config chips -->
           <div class="aip-config-row">
+            <div class="aip-config-chip">INSIGHTS_MCP_ENDPOINT</div>
+            <div class="aip-config-chip">RISK_URL (KServe)</div>
             <div class="aip-config-chip">LLAMA_STACK_URL</div>
-            <div class="aip-config-chip">DEFAULT_LLM_MODEL</div>
-            <div class="aip-config-chip">VECTOR_DB_ID</div>
-            <div class="aip-config-chip">POST /v1/chat/completions</div>
+            <div class="aip-config-chip">VECTOR_DB_ID (Milvus)</div>
+            <div class="aip-config-chip">AAP_BASE_URL</div>
+            <div class="aip-config-chip">GITHUB_TOKEN</div>
           </div>
 
         </div><!-- end aip-inner -->
@@ -1882,6 +1967,168 @@
         </div>
       </div>
       </div><!-- end TAB: Quick Start -->
+
+      <div class="guide-tab-panel" id="gtab_demoscript">
+      <!-- ── Demo Script ── -->
+      <div class="guide-section-title">
+        <span class="gs-icon" style="background:linear-gradient(135deg,#e00000,#ff3333);">&#9658;</span>
+        Demo Talk Track
+      </div>
+
+      <p class="ds-intro">A scene-by-scene guide for presenting AIP. Each scene maps to what you'll see on screen. Read the <strong>Say</strong> sections aloud; the <strong>Watch for</strong> notes tell you what to point at. Timing is automatic &mdash; just talk along with the flow.</p>
+
+      <!-- Opening -->
+      <div class="ds-scene ds-scene-opening">
+        <div class="ds-scene-head">
+          <span class="ds-scene-num">&#9733;</span>
+          <span class="ds-scene-title">Opening &mdash; Set the Stage</span>
+          <span class="ds-scene-time">~30s &middot; before starting</span>
+        </div>
+        <div class="ds-scene-body">
+          <div class="ds-say">&ldquo;Imagine a critical CVE drops. Today that means tickets, war rooms, and weeks of manual patching. What if six AI agents could take it from discovery to fully patched &mdash; with a human in the loop only when it matters?&rdquo;</div>
+          <div class="ds-do"><strong>Do:</strong> Point to the pipeline bar at the top &mdash; explain the five stages: Discover &rarr; Predict &rarr; Reason &rarr; Execute &rarr; Learn. Mention the A2A sidebar will show agent-to-agent messages in real time.</div>
+        </div>
+      </div>
+
+      <!-- Scene 1: Start the flow -->
+      <div class="ds-scene">
+        <div class="ds-scene-head">
+          <span class="ds-scene-num" style="background:var(--red);">1</span>
+          <span class="ds-scene-title">DISCOVER &mdash; CVE Intake</span>
+          <span class="ds-scene-time">~20s</span>
+        </div>
+        <div class="ds-scene-body">
+          <div class="ds-do"><strong>Do:</strong> Enter a CVE ID and click <strong>Start Patch Flow</strong>.</div>
+          <div class="ds-watch"><strong>Watch for:</strong> Pipeline stage 1 lights up red. A2A sidebar shows <em>Console &rarr; Patch Manager &rarr; Vulnerability Agent</em> message chain.</div>
+          <div class="ds-say">&ldquo;The Vulnerability Agent queries Red Hat Insights via an MCP server. It pulls CVE details &mdash; CVSS score, affected packages, errata &mdash; and identifies every system in our fleet that's exposed. No one opened a spreadsheet.&rdquo;</div>
+        </div>
+      </div>
+
+      <!-- Scene 2: Predict -->
+      <div class="ds-scene">
+        <div class="ds-scene-head">
+          <span class="ds-scene-num" style="background:#d97706;">2</span>
+          <span class="ds-scene-title">PREDICT &mdash; Risk Scoring</span>
+          <span class="ds-scene-time">~25s</span>
+        </div>
+        <div class="ds-scene-body">
+          <div class="ds-watch"><strong>Watch for:</strong> Stage 2 lights up amber. Host cards appear with risk scores and ok/review badges. The status bar shows the risk model being invoked.</div>
+          <div class="ds-say">&ldquo;Now the Risk Agent calls a machine learning model running on OpenShift AI. It scores every host &mdash; factoring in CVSS severity, system age, workload type, and historical patch outcomes. High-risk hosts get flagged for human review; safe ones go straight to auto-patch. This is data-driven triage, not gut feel.&rdquo;</div>
+          <div class="ds-tip"><strong>Tip:</strong> Click a host card to show the risk breakdown. Point out the ok vs. review classification.</div>
+        </div>
+      </div>
+
+      <!-- Scene 3: Reason -->
+      <div class="ds-scene">
+        <div class="ds-scene-head">
+          <span class="ds-scene-num" style="background:var(--blue);">3</span>
+          <span class="ds-scene-title">REASON &mdash; LLM Analysis &amp; Strategy</span>
+          <span class="ds-scene-time">~30s</span>
+        </div>
+        <div class="ds-scene-body">
+          <div class="ds-watch"><strong>Watch for:</strong> Stage 3 lights up blue. History analysis panel appears. Phased strategy (Test &rarr; Canary &rarr; Production) is generated.</div>
+          <div class="ds-say">&ldquo;Here's where the LLM earns its keep. The Risk Agent uses RAG &mdash; Retrieval-Augmented Generation &mdash; to search a vector database of every patch we've ever run. It finds that similar patches failed on Fridays and had drain timeout issues. Then the Automation Agent uses that intelligence to build a phased deployment strategy: test first, then canaries, then production. The AI isn't just predicting &mdash; it's reasoning from your own operational history.&rdquo;</div>
+          <div class="ds-tip"><strong>Tip:</strong> Good moment to explain RAG for non-technical audiences: &ldquo;Think of it as the AI searching its memory of every patch you've ever done.&rdquo;</div>
+        </div>
+      </div>
+
+      <!-- Scene 4: Execute pre-approval -->
+      <div class="ds-scene">
+        <div class="ds-scene-head">
+          <span class="ds-scene-num" style="background:var(--purple);">4</span>
+          <span class="ds-scene-title">EXECUTE &mdash; Playbook &amp; Approval Gate</span>
+          <span class="ds-scene-time">~30s</span>
+        </div>
+        <div class="ds-scene-body">
+          <div class="ds-watch"><strong>Watch for:</strong> Stage 4 lights up purple. A2A messages show playbook generation, GitHub publish, AAP template creation. The Approve button appears.</div>
+          <div class="ds-say">&ldquo;The Automation Agent calls Ansible Lightspeed to generate a remediation playbook &mdash; and it's already learned from that drain timeout issue, so it bakes in a 120-second drain. The playbook goes to GitHub, syncs into AAP, and creates a workflow template with a human approval gate. The system did all the prep; now it pauses and asks a human: are we good to go?&rdquo;</div>
+          <div class="ds-do"><strong>Do:</strong> Pause here. Let the audience absorb the approval gate. This is your &ldquo;human in the loop&rdquo; moment.</div>
+        </div>
+      </div>
+
+      <!-- Scene 5: Approve and phased rollout -->
+      <div class="ds-scene">
+        <div class="ds-scene-head">
+          <span class="ds-scene-num" style="background:var(--purple);">5</span>
+          <span class="ds-scene-title">EXECUTE &mdash; Phased Rollout</span>
+          <span class="ds-scene-time">~30s</span>
+        </div>
+        <div class="ds-scene-body">
+          <div class="ds-do"><strong>Do:</strong> Click <strong>Approve</strong>.</div>
+          <div class="ds-watch"><strong>Watch for:</strong> Three-phase execution progress (Test &rarr; Canary &rarr; Production). Progress bars fill in real time.</div>
+          <div class="ds-say">&ldquo;After approval, execution is fully automated and phased. Test systems go first &mdash; if they pass, canary production nodes are next, then the full fleet. At every phase boundary, health checks run before proceeding. If anything fails, the system stops automatically.&rdquo;</div>
+        </div>
+      </div>
+
+      <!-- Scene 6: Failure & self-heal -->
+      <div class="ds-scene ds-scene-highlight">
+        <div class="ds-scene-head">
+          <span class="ds-scene-num" style="background:var(--red);">6</span>
+          <span class="ds-scene-title">SELF-HEAL &mdash; Failure, Diagnosis &amp; Remediation</span>
+          <span class="ds-scene-time">~45s &middot; key moment</span>
+        </div>
+        <div class="ds-scene-body">
+          <div class="ds-watch"><strong>Watch for:</strong> A host fails its health check. Alert appears. Automatic rollback runs. Diagnosis Agent searches RAG for similar failures. Remediation is proposed and auto-approved.</div>
+          <div class="ds-say">&ldquo;This is the highlight. A production host fails its post-patch health check. Watch what happens: the Automation Agent immediately rolls it back &mdash; the app is healthy again in seconds. Then the Diagnosis Agent kicks in. It uses the LLM with RAG to search historical failures, finds that this exact pattern happened before with an insufficient drain timeout, and proposes a fix: increase the timeout from 30 to 120 seconds. The fix is applied, the host is re-patched, and this time it succeeds. No pages. No war room. The AI diagnosed and fixed the problem from its own operational memory.&rdquo;</div>
+          <div class="ds-tip"><strong>Tip:</strong> This is your strongest demo moment. Slow down here. Let the audience see the failure alert, the rollback, the diagnosis, and the successful retry. The story is: the AI doesn't just patch &mdash; it learns and adapts when things go wrong.</div>
+        </div>
+      </div>
+
+      <!-- Scene 7: Learn -->
+      <div class="ds-scene">
+        <div class="ds-scene-head">
+          <span class="ds-scene-num" style="background:var(--green);">7</span>
+          <span class="ds-scene-title">LEARN &mdash; Continuous Improvement</span>
+          <span class="ds-scene-time">~25s</span>
+        </div>
+        <div class="ds-scene-body">
+          <div class="ds-watch"><strong>Watch for:</strong> Stage 5 lights up green. Final summary appears with training records generated. A2A shows Learning Agent updating the model.</div>
+          <div class="ds-say">&ldquo;Every outcome &mdash; success, failure, rollback, remediation &mdash; becomes training data. The Learning Agent captures it all and feeds it into a data pipeline: outcomes go to a Feature Store, OpenShift AI retrains the risk model, the new model lands in Model Registry, and KServe deploys it to replace the prediction endpoint. Next time a similar CVE hits, the PREDICT stage is smarter. The system literally gets better at patching every time it patches.&rdquo;</div>
+        </div>
+      </div>
+
+      <!-- Closing -->
+      <div class="ds-scene ds-scene-opening">
+        <div class="ds-scene-head">
+          <span class="ds-scene-num">&#9733;</span>
+          <span class="ds-scene-title">Closing &mdash; Bring It Home</span>
+          <span class="ds-scene-time">~20s</span>
+        </div>
+        <div class="ds-scene-body">
+          <div class="ds-say">&ldquo;What you just saw was a critical CVE go from discovery to fully remediated with one click and one approval. Six agents coordinated autonomously, the system self-healed when something went wrong, and every outcome made the next patch cycle smarter. This is what Autonomous Intelligent Patching looks like.&rdquo;</div>
+          <div class="ds-tip"><strong>Tip:</strong> Good time for the &ldquo;What If&rdquo; and &ldquo;Why&rdquo; buttons on host cards &mdash; show the audience that operators can interrogate the AI's decisions at any point.</div>
+        </div>
+      </div>
+
+      <!-- Audience Q&A ammo -->
+      <div class="guide-section-title" style="margin-top:28px;">
+        <span class="gs-icon" style="background:linear-gradient(135deg,#6b21a8,#a855f7);">?</span>
+        Common Questions
+      </div>
+      <div class="ds-faq">
+        <div class="ds-faq-item">
+          <div class="ds-faq-q">What if we don't have all the backends configured?</div>
+          <div class="ds-faq-a">Every stage tries real APIs first and falls back to built-in demo data with clear logging. You can demo with zero backends, one backend, or all of them &mdash; the flow works the same.</div>
+        </div>
+        <div class="ds-faq-item">
+          <div class="ds-faq-q">Where does the LLM run?</div>
+          <div class="ds-faq-a">Llama Stack on OpenShift, using a locally-hosted Llama model. No data leaves your infrastructure. RAG queries hit a Milvus vector database for historical patch records.</div>
+        </div>
+        <div class="ds-faq-item">
+          <div class="ds-faq-q">Is the human always in the loop?</div>
+          <div class="ds-faq-a">Yes, at the approval gate before execution begins. The system does all the analysis and preparation autonomously, then pauses for human judgment. Post-approval, rollback and remediation are automatic to minimize MTTR.</div>
+        </div>
+        <div class="ds-faq-item">
+          <div class="ds-faq-q">How does it learn?</div>
+          <div class="ds-faq-a">Patch outcomes feed a data pipeline &rarr; Feature Store &rarr; OpenShift AI &rarr; Model Registry &rarr; KServe. The retrained model replaces the PREDICT endpoint, so risk scores improve continuously.</div>
+        </div>
+        <div class="ds-faq-item">
+          <div class="ds-faq-q">What Red Hat products are involved?</div>
+          <div class="ds-faq-a">Red Hat Insights (CVE data), Ansible Automation Platform (execution), Ansible Lightspeed (playbook generation), OpenShift AI (model training &amp; serving), and Llama Stack on OpenShift (LLM reasoning).</div>
+        </div>
+      </div>
+
+      </div><!-- end TAB: Demo Script -->
 
     </div>
   </div>
