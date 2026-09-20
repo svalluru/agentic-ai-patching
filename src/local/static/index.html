@@ -2149,9 +2149,11 @@ function showWhy(hostname) {
         html += '<div class="analysis-recommendation"><strong>Recommendation</strong><p>' + esc(data.recommendation) + '</p></div>';
       }
       document.getElementById('analysisBody').innerHTML = html;
+      refresh();
     })
     .catch(e => {
       document.getElementById('analysisBody').innerHTML = '<div style="color:var(--red);padding:24px;">Failed to load: ' + esc(String(e)) + '</div>';
+      refresh();
     });
 }
 
@@ -2285,9 +2287,11 @@ function showWhatIf() {
         html += '</div></div>';
       }
       document.getElementById('analysisBody').innerHTML = html;
+      refresh();
     })
     .catch(e => {
       document.getElementById('analysisBody').innerHTML = '<div style="color:var(--red);padding:24px;">Failed to load: ' + esc(String(e)) + '</div>';
+      refresh();
     });
 }
 

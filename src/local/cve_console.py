@@ -1151,14 +1151,30 @@ FALLBACK_WHY = {
 }
 
 
+def _add_a2a(state: dict, from_agent: str, to_agent: str, msg_type: str, action: str, message: str) -> None:
+    ts = now_iso()
+    state.setdefault('stream', []).append({
+        'time': ts, 'event': 'a2a_message',
+        'from': from_agent, 'to': to_agent,
+        'type': msg_type, 'action': action, 'message': message,
+    })
+    state['stream'] = state['stream'][-100:]
+    persist_state(state)
+
+
 def handle_whatif(state: dict) -> dict:
     summary = state.get('summary', {})
     hosts = state.get('hosts', [])
     ctx = summary.get('operational_context', {})
+    cve_id = summary.get('cve_id', 'unknown')
+    _add_a2a(state, 'Console UI', 'Reason Agent', 'request', 'what_if_analysis',
+             f'Console UI → Reason Agent: What-If scenario analysis requested for {cve_id}')
     try:
+        _add_a2a(state, 'Reason Agent', 'Llama Stack', 'request', 'llm_inference',
+                 f'Reason Agent → Llama Stack: Generating 4 risk scenarios via /v1/chat/completions')
         prompt = (
             f"You are a patch risk analyst. Given this CVE patch scenario, generate exactly 4 what-if scenarios.\n\n"
-            f"CVE: {summary.get('cve_id', 'unknown')}\n"
+            f"CVE: {cve_id}\n"
             f"CVSS: {summary.get('cvss', 'N/A')}\n"
             f"Risk classification: {summary.get('risk_classification', 'N/A')}\n"
             f"Failure probability: {summary.get('failure_probability', 'N/A')}%\n"
@@ -1176,9 +1192,17 @@ def handle_whatif(state: dict) -> dict:
         if clean.startswith('```'):
             clean = clean.split('\n', 1)[1].rsplit('```', 1)[0].strip()
         scenarios = json.loads(clean)
+        _add_a2a(state, 'Llama Stack', 'Reason Agent', 'response', 'llm_result',
+                 f'Llama Stack → Reason Agent: Generated {len(scenarios)} scenarios (LIVE)')
+        _add_a2a(state, 'Reason Agent', 'Console UI', 'response', 'what_if_result',
+                 f'Reason Agent → Console UI: What-If analysis complete — {len(scenarios)} scenarios delivered')
         return {'ok': True, 'source': 'live', 'scenarios': scenarios}
     except Exception as exc:
         LOG.info('  FALLBACK: what-if LLM failed (%s). Using demo data.', exc)
+        _add_a2a(state, 'Llama Stack', 'Reason Agent', 'error', 'llm_failed',
+                 f'Llama Stack → Reason Agent: LLM inference failed — {exc}')
+        _add_a2a(state, 'Reason Agent', 'Console UI', 'response', 'what_if_fallback',
+                 f'Reason Agent → Console UI: What-If analysis complete — 4 scenarios (FALLBACK)')
         return {'ok': True, **FALLBACK_WHATIF}
 
 
@@ -1192,7 +1216,11 @@ def handle_why(state: dict, hostname: str) -> dict:
     if not host:
         host = {'host': hostname, 'risk_score': 'N/A', 'decision': 'N/A'}
     ctx = summary.get('operational_context', {})
+    _add_a2a(state, 'Console UI', 'Risk Agent', 'request', 'why_analysis',
+             f'Console UI → Risk Agent: Why risk explanation requested for {hostname}')
     try:
+        _add_a2a(state, 'Risk Agent', 'Llama Stack', 'request', 'llm_inference',
+                 f'Risk Agent → Llama Stack: Analyzing risk factors for {hostname} via /v1/chat/completions')
         prompt = (
             f"You are a patch risk explainer. Explain why this host received its risk score and decision.\n\n"
             f"Host: {host.get('host')}\n"
@@ -1213,9 +1241,18 @@ def handle_why(state: dict, hostname: str) -> dict:
         if clean.startswith('```'):
             clean = clean.split('\n', 1)[1].rsplit('```', 1)[0].strip()
         result = json.loads(clean)
+        n = len(result.get('factors', []))
+        _add_a2a(state, 'Llama Stack', 'Risk Agent', 'response', 'llm_result',
+                 f'Llama Stack → Risk Agent: Risk analysis complete — {n} factors identified (LIVE)')
+        _add_a2a(state, 'Risk Agent', 'Console UI', 'response', 'why_result',
+                 f'Risk Agent → Console UI: Why analysis for {hostname} — {n} factors + recommendation')
         return {'ok': True, 'source': 'live', 'host': host, **result}
     except Exception as exc:
         LOG.info('  FALLBACK: why LLM failed (%s). Using demo data.', exc)
+        _add_a2a(state, 'Llama Stack', 'Risk Agent', 'error', 'llm_failed',
+                 f'Llama Stack → Risk Agent: LLM inference failed — {exc}')
+        _add_a2a(state, 'Risk Agent', 'Console UI', 'response', 'why_fallback',
+                 f'Risk Agent → Console UI: Why analysis for {hostname} — 5 factors (FALLBACK)')
         return {'ok': True, 'host': host, **FALLBACK_WHY}
 
 
