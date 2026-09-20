@@ -412,6 +412,12 @@ def clone_aap_git_repo(repo_root: Path, *, preserve_paths: list[str] | None = No
 
 def ensure_git_checkout_ready(repo_root: Path, *, preserve_paths: list[str] | None = None) -> str:
     """Ensure AAP repo has a valid branch HEAD (fixes broken shallow clones on PVC)."""
+    # Safety: never reset the workspace itself — only operate on a dedicated AAP checkout
+    if repo_root.resolve() == WORKSPACE.resolve() or repo_root.resolve() == WORKSPACE.resolve().parent.parent:
+        raise RuntimeError(
+            f'ensure_git_checkout_ready refusing to operate on workspace {repo_root}; '
+            f'set AAP_PROJECT_CHECKOUT to a dedicated directory'
+        )
     branch = github_repo_branch()
     if not (repo_root / '.git').exists():
         LOG.info('AAP git checkout missing; cloning into %s', repo_root)

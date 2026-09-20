@@ -1,0 +1,2661 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Autonomous Intelligent Patching</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #f0f2f5;
+      --white: #ffffff;
+      --text: #111827;
+      --text-secondary: #4b5563;
+      --muted: #9ca3af;
+      --red: #e00000;
+      --red-glow: rgba(224,0,0,0.15);
+      --red-light: #fef2f2;
+      --red-dark: #b91c1c;
+      --border: rgba(0,0,0,0.08);
+      --border-strong: rgba(0,0,0,0.12);
+      --green: #059669;
+      --green-light: #ecfdf5;
+      --yellow: #d97706;
+      --yellow-light: #fffbeb;
+      --orange: #ea580c;
+      --blue: #2563eb;
+      --blue-light: #eff6ff;
+      --purple: #7c3aed;
+      --purple-light: #f5f3ff;
+      --card-shadow: 0 1px 3px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04);
+      --card-shadow-hover: 0 10px 25px rgba(0,0,0,0.08), 0 4px 10px rgba(0,0,0,0.04);
+      --glass: rgba(255,255,255,0.7);
+      --glass-border: rgba(255,255,255,0.4);
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: 'Inter', system-ui, -apple-system, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      font-size: 14px;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* ── Top Bar ── */
+    .topbar {
+      background: linear-gradient(135deg, #cc0000 0%, #e00000 40%, #ff1a1a 100%);
+      color: #fff;
+      padding: 0 28px;
+      display: flex;
+      align-items: center;
+      height: 58px;
+      box-shadow: 0 4px 20px rgba(204,0,0,0.25);
+      position: sticky;
+      top: 0;
+      z-index: 50;
+    }
+    .topbar h1 {
+      margin: 0; font-size: 17px; font-weight: 700;
+      letter-spacing: -0.2px;
+      text-shadow: 0 1px 2px rgba(0,0,0,0.15);
+    }
+    .topbar-logo { width: 30px; height: 30px; margin-right: 14px; filter: drop-shadow(0 1px 2px rgba(0,0,0,0.2)); }
+    .topbar-actions { margin-left: auto; display: flex; gap: 8px; }
+    .topbar-btn {
+      padding: 7px 16px;
+      background: rgba(255,255,255,0.12);
+      backdrop-filter: blur(8px);
+      color: #fff;
+      border: 1px solid rgba(255,255,255,0.2);
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: 600;
+      font-size: 12px;
+      transition: all 0.2s;
+    }
+    .topbar-btn:hover { background: rgba(255,255,255,0.22); transform: translateY(-1px); box-shadow: 0 2px 8px rgba(0,0,0,0.15); }
+
+    /* ── Pipeline (clickable stages) ── */
+    .pipeline-bar {
+      background: var(--white);
+      border-bottom: 1px solid var(--border);
+      padding: 0 28px;
+      display: flex;
+      align-items: stretch;
+      height: 72px;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.04);
+    }
+    .pipe-stage {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      position: relative;
+      border-bottom: 3px solid transparent;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      gap: 3px;
+      user-select: none;
+    }
+    .pipe-stage:hover { background: linear-gradient(180deg, transparent 0%, rgba(0,0,0,0.015) 100%); }
+    .pipe-stage .pipe-num {
+      width: 26px; height: 26px;
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 12px; font-weight: 700;
+      background: #f3f4f6; color: var(--muted);
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+    }
+    .pipe-stage .pipe-label { font-size: 11px; font-weight: 700; color: var(--muted); letter-spacing: 0.8px; transition: all 0.3s; }
+    .pipe-stage .pipe-sub { font-size: 9px; color: var(--muted); opacity: 0.7; transition: opacity 0.3s; }
+    .pipe-stage:hover .pipe-sub { opacity: 1; }
+    .pipe-stage.active { border-bottom-color: var(--red); }
+    .pipe-stage.active .pipe-num { background: var(--red); color: #fff; box-shadow: 0 2px 10px var(--red-glow), 0 0 20px var(--red-glow); transform: scale(1.1); }
+    .pipe-stage.active .pipe-label { color: var(--red); }
+    .pipe-stage.done .pipe-num { background: var(--green); color: #fff; box-shadow: 0 2px 8px rgba(5,150,105,0.2); }
+    .pipe-stage.done .pipe-label { color: var(--green); }
+    .pipe-stage.failed .pipe-num { background: var(--red-dark); color: #fff; box-shadow: 0 2px 8px rgba(185,28,28,0.3); }
+    .pipe-stage.failed .pipe-label { color: var(--red-dark); }
+    .pipe-arrow {
+      display: flex; align-items: center; justify-content: center;
+      color: #d1d5db; font-size: 14px; width: 28px; flex-shrink: 0;
+    }
+
+    /* ── Layout: sidebar + main ── */
+    .layout {
+      display: flex;
+      height: calc(100vh - 130px);
+      overflow: hidden;
+    }
+    .sidebar {
+      width: 340px;
+      min-width: 340px;
+      background: linear-gradient(180deg, var(--white) 0%, #fafbfc 100%);
+      border-right: 1px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+    .sidebar-header {
+      padding: 14px 18px;
+      border-bottom: 1px solid var(--border);
+      font-weight: 700;
+      font-size: 13px;
+      color: var(--text);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-shrink: 0;
+      background: var(--white);
+    }
+    .sidebar-header .dot {
+      width: 8px; height: 8px; border-radius: 50%; background: var(--green);
+      box-shadow: 0 0 6px rgba(5,150,105,0.4);
+      animation: pulse 2s ease-in-out infinite;
+    }
+    @keyframes pulse {
+      0%, 100% { opacity: 1; box-shadow: 0 0 6px rgba(5,150,105,0.4); }
+      50% { opacity: 0.5; box-shadow: 0 0 12px rgba(5,150,105,0.6); }
+    }
+    .sidebar-body {
+      flex: 1;
+      overflow-y: auto;
+      padding: 10px;
+      scrollbar-width: thin;
+      scrollbar-color: #d1d5db transparent;
+    }
+    .sidebar-body::-webkit-scrollbar { width: 5px; }
+    .sidebar-body::-webkit-scrollbar-thumb { background: #d1d5db; border-radius: 4px; }
+    .agent-msg {
+      padding: 10px 12px;
+      margin-bottom: 8px;
+      border-radius: 10px;
+      font-size: 12px;
+      font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+      border-left: 3px solid var(--border);
+      background: var(--white);
+      line-height: 1.5;
+      box-shadow: 0 1px 2px rgba(0,0,0,0.03);
+      transition: transform 0.15s, box-shadow 0.15s;
+      animation: slideIn 0.3s ease-out;
+    }
+    @keyframes slideIn {
+      from { opacity: 0; transform: translateX(-10px); }
+      to { opacity: 1; transform: translateX(0); }
+    }
+    .agent-msg:hover { transform: translateX(2px); box-shadow: 0 2px 6px rgba(0,0,0,0.06); }
+    .agent-msg.request { border-left-color: var(--blue); background: var(--blue-light); }
+    .agent-msg.response { border-left-color: var(--green); background: var(--green-light); }
+    .agent-msg.event { border-left-color: var(--yellow); background: var(--yellow-light); }
+    .agent-msg.error { border-left-color: var(--red); background: var(--red-light); }
+    .agent-msg .msg-time { color: var(--muted); font-size: 10px; display: block; margin-bottom: 3px; }
+    .agent-msg .msg-route { font-weight: 600; color: var(--text); font-size: 11px; }
+
+    .main {
+      flex: 1;
+      overflow-y: auto;
+      padding: 24px 28px;
+      scrollbar-width: thin;
+      scrollbar-color: #d1d5db transparent;
+    }
+    .main::-webkit-scrollbar { width: 6px; }
+    .main::-webkit-scrollbar-thumb { background: #d1d5db; border-radius: 4px; }
+
+    /* ── Tabs ── */
+    .tabs { display: flex; gap: 4px; margin-bottom: 20px; }
+    .tab {
+      padding: 8px 18px;
+      background: transparent;
+      color: var(--text-secondary);
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: 600;
+      font-size: 13px;
+      transition: all 0.2s;
+    }
+    .tab:hover { background: rgba(0,0,0,0.04); color: var(--text); }
+    .tab.active { background: var(--red); color: #fff; box-shadow: 0 2px 8px var(--red-glow); }
+    .tab-panel { display: none; }
+    .tab-panel.active { display: block; animation: fadeIn 0.3s ease; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
+
+    /* ── Cards ── */
+    .card {
+      background: var(--white);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      margin-bottom: 20px;
+      box-shadow: var(--card-shadow);
+      overflow: hidden;
+      transition: box-shadow 0.25s, transform 0.25s;
+    }
+    .card:hover { box-shadow: var(--card-shadow-hover); transform: translateY(-1px); }
+    .card-header {
+      padding: 14px 20px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      background: linear-gradient(180deg, #fafafa 0%, #f5f5f5 100%);
+    }
+    .card-header h3 { margin: 0; font-size: 15px; font-weight: 700; letter-spacing: -0.2px; }
+    .card-header .stage-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 3px 12px;
+      border-radius: 6px;
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 0.8px;
+    }
+    .stage-discover { background: var(--red-light); color: var(--red); }
+    .stage-predict { background: #fef3c7; color: #b45309; }
+    .stage-reason { background: var(--blue-light); color: var(--blue); }
+    .stage-execute { background: var(--purple-light); color: var(--purple); }
+    .stage-learn { background: var(--green-light); color: var(--green); }
+    .card-body { padding: 20px; }
+    .card-header .actions { margin-left: auto; display: flex; gap: 8px; }
+
+    /* ── Tables ── */
+    table { width: 100%; border-collapse: separate; border-spacing: 0; }
+    th, td { text-align: left; vertical-align: top; padding: 12px 14px; border-bottom: 1px solid var(--border); font-size: 13px; }
+    th { color: var(--text-secondary); font-weight: 600; font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px; background: #f9fafb; }
+    tr:last-child td { border-bottom: none; }
+    tr:hover td { background: #f9fafb; }
+    th:first-child { border-radius: 8px 0 0 0; }
+    th:last-child { border-radius: 0 8px 0 0; }
+
+    /* ── Buttons ── */
+    .btn {
+      padding: 8px 16px;
+      border: none;
+      border-radius: 8px;
+      font-weight: 600;
+      cursor: pointer;
+      font-size: 12px;
+      white-space: nowrap;
+      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+      letter-spacing: 0.2px;
+    }
+    .btn-primary {
+      background: linear-gradient(135deg, #cc0000, #e00000);
+      color: #fff;
+      box-shadow: 0 2px 6px var(--red-glow);
+    }
+    .btn-primary:hover { background: linear-gradient(135deg, #b00000, #cc0000); transform: translateY(-1px); box-shadow: 0 4px 12px var(--red-glow); }
+    .btn-green {
+      background: linear-gradient(135deg, #047857, #059669);
+      color: #fff;
+      box-shadow: 0 2px 6px rgba(5,150,105,0.2);
+    }
+    .btn-green:hover { transform: translateY(-1px); box-shadow: 0 4px 12px rgba(5,150,105,0.3); }
+    .btn-danger {
+      background: linear-gradient(135deg, #b91c1c, #dc2626);
+      color: #fff;
+      box-shadow: 0 2px 6px rgba(185,28,28,0.2);
+    }
+    .btn-danger:hover { transform: translateY(-1px); }
+    .btn-secondary {
+      background: var(--white);
+      color: var(--text-secondary);
+      border: 1px solid var(--border-strong);
+      box-shadow: 0 1px 2px rgba(0,0,0,0.04);
+    }
+    .btn-secondary:hover { background: #f9fafb; transform: translateY(-1px); box-shadow: 0 2px 6px rgba(0,0,0,0.06); }
+    .btn-small { padding: 5px 12px; font-size: 11px; border-radius: 6px; }
+    .btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none !important; box-shadow: none !important; }
+
+    /* ── Utility ── */
+    .mono { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; }
+    .muted { color: var(--muted); }
+    .empty { color: var(--muted); font-style: italic; }
+    a { color: var(--blue); text-decoration: none; }
+    a:hover { text-decoration: underline; }
+    .badge {
+      display: inline-block;
+      padding: 3px 10px;
+      border-radius: 6px;
+      font-size: 11px;
+      font-weight: 600;
+    }
+    .badge-ok { background: var(--green-light); color: var(--green); }
+    .badge-review { background: var(--yellow-light); color: var(--yellow); }
+    .badge-high { background: var(--red-light); color: var(--red); }
+    .badge-critical { background: linear-gradient(135deg, #cc0000, #e00000); color: #fff; box-shadow: 0 1px 4px var(--red-glow); }
+
+    /* ── Info Icons ── */
+    .info-icon {
+      display: inline-flex; align-items: center; justify-content: center;
+      width: 16px; height: 16px; border-radius: 50%;
+      background: var(--blue-light); color: var(--blue);
+      font-size: 10px; font-weight: 700; cursor: help;
+      position: relative; margin-left: 5px; vertical-align: middle; flex-shrink: 0;
+      transition: all 0.2s;
+    }
+    .info-icon:hover { background: var(--blue); color: #fff; transform: scale(1.15); }
+    .info-tip {
+      display: none; position: absolute;
+      bottom: calc(100% + 8px); left: 50%; transform: translateX(-50%);
+      background: var(--white); color: var(--text);
+      padding: 12px 16px; border-radius: 10px;
+      font-size: 12px; font-weight: 400;
+      white-space: normal; width: 300px; z-index: 100;
+      box-shadow: 0 8px 30px rgba(0,0,0,0.12);
+      border: 1px solid var(--border);
+      text-align: left; line-height: 1.5;
+    }
+    .info-icon:hover .info-tip { display: block; animation: fadeIn 0.2s ease; }
+
+    /* ── Stat Grid ── */
+    .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 14px; margin-bottom: 18px; }
+    .stat-box {
+      background: linear-gradient(135deg, #fafafa 0%, var(--white) 100%);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 18px 14px;
+      text-align: center;
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+    .stat-box:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.06); }
+    .stat-value { font-size: 28px; font-weight: 900; color: var(--red); letter-spacing: -0.5px; }
+    .stat-label { font-size: 10px; color: var(--text-secondary); margin-top: 6px; text-transform: uppercase; letter-spacing: 0.8px; font-weight: 600; }
+
+    /* ── Progress bars ── */
+    .progress-bar { background: #e5e7eb; border-radius: 6px; height: 8px; overflow: hidden; }
+    .progress-fill { height: 100%; border-radius: 6px; transition: width 0.6s cubic-bezier(0.4, 0, 0.2, 1); }
+    .progress-fill.green { background: linear-gradient(90deg, #059669, #10b981); }
+    .progress-fill.blue { background: linear-gradient(90deg, #2563eb, #3b82f6); }
+    .progress-fill.red { background: linear-gradient(90deg, #cc0000, #e00000); }
+
+    /* ── Execution phases ── */
+    .exec-phases { display: flex; gap: 14px; margin-bottom: 14px; }
+    .exec-phase {
+      flex: 1;
+      background: #fafafa;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 16px;
+      text-align: center;
+      transition: all 0.25s;
+    }
+    .exec-phase:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.06); }
+    .exec-phase.running { border-color: var(--blue); background: var(--blue-light); box-shadow: 0 0 15px rgba(37,99,235,0.1); }
+    .exec-phase.complete { border-color: var(--green); background: var(--green-light); }
+    .exec-phase.paused { border-color: var(--red); background: var(--red-light); }
+    .exec-phase h4 { margin: 0 0 8px; font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; color: var(--text-secondary); }
+    .exec-phase .count { font-size: 24px; font-weight: 900; letter-spacing: -0.5px; }
+
+    /* ── Alerts ── */
+    .alert { padding: 14px 18px; border-radius: 12px; margin-bottom: 14px; border-left: 4px solid; }
+    .alert-danger { background: var(--red-light); border-left-color: var(--red); color: var(--red-dark); }
+    .alert-success { background: var(--green-light); border-left-color: var(--green); color: #065f46; }
+    .alert-info { background: var(--blue-light); border-left-color: var(--blue); color: #1e40af; }
+    .alert-warning { background: var(--yellow-light); border-left-color: var(--yellow); color: #92400e; }
+
+    /* ── Start bar ── */
+    .start-bar {
+      display: flex; gap: 12px; align-items: center; flex-wrap: wrap;
+      margin-bottom: 20px; background: var(--white);
+      border: 1px solid var(--border); border-radius: 14px;
+      padding: 14px 20px; box-shadow: var(--card-shadow);
+    }
+    .start-bar input {
+      min-width: 340px; padding: 10px 14px;
+      background: var(--bg); color: var(--text);
+      border: 1px solid var(--border-strong); border-radius: 10px; font-size: 14px;
+      transition: all 0.2s;
+    }
+    .start-bar input:focus { outline: none; border-color: var(--red); box-shadow: 0 0 0 3px var(--red-glow); }
+
+    /* ── Overlays ── */
+    .overlay {
+      display: none; position: fixed; inset: 0;
+      background: rgba(0,0,0,0.5); backdrop-filter: blur(4px);
+      z-index: 200;
+      justify-content: center; align-items: flex-start;
+      padding-top: 60px; overflow-y: auto;
+    }
+    .overlay.open { display: flex; animation: fadeIn 0.2s ease; }
+    .overlay-content {
+      background: var(--white); border-radius: 16px;
+      width: 90%; max-width: 900px; max-height: 80vh;
+      overflow-y: auto; padding: 32px; position: relative;
+      box-shadow: 0 25px 60px rgba(0,0,0,0.25);
+    }
+    .overlay-close {
+      position: absolute; top: 14px; right: 18px;
+      background: #f3f4f6; border: none; color: var(--text-secondary);
+      font-size: 20px; cursor: pointer; width: 32px; height: 32px;
+      border-radius: 8px; display: flex; align-items: center; justify-content: center;
+      transition: all 0.15s;
+    }
+    .overlay-close:hover { background: var(--red-light); color: var(--red); }
+
+    /* ── Settings ── */
+    .setting-row { display: flex; align-items: center; gap: 14px; padding: 10px 0; border-bottom: 1px solid var(--border); }
+    .setting-row:last-child { border-bottom: none; }
+    .setting-label { min-width: 160px; font-weight: 600; font-size: 13px; color: var(--text-secondary); }
+    .setting-input {
+      flex: 1; padding: 8px 12px; background: var(--bg); color: var(--text);
+      border: 1px solid var(--border-strong); border-radius: 8px; font-size: 13px;
+      font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+      transition: all 0.2s;
+    }
+    .setting-input:focus { outline: none; border-color: var(--red); box-shadow: 0 0 0 3px var(--red-glow); }
+    .setting-input.changed { border-color: var(--red); background: var(--red-light); }
+    .setting-hint { font-size: 11px; color: var(--muted); margin-top: 3px; }
+    .setting-section {
+      font-weight: 700; font-size: 13px; color: var(--red);
+      margin-top: 20px; margin-bottom: 10px;
+      padding: 6px 12px; background: var(--red-light); border-radius: 6px;
+      letter-spacing: 0.3px;
+    }
+    .setting-section:first-child { margin-top: 0; }
+
+    /* ── CVE toolbar ── */
+    .cve-toolbar { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; margin-bottom: 14px; }
+    .cve-toolbar input {
+      min-width: 320px; padding: 10px 14px; background: var(--white);
+      color: var(--text); border: 1px solid var(--border-strong); border-radius: 10px;
+      transition: all 0.2s;
+    }
+    .cve-toolbar input:focus { outline: none; border-color: var(--red); box-shadow: 0 0 0 3px var(--red-glow); }
+
+    /* ── Analysis Modal ── */
+    .analysis-overlay {
+      display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); backdrop-filter: blur(4px);
+      z-index: 1100; justify-content: center; align-items: center; padding: 24px;
+    }
+    .analysis-overlay.open { display: flex; }
+    .analysis-modal {
+      background: var(--white); border-radius: 20px; max-width: 680px; width: 100%;
+      max-height: 85vh; overflow-y: auto; box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+      animation: modalSlideIn 0.3s ease;
+    }
+    @keyframes modalSlideIn { from { opacity:0; transform: translateY(20px) scale(0.96); } to { opacity:1; transform: translateY(0) scale(1); } }
+    .analysis-header {
+      padding: 24px 28px 16px; border-bottom: 1px solid var(--border);
+      display: flex; justify-content: space-between; align-items: flex-start;
+    }
+    .analysis-header h3 { margin: 0; font-size: 18px; font-weight: 800; }
+    .analysis-header .analysis-badge {
+      padding: 4px 10px; border-radius: 20px; font-size: 10px; font-weight: 700;
+      text-transform: uppercase; letter-spacing: 0.5px;
+    }
+    .analysis-header .badge-live { background: #dcfce7; color: #059669; }
+    .analysis-header .badge-fallback { background: #fef3c7; color: #d97706; }
+    .analysis-close {
+      background: none; border: none; font-size: 22px; cursor: pointer; color: var(--text-secondary);
+      padding: 0 4px; line-height: 1;
+    }
+    .analysis-body { padding: 20px 28px 28px; }
+    .analysis-loading { text-align: center; padding: 48px; color: var(--text-secondary); }
+    .analysis-loading .spinner {
+      width: 36px; height: 36px; border: 3px solid var(--border); border-top-color: var(--red);
+      border-radius: 50%; animation: spin 0.8s linear infinite; margin: 0 auto 16px;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .scenario-card {
+      background: var(--bg); border: 1px solid var(--border); border-radius: 14px;
+      padding: 18px 20px; margin-bottom: 12px; transition: all 0.2s;
+    }
+    .scenario-card:hover { transform: translateX(4px); box-shadow: 0 4px 12px rgba(0,0,0,0.06); }
+    .scenario-card:last-child { margin-bottom: 0; }
+    .scenario-head { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; }
+    .scenario-icon { font-size: 22px; }
+    .scenario-title { font-size: 14px; font-weight: 700; flex: 1; }
+    .scenario-impact { padding: 4px 10px; border-radius: 20px; font-size: 12px; font-weight: 800; letter-spacing: 0.5px; }
+    .impact-down { background: #dcfce7; color: #059669; }
+    .impact-up { background: #fee2e2; color: #dc2626; }
+    .scenario-change {
+      font-size: 12px; color: var(--text-secondary); background: var(--white);
+      padding: 6px 10px; border-radius: 8px; margin-bottom: 8px; border-left: 3px solid var(--red);
+    }
+    .scenario-detail { font-size: 13px; color: var(--text-secondary); line-height: 1.5; margin-bottom: 6px; }
+    .scenario-meta { display: flex; gap: 12px; font-size: 11px; color: var(--text-secondary); }
+    .scenario-meta span { display: flex; align-items: center; gap: 4px; }
+    .factor-card {
+      display: flex; gap: 14px; padding: 16px 18px; background: var(--bg);
+      border: 1px solid var(--border); border-radius: 14px; margin-bottom: 10px;
+      transition: all 0.2s; align-items: flex-start;
+    }
+    .factor-card:hover { transform: translateX(4px); box-shadow: 0 4px 12px rgba(0,0,0,0.06); }
+    .factor-card:last-child { margin-bottom: 0; }
+    .factor-icon { font-size: 24px; flex-shrink: 0; margin-top: 2px; }
+    .factor-content { flex: 1; }
+    .factor-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px; }
+    .factor-name { font-size: 14px; font-weight: 700; }
+    .factor-weight { padding: 3px 8px; border-radius: 12px; font-size: 10px; font-weight: 700; background: var(--red-light); color: var(--red); }
+    .factor-value { font-size: 13px; font-weight: 600; color: var(--red); margin-bottom: 4px; }
+    .factor-detail { font-size: 12px; color: var(--text-secondary); line-height: 1.4; }
+    .analysis-recommendation {
+      margin-top: 16px; padding: 16px 20px; border-radius: 14px;
+      background: linear-gradient(135deg, #fef3c7, #fff7ed); border: 1px solid rgba(217,119,6,0.2);
+    }
+    .analysis-recommendation strong { color: #92400e; font-size: 12px; text-transform: uppercase; letter-spacing: 0.5px; }
+    .analysis-recommendation p { margin: 6px 0 0; font-size: 13px; color: #78350f; line-height: 1.5; }
+
+    /* ── Guide Tabs ── */
+    .guide-tabs {
+      display: flex; gap: 4px; margin-bottom: 24px; border-bottom: 2px solid #e5e7eb;
+      padding-bottom: 0; overflow-x: auto; -webkit-overflow-scrolling: touch;
+    }
+    .guide-tab {
+      padding: 10px 18px; background: transparent; border: none; border-bottom: 3px solid transparent;
+      color: var(--text-secondary); font-size: 13px; font-weight: 700; cursor: pointer;
+      white-space: nowrap; transition: all 0.2s ease; border-radius: 8px 8px 0 0;
+      letter-spacing: 0.3px;
+    }
+    .guide-tab:hover { background: #f3f4f6; color: var(--text); }
+    .guide-tab.active {
+      color: var(--red); border-bottom-color: var(--red);
+      background: linear-gradient(to bottom, rgba(224,0,0,0.06), transparent);
+    }
+    .guide-tab .gt-icon { margin-right: 6px; font-size: 14px; }
+    .guide-tab-panel { display: none; animation: guideFadeIn 0.3s ease; }
+    .guide-tab-panel.active { display: block; }
+    @keyframes guideFadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
+
+    /* ── Guide ── */
+    .guide-hero {
+      background: linear-gradient(135deg, #cc0000 0%, #e00000 50%, #ff3333 100%);
+      color: #fff; border-radius: 16px; padding: 32px 28px; margin-bottom: 28px;
+      position: relative; overflow: hidden;
+    }
+    .guide-hero::before {
+      content: ''; position: absolute; top: -40%; right: -10%; width: 300px; height: 300px;
+      background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+      border-radius: 50%;
+    }
+    .guide-hero h2 { margin: 0 0 10px; font-size: 24px; font-weight: 800; letter-spacing: -0.5px; position: relative; }
+    .guide-hero p { margin: 0; font-size: 14px; opacity: 0.9; line-height: 1.6; position: relative; max-width: 600px; }
+
+    .guide-section-title {
+      display: flex; align-items: center; gap: 10px;
+      font-size: 16px; font-weight: 800; color: var(--text); letter-spacing: -0.3px;
+      margin: 32px 0 16px; padding-bottom: 10px;
+      border-bottom: 2px solid var(--border);
+    }
+    .guide-section-title .gs-icon {
+      width: 30px; height: 30px; border-radius: 8px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 14px; color: #fff; flex-shrink: 0;
+    }
+
+    /* Architecture boxes */
+    .arch-grid { display: flex; flex-direction: column; align-items: center; gap: 0; margin: 20px 0; }
+    .arch-box {
+      padding: 10px 20px; border-radius: 10px; font-weight: 700; font-size: 13px;
+      text-align: center; position: relative; z-index: 1;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    }
+    .arch-connector { width: 2px; height: 20px; background: #d1d5db; }
+    .arch-connector-h { height: 2px; background: #d1d5db; flex: 1; }
+    .arch-agents-row { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; width: 100%; }
+    .arch-agent-col { display: flex; flex-direction: column; align-items: center; gap: 0; flex: 1; min-width: 130px; max-width: 170px; }
+    .arch-agent-box {
+      padding: 10px 8px; border-radius: 10px; font-weight: 600; font-size: 11px;
+      text-align: center; width: 100%;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.06); transition: transform 0.2s, box-shadow 0.2s;
+    }
+    .arch-agent-box:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
+    .arch-backend-box {
+      padding: 8px 6px; border-radius: 8px; font-size: 10px; font-weight: 600;
+      text-align: center; width: 100%; letter-spacing: 0.2px;
+    }
+    .arch-fan { display: flex; justify-content: center; align-items: flex-start; gap: 12px; width: 100%; position: relative; }
+    .arch-fan::before {
+      content: ''; position: absolute; top: 0; left: 15%; right: 15%; height: 2px; background: #d1d5db;
+    }
+    .arch-fan-line { width: 2px; height: 16px; background: #d1d5db; }
+
+    /* Pipeline visual */
+    .guide-pipeline { display: flex; align-items: center; gap: 0; margin: 20px 0; flex-wrap: wrap; justify-content: center; }
+    .guide-pipe-box {
+      padding: 14px 10px; border-radius: 12px; text-align: center;
+      min-width: 120px; flex: 1; transition: transform 0.2s, box-shadow 0.2s;
+    }
+    .guide-pipe-box:hover { transform: translateY(-3px); }
+    .guide-pipe-box .gp-num {
+      width: 28px; height: 28px; border-radius: 50%; display: inline-flex;
+      align-items: center; justify-content: center; font-size: 13px; font-weight: 800;
+      color: #fff; margin-bottom: 6px;
+    }
+    .guide-pipe-box .gp-title { font-size: 12px; font-weight: 800; letter-spacing: 0.5px; margin-bottom: 4px; }
+    .guide-pipe-box .gp-sub { font-size: 10px; opacity: 0.7; line-height: 1.4; }
+    .guide-pipe-arrow { font-size: 18px; color: #d1d5db; padding: 0 2px; flex-shrink: 0; }
+
+    /* Stage detail cards */
+    .guide-stage-card {
+      border-radius: 14px; overflow: hidden; margin-bottom: 16px;
+      border: 1px solid var(--border); box-shadow: var(--card-shadow);
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+    .guide-stage-card:hover { transform: translateY(-2px); box-shadow: var(--card-shadow-hover); }
+    .guide-stage-head {
+      padding: 14px 20px; display: flex; align-items: center; gap: 12px;
+    }
+    .guide-stage-head .gs-num {
+      width: 32px; height: 32px; border-radius: 50%; display: flex;
+      align-items: center; justify-content: center; font-size: 14px; font-weight: 800; color: #fff; flex-shrink: 0;
+    }
+    .guide-stage-head .gs-title { font-size: 15px; font-weight: 800; }
+    .guide-stage-head .gs-badge {
+      margin-left: auto; padding: 3px 10px; border-radius: 6px;
+      font-size: 10px; font-weight: 700; letter-spacing: 0.5px;
+    }
+    .guide-stage-body { padding: 16px 20px; background: var(--white); }
+    .guide-stage-body p { margin: 0 0 8px; font-size: 13px; line-height: 1.6; color: var(--text-secondary); }
+    .guide-stage-body p:last-child { margin-bottom: 0; }
+    .guide-stage-body code {
+      background: #f3f4f6; padding: 2px 6px; border-radius: 4px; font-size: 12px;
+      color: var(--text); font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+    }
+    .guide-stage-body .gs-detail-grid {
+      display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 10px;
+    }
+    .guide-stage-body .gs-detail-item {
+      background: #f9fafb; border-radius: 8px; padding: 10px 12px;
+      border: 1px solid var(--border);
+    }
+    .guide-stage-body .gs-detail-item .gs-dl { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 4px; }
+    .guide-stage-body .gs-detail-item .gs-dv { font-size: 12px; color: var(--text-secondary); line-height: 1.4; }
+
+    /* Message type chips */
+    .guide-msg-types { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin: 16px 0; }
+    .guide-msg-chip {
+      display: flex; align-items: center; gap: 10px; padding: 12px 16px;
+      border-radius: 10px; border: 1px solid var(--border);
+      transition: transform 0.15s;
+    }
+    .guide-msg-chip:hover { transform: translateX(3px); }
+    .guide-msg-chip .gm-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+    .guide-msg-chip .gm-label { font-size: 13px; font-weight: 700; }
+    .guide-msg-chip .gm-desc { font-size: 11px; color: var(--text-secondary); }
+
+    /* Quick start steps */
+    .guide-steps { display: flex; flex-direction: column; gap: 10px; margin: 16px 0; }
+    .guide-step {
+      display: flex; align-items: flex-start; gap: 14px; padding: 12px 16px;
+      background: var(--white); border-radius: 12px; border: 1px solid var(--border);
+      transition: transform 0.15s, box-shadow 0.15s;
+    }
+    .guide-step:hover { transform: translateX(4px); box-shadow: 0 2px 8px rgba(0,0,0,0.05); }
+    .guide-step .step-num {
+      width: 28px; height: 28px; border-radius: 50%;
+      background: linear-gradient(135deg, #cc0000, #e00000); color: #fff;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 13px; font-weight: 800; flex-shrink: 0;
+    }
+    .guide-step .step-text { font-size: 13px; line-height: 1.5; color: var(--text-secondary); padding-top: 3px; }
+
+    /* Unified mode box */
+    .guide-unified-box {
+      background: linear-gradient(135deg, #eff6ff 0%, #f5f3ff 100%);
+      border: 1px solid rgba(37,99,235,0.15); border-radius: 14px;
+      padding: 20px 24px; margin: 16px 0;
+    }
+    .guide-unified-box .gu-row {
+      display: flex; align-items: center; gap: 10px; margin-bottom: 8px;
+    }
+    .guide-unified-box .gu-row:last-child { margin-bottom: 0; }
+    .guide-unified-box .gu-badge {
+      padding: 2px 8px; border-radius: 4px; font-size: 10px; font-weight: 700; letter-spacing: 0.3px;
+    }
+    .guide-unified-box .gu-text { font-size: 13px; color: var(--text-secondary); }
+
+    .guide-diagram {
+      background: #1e293b; color: #e2e8f0; border: none; border-radius: 12px;
+      padding: 20px; margin: 16px 0; font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+      font-size: 11px; line-height: 1.6; overflow-x: auto; white-space: pre;
+      box-shadow: inset 0 1px 3px rgba(0,0,0,0.2);
+    }
+    .guide-stage {
+      margin-bottom: 16px; padding: 16px 20px;
+      border-left: 4px solid var(--red);
+      background: linear-gradient(135deg, var(--red-light) 0%, var(--white) 100%);
+      border-radius: 0 12px 12px 0;
+      transition: transform 0.2s;
+    }
+    .guide-stage:hover { transform: translateX(4px); }
+    .guide-stage h4 { margin: 0 0 8px; color: var(--red); font-size: 14px; }
+    .guide-stage p { margin: 0; line-height: 1.6; font-size: 13px; color: var(--text-secondary); }
+
+    /* ── Animated Workflow ── */
+    .wf-timeline { position: relative; padding: 0 0 0 40px; }
+    .wf-timeline::before {
+      content: ''; position: absolute; left: 18px; top: 0; bottom: 0; width: 3px;
+      background: linear-gradient(180deg, var(--red), #d97706, var(--blue), var(--purple), var(--green));
+      border-radius: 2px;
+    }
+    .wf-node {
+      position: relative; margin-bottom: 0; padding: 0;
+      opacity: 0; animation: wfAppear 0.5s ease forwards;
+    }
+    .wf-node:nth-child(1) { animation-delay: 0.1s; }
+    .wf-node:nth-child(2) { animation-delay: 0.25s; }
+    .wf-node:nth-child(3) { animation-delay: 0.4s; }
+    .wf-node:nth-child(4) { animation-delay: 0.55s; }
+    .wf-node:nth-child(5) { animation-delay: 0.7s; }
+    .wf-node:nth-child(6) { animation-delay: 0.85s; }
+    .wf-node:nth-child(7) { animation-delay: 1.0s; }
+    .wf-node:nth-child(8) { animation-delay: 1.15s; }
+    .wf-node:nth-child(9) { animation-delay: 1.3s; }
+    .wf-node:nth-child(10) { animation-delay: 1.45s; }
+    .wf-node:nth-child(11) { animation-delay: 1.6s; }
+    .wf-node:nth-child(12) { animation-delay: 1.75s; }
+    .wf-node:nth-child(13) { animation-delay: 1.9s; }
+    .wf-node:nth-child(14) { animation-delay: 2.05s; }
+    .wf-node:nth-child(15) { animation-delay: 2.2s; }
+    .wf-node:nth-child(16) { animation-delay: 2.35s; }
+    .wf-node:nth-child(17) { animation-delay: 2.5s; }
+    .wf-node:nth-child(18) { animation-delay: 2.65s; }
+    @keyframes wfAppear { from { opacity: 0; transform: translateX(-12px); } to { opacity: 1; transform: translateX(0); } }
+
+    .wf-dot {
+      position: absolute; left: -30px; top: 14px;
+      width: 14px; height: 14px; border-radius: 50%;
+      border: 3px solid var(--white); z-index: 2;
+      box-shadow: 0 0 0 2px currentColor;
+    }
+    .wf-card {
+      border-radius: 12px; border: 1px solid var(--border);
+      margin-bottom: 12px; overflow: hidden;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+    .wf-card:hover { transform: translateX(4px); box-shadow: 0 4px 14px rgba(0,0,0,0.08); }
+    .wf-card-head {
+      padding: 10px 16px; font-size: 13px; font-weight: 700;
+      display: flex; align-items: center; gap: 10px;
+    }
+    .wf-card-head .wf-step-label {
+      font-size: 10px; font-weight: 700; letter-spacing: 0.5px;
+      padding: 2px 8px; border-radius: 4px;
+    }
+    .wf-card-body { padding: 10px 16px; background: var(--white); }
+
+    .wf-io { display: flex; gap: 8px; flex-wrap: wrap; }
+    .wf-io-box {
+      flex: 1; min-width: 160px; padding: 8px 12px; border-radius: 8px;
+      border: 1px solid var(--border); font-size: 11px;
+    }
+    .wf-io-box .wf-io-label {
+      font-size: 9px; font-weight: 700; text-transform: uppercase;
+      letter-spacing: 0.6px; margin-bottom: 4px;
+    }
+    .wf-io-box .wf-io-val { color: var(--text-secondary); line-height: 1.4; }
+    .wf-io-box code { background: rgba(0,0,0,0.04); padding: 1px 4px; border-radius: 3px; font-size: 10px; }
+
+    .wf-arrow-row {
+      display: flex; align-items: center; gap: 6px;
+      padding: 3px 16px; font-size: 11px; color: var(--text-secondary);
+    }
+    .wf-arrow-row .wf-ar-icon {
+      width: 18px; height: 18px; border-radius: 50%; display: inline-flex;
+      align-items: center; justify-content: center;
+      font-size: 9px; color: #fff; flex-shrink: 0;
+    }
+    .wf-arrow-row .wf-ar-label { font-weight: 600; font-size: 11px; }
+    .wf-arrow-row .wf-ar-detail { font-size: 11px; }
+
+    .wf-data-pulse {
+      display: inline-block; width: 6px; height: 6px; border-radius: 50%;
+      margin-right: 4px; vertical-align: middle;
+      animation: dataPulse 1.5s ease-in-out infinite;
+    }
+    @keyframes dataPulse {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.4; transform: scale(0.7); }
+    }
+
+    .wf-gate {
+      margin: 12px 0 12px -40px; padding: 12px 16px 12px 52px;
+      background: linear-gradient(90deg, #fef3c7, #fffbeb); border: 2px dashed #d97706;
+      border-radius: 12px; position: relative;
+      animation: gateGlow 2s ease-in-out infinite;
+    }
+    @keyframes gateGlow {
+      0%, 100% { box-shadow: 0 0 8px rgba(217,119,6,0.15); }
+      50% { box-shadow: 0 0 20px rgba(217,119,6,0.3); }
+    }
+    .wf-gate .wf-dot { left: 10px; }
+
+    .wf-failure-zone {
+      margin: 8px 0 8px -40px; padding: 10px 16px 10px 52px;
+      background: linear-gradient(90deg, var(--red-light), #fff5f5); border: 2px solid var(--red);
+      border-radius: 12px; position: relative;
+    }
+    .wf-failure-zone .wf-dot { left: 10px; }
+
+    .wf-success-zone {
+      margin: 8px 0 8px -40px; padding: 10px 16px 10px 52px;
+      background: linear-gradient(90deg, var(--green-light), #f0fdf4); border: 2px solid var(--green);
+      border-radius: 12px; position: relative;
+    }
+    .wf-success-zone .wf-dot { left: 10px; }
+
+    /* ── Status indicator ── */
+    .flow-status {
+      display: flex; align-items: center; gap: 10px;
+      padding: 10px 16px; border-radius: 12px; margin-bottom: 20px;
+      font-weight: 600; font-size: 13px;
+      border: 1px solid;
+    }
+    .flow-status.in-progress { background: var(--blue-light); color: var(--blue); border-color: rgba(37,99,235,0.15); }
+    .flow-status.waiting { background: var(--yellow-light); color: var(--yellow); border-color: rgba(217,119,6,0.15); }
+    .flow-status.complete { background: var(--green-light); color: var(--green); border-color: rgba(5,150,105,0.15); }
+    .flow-status.failed { background: var(--red-light); color: var(--red); border-color: rgba(224,0,0,0.15); }
+    .flow-status.idle { background: #f9fafb; color: var(--muted); border-color: var(--border); }
+    .flow-status .status-dot {
+      width: 8px; height: 8px; border-radius: 50%; background: currentColor;
+      box-shadow: 0 0 6px currentColor;
+    }
+    .flow-status.in-progress .status-dot, .flow-status.waiting .status-dot { animation: pulse 1.5s ease-in-out infinite; }
+  </style>
+</head>
+<body>
+  <!-- Top Bar -->
+  <div class="topbar">
+    <svg class="topbar-logo" viewBox="0 0 32 32" fill="none"><rect width="32" height="32" rx="4" fill="#fff" fill-opacity="0.15"/><path d="M8 12h16v2H8zm0 4h12v2H8zm0 4h8v2H8z" fill="#fff"/></svg>
+    <h1>Autonomous Intelligent Patching</h1>
+    <div class="topbar-actions">
+      <button class="topbar-btn" onclick="openGuide()">Guide</button>
+      <button class="topbar-btn" onclick="openSettings()">Settings</button>
+    </div>
+  </div>
+
+  <!-- Pipeline -->
+  <div class="pipeline-bar" id="pipeline">
+    <div class="pipe-stage" data-stage="discover" onclick="scrollToStage('discover')">
+      <span class="pipe-num">1</span>
+      <span class="pipe-label">DISCOVER</span>
+      <span class="pipe-sub">Red Hat Insights</span>
+    </div>
+    <div class="pipe-arrow">&#9655;</div>
+    <div class="pipe-stage" data-stage="predict" onclick="scrollToStage('predict')">
+      <span class="pipe-num">2</span>
+      <span class="pipe-label">PREDICT</span>
+      <span class="pipe-sub">RHOAI Model</span>
+    </div>
+    <div class="pipe-arrow">&#9655;</div>
+    <div class="pipe-stage" data-stage="reason" onclick="scrollToStage('reason')">
+      <span class="pipe-num">3</span>
+      <span class="pipe-label">REASON</span>
+      <span class="pipe-sub">LLM + RAG</span>
+    </div>
+    <div class="pipe-arrow">&#9655;</div>
+    <div class="pipe-stage" data-stage="execute" onclick="scrollToStage('execute')">
+      <span class="pipe-num">4</span>
+      <span class="pipe-label">EXECUTE</span>
+      <span class="pipe-sub">Ansible (AAP)</span>
+    </div>
+    <div class="pipe-arrow">&#9655;</div>
+    <div class="pipe-stage" data-stage="learn" onclick="scrollToStage('learn')">
+      <span class="pipe-num">5</span>
+      <span class="pipe-label">LEARN</span>
+      <span class="pipe-sub">Continuous</span>
+    </div>
+  </div>
+
+  <!-- Layout: sidebar + main -->
+  <div class="layout">
+    <!-- Left sidebar: Agent Activity -->
+    <div class="sidebar">
+      <div class="sidebar-header">
+        <div class="dot" id="agentDot"></div>
+        Agent Activity
+        <span class="muted" style="margin-left:auto; font-size:11px;" id="agentCount">0 messages</span>
+      </div>
+      <div class="sidebar-body" id="a2a_stream">
+        <div class="empty" style="padding:12px; text-align:center;">No agent messages yet.<br>Start a patch flow to see A2A communication.</div>
+      </div>
+    </div>
+
+    <!-- Main content -->
+    <div class="main">
+      <div class="tabs">
+        <button type="button" class="tab active" data-tab="flow">Dashboard</button>
+        <button type="button" class="tab" data-tab="log">Server Log</button>
+      </div>
+
+      <!-- Tab: Dashboard (CVEs + Flow combined) -->
+      <div id="panel_flow" class="tab-panel active">
+        <!-- CVE List Section -->
+        <div id="cve_section">
+          <div class="cve-toolbar" style="margin-bottom:12px;">
+            <input id="cve_search" type="search" placeholder="Filter by CVE ID or description..." />
+            <button type="button" id="cve_prev_btn" class="btn btn-secondary" disabled>Previous</button>
+            <button type="button" id="cve_next_btn" class="btn btn-secondary" disabled>Next</button>
+            <button type="button" id="cve_reload_btn" class="btn btn-secondary">Refresh</button>
+            <span id="cve_load_status" class="muted">Loading CVEs...</span>
+          </div>
+          <div class="card" id="cve_list_card"><table>
+            <thead><tr><th>CVE</th><th>CVSS</th><th>Severity</th><th>Systems</th><th>Published</th><th>Description</th><th>Action</th></tr></thead>
+            <tbody id="cves_table_body"><tr><td colspan="7" class="empty">Loading CVEs...</td></tr></tbody>
+          </table></div>
+        </div>
+
+        <!-- Hidden manual CVE input (fallback) -->
+        <input id="cve_input" type="hidden" />
+        <span id="launch_status" style="display:none;"></span>
+        <button id="start_btn" style="display:none;">Start</button>
+
+        <!-- Flow content appears here when a patch is running -->
+        <div id="flow_status_bar"></div>
+        <div id="flow_content"></div>
+      </div>
+
+      <!-- Tab: Server Log -->
+      <div id="panel_log" class="tab-panel">
+        <div class="card">
+          <div class="card-header">
+            <h3>Flow Log</h3>
+            <div class="actions"><button class="btn btn-secondary btn-small" onclick="loadFlowLog()">Refresh</button></div>
+          </div>
+          <div class="card-body">
+            <pre id="flow_log_content" class="mono" style="font-size: 11px; max-height: 600px; overflow-y: auto; white-space: pre-wrap; word-break: break-all; margin: 0; background:#fafafa; padding:12px; border-radius:6px;">Loading...</pre>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Settings overlay -->
+  <div class="overlay" id="settingsOverlay">
+    <div class="overlay-content">
+      <button class="overlay-close" onclick="closeSettings()">&times;</button>
+      <h2 style="margin-top:0; color:var(--red);">Settings</h2>
+      <div id="settings_form"></div>
+      <div style="margin-top: 16px; display: flex; gap: 12px; align-items: center;">
+        <button class="btn btn-primary" onclick="saveSettings()">Save</button>
+        <span id="settings_msg" class="muted"></span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Guide overlay -->
+  <div class="overlay" id="guideOverlay">
+    <div class="overlay-content" style="max-width:960px;">
+      <button class="overlay-close" onclick="closeGuide()">&times;</button>
+
+      <!-- Hero -->
+      <div class="guide-hero">
+        <h2>Autonomous Intelligent Patching</h2>
+        <p>AI-powered CVE remediation that orchestrates the full lifecycle &mdash; from vulnerability discovery through automated patching to continuous learning. Five specialized agents coordinate through a real-time message bus to patch your fleet intelligently.</p>
+      </div>
+
+      <div class="guide-tabs">
+        <button class="guide-tab active" data-gtab="overview"><span class="gt-icon">&#9878;</span>Overview</button>
+        <button class="guide-tab" data-gtab="stages"><span class="gt-icon">&#9733;</span>Stages</button>
+        <button class="guide-tab" data-gtab="workflow"><span class="gt-icon">&#9776;</span>API Workflow</button>
+        <button class="guide-tab" data-gtab="integration"><span class="gt-icon">&#8644;</span>Integration</button>
+        <button class="guide-tab" data-gtab="quickstart"><span class="gt-icon">&#9889;</span>Quick Start</button>
+      </div>
+
+      <div class="guide-tab-panel active" id="gtab_overview">
+      <!-- ── Architecture ── -->
+      <div class="guide-section-title">
+        <span class="gs-icon" style="background:linear-gradient(135deg,#6366f1,#8b5cf6);">&#9878;</span>
+        System Architecture
+      </div>
+
+      <div class="arch-grid">
+        <div class="arch-box" style="background:linear-gradient(135deg,#1e293b,#334155); color:#fff; min-width:200px;">
+          CVE Console UI &nbsp;&#8226;&nbsp; Port 8787
+        </div>
+        <div class="arch-connector"></div>
+        <div class="arch-box" style="background:linear-gradient(135deg,#7c3aed,#a78bfa); color:#fff; min-width:240px;">
+          A2A Agent Message Bus
+        </div>
+        <div class="arch-connector"></div>
+        <div class="arch-fan">
+          <div class="arch-fan-line"></div>
+          <div class="arch-fan-line"></div>
+          <div class="arch-fan-line"></div>
+          <div class="arch-fan-line"></div>
+          <div class="arch-fan-line"></div>
+        </div>
+        <div class="arch-agents-row">
+          <div class="arch-agent-col">
+            <div class="arch-agent-box" style="background:var(--red-light); color:var(--red); border:1px solid rgba(224,0,0,0.15);">Discovery<br>Agent</div>
+            <div class="arch-connector"></div>
+            <div class="arch-backend-box" style="background:#fee2e2; color:#991b1b;">Red Hat Insights<br>(MCP)</div>
+          </div>
+          <div class="arch-agent-col">
+            <div class="arch-agent-box" style="background:#fef3c7; color:#b45309; border:1px solid rgba(180,83,9,0.15);">Risk<br>Agent</div>
+            <div class="arch-connector"></div>
+            <div class="arch-backend-box" style="background:#fef9c3; color:#854d0e;">RHOAI KServe<br>ML Model</div>
+          </div>
+          <div class="arch-agent-col">
+            <div class="arch-agent-box" style="background:var(--blue-light); color:var(--blue); border:1px solid rgba(37,99,235,0.15);">Reason<br>Agent</div>
+            <div class="arch-connector"></div>
+            <div class="arch-backend-box" style="background:#dbeafe; color:#1e40af;">Llama Stack<br>LLM + RAG</div>
+          </div>
+          <div class="arch-agent-col">
+            <div class="arch-agent-box" style="background:var(--purple-light); color:var(--purple); border:1px solid rgba(124,58,237,0.15);">Automation<br>Agent</div>
+            <div class="arch-connector"></div>
+            <div class="arch-backend-box" style="background:#f3e8ff; color:#6b21a8;">Ansible AAP<br>Controller</div>
+          </div>
+          <div class="arch-agent-col">
+            <div class="arch-agent-box" style="background:var(--green-light); color:var(--green); border:1px solid rgba(5,150,105,0.15);">Learning<br>Agent</div>
+            <div class="arch-connector"></div>
+            <div class="arch-backend-box" style="background:#ecfdf5; color:#065f46;">Vector Store<br>RAG DB</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── Pipeline Visual ── -->
+      <div class="guide-section-title">
+        <span class="gs-icon" style="background:linear-gradient(135deg,#e00000,#ff3333);">&#9654;</span>
+        5-Stage Pipeline
+      </div>
+
+      <div class="guide-pipeline">
+        <div class="guide-pipe-box" style="background:var(--red-light); box-shadow:0 2px 8px var(--red-glow);">
+          <div class="gp-num" style="background:var(--red);">1</div>
+          <div class="gp-title" style="color:var(--red);">DISCOVER</div>
+          <div class="gp-sub" style="color:#991b1b;">Insights fetches<br>CVE &amp; systems</div>
+        </div>
+        <div class="guide-pipe-arrow">&#10132;</div>
+        <div class="guide-pipe-box" style="background:#fef3c7; box-shadow:0 2px 8px rgba(180,83,9,0.1);">
+          <div class="gp-num" style="background:#d97706;">2</div>
+          <div class="gp-title" style="color:#b45309;">PREDICT</div>
+          <div class="gp-sub" style="color:#92400e;">ML model scores<br>risk per host</div>
+        </div>
+        <div class="guide-pipe-arrow">&#10132;</div>
+        <div class="guide-pipe-box" style="background:var(--blue-light); box-shadow:0 2px 8px rgba(37,99,235,0.1);">
+          <div class="gp-num" style="background:var(--blue);">3</div>
+          <div class="gp-title" style="color:var(--blue);">REASON</div>
+          <div class="gp-sub" style="color:#1e40af;">LLM + RAG<br>analyzes &amp; plans</div>
+        </div>
+        <div class="guide-pipe-arrow">&#10132;</div>
+        <div class="guide-pipe-box" style="background:var(--purple-light); box-shadow:0 2px 8px rgba(124,58,237,0.1);">
+          <div class="gp-num" style="background:var(--purple);">4</div>
+          <div class="gp-title" style="color:var(--purple);">EXECUTE</div>
+          <div class="gp-sub" style="color:#6b21a8;">AAP phased<br>remediation</div>
+        </div>
+        <div class="guide-pipe-arrow">&#10132;</div>
+        <div class="guide-pipe-box" style="background:var(--green-light); box-shadow:0 2px 8px rgba(5,150,105,0.1);">
+          <div class="gp-num" style="background:var(--green);">5</div>
+          <div class="gp-title" style="color:var(--green);">LEARN</div>
+          <div class="gp-sub" style="color:#065f46;">Feedback updates<br>model &amp; store</div>
+        </div>
+      </div>
+      </div><!-- end TAB: Overview -->
+
+      <div class="guide-tab-panel" id="gtab_stages">
+      <!-- ── Stage Details ── -->
+      <div class="guide-section-title">
+        <span class="gs-icon" style="background:linear-gradient(135deg,#059669,#10b981);">&#9733;</span>
+        Stage Details
+      </div>
+
+      <!-- Stage 1 -->
+      <div class="guide-stage-card">
+        <div class="guide-stage-head" style="background:linear-gradient(135deg,#fef2f2,#fee2e2);">
+          <span class="gs-num" style="background:var(--red);">1</span>
+          <span class="gs-title" style="color:var(--red-dark);">DISCOVER</span>
+          <span class="gs-badge" style="background:var(--red-light); color:var(--red);">Discovery Agent</span>
+        </div>
+        <div class="guide-stage-body">
+          <p>Queries <strong>Red Hat Insights</strong> for CVE details (CVSS score, affected packages, errata) and identifies all systems in your inventory affected by this vulnerability.</p>
+          <div class="gs-detail-grid">
+            <div class="gs-detail-item">
+              <div class="gs-dl" style="color:var(--red);">Backend</div>
+              <div class="gs-dv"><code>INSIGHTS_MCP_ENDPOINT</code> &mdash; MCP server connecting to Red Hat Insights API</div>
+            </div>
+            <div class="gs-detail-item">
+              <div class="gs-dl" style="color:var(--red);">Fallback</div>
+              <div class="gs-dv">37 demo hosts with pre-configured system profiles when Insights is unavailable</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Stage 2 -->
+      <div class="guide-stage-card">
+        <div class="guide-stage-head" style="background:linear-gradient(135deg,#fffbeb,#fef3c7);">
+          <span class="gs-num" style="background:#d97706;">2</span>
+          <span class="gs-title" style="color:#92400e;">PREDICT</span>
+          <span class="gs-badge" style="background:#fef3c7; color:#b45309;">Risk Agent</span>
+        </div>
+        <div class="guide-stage-body">
+          <p>Invokes a machine learning model to calculate a <strong>composite risk score</strong> (0&ndash;100) per host based on CVSS severity, host age, fleet size, workload type, and historical patch success. Classifies hosts as <code>ok</code> (auto-patch) or <code>review</code> (needs human approval).</p>
+          <div class="gs-detail-grid">
+            <div class="gs-detail-item">
+              <div class="gs-dl" style="color:#b45309;">Backend</div>
+              <div class="gs-dv"><code>RISK_URL</code> &mdash; RHOAI model serving endpoint on OpenShift</div>
+            </div>
+            <div class="gs-detail-item">
+              <div class="gs-dl" style="color:#b45309;">Key Metrics</div>
+              <div class="gs-dv">Failure probability, impact probability, risk classification (LOW / MEDIUM / HIGH)</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Stage 3 -->
+      <div class="guide-stage-card">
+        <div class="guide-stage-head" style="background:linear-gradient(135deg,#eff6ff,#dbeafe);">
+          <span class="gs-num" style="background:var(--blue);">3</span>
+          <span class="gs-title" style="color:#1e40af;">REASON</span>
+          <span class="gs-badge" style="background:var(--blue-light); color:var(--blue);">Reason Agent</span>
+        </div>
+        <div class="guide-stage-body">
+          <p>Uses <strong>RAG</strong> to search a vector database of historical patch records. Finds similar past patches, identifies patterns, generates per-host recommendations (<em>Why?</em> analysis), and produces a risk-aware phased strategy. Also invokes <strong>Ansible Lightspeed</strong> to generate specialized playbooks.</p>
+          <div class="gs-detail-grid">
+            <div class="gs-detail-item">
+              <div class="gs-dl" style="color:var(--blue);">Backend</div>
+              <div class="gs-dv"><code>LLAMA_STACK_URL</code> + <code>VECTOR_DB_ID</code> for RAG lookups</div>
+            </div>
+            <div class="gs-detail-item">
+              <div class="gs-dl" style="color:var(--blue);">Outputs</div>
+              <div class="gs-dv">Patch history analysis, host-level decision support, phased deployment strategy</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Stage 4 -->
+      <div class="guide-stage-card">
+        <div class="guide-stage-head" style="background:linear-gradient(135deg,#f5f3ff,#ede9fe);">
+          <span class="gs-num" style="background:var(--purple);">4</span>
+          <span class="gs-title" style="color:#6b21a8;">EXECUTE</span>
+          <span class="gs-badge" style="background:var(--purple-light); color:var(--purple);">Automation Agent</span>
+        </div>
+        <div class="guide-stage-body">
+          <p>Publishes the generated playbook to <strong>GitHub</strong>, syncs the AAP project, creates job and workflow templates, and launches the workflow with an <strong>approval gate</strong>. After human approval, executes in three phases with automatic failure detection, rollback, root cause analysis, and AI-driven remediation.</p>
+          <div class="gs-detail-grid">
+            <div class="gs-detail-item">
+              <div class="gs-dl" style="color:var(--purple);">Backend</div>
+              <div class="gs-dv"><code>AAP_BASE_URL</code> + <code>AAP_TOKEN</code>, <code>GITHUB_TOKEN</code></div>
+            </div>
+            <div class="gs-detail-item">
+              <div class="gs-dl" style="color:var(--purple);">Phases</div>
+              <div class="gs-dv">Test systems &rarr; Production canaries &rarr; Remaining production</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Stage 5 -->
+      <div class="guide-stage-card">
+        <div class="guide-stage-head" style="background:linear-gradient(135deg,#ecfdf5,#d1fae5);">
+          <span class="gs-num" style="background:var(--green);">5</span>
+          <span class="gs-title" style="color:#065f46;">LEARN</span>
+          <span class="gs-badge" style="background:var(--green-light); color:var(--green);">Learning Agent</span>
+        </div>
+        <div class="guide-stage-body">
+          <p>Records the outcome of every host patch (success, failure, rollback, remediation) as training events. Updates the <strong>RAG vector store</strong> so future REASON queries can reference this patch. Generates model retraining data to improve PREDICT accuracy over time.</p>
+          <div class="gs-detail-grid">
+            <div class="gs-detail-item">
+              <div class="gs-dl" style="color:var(--green);">Feedback Loop</div>
+              <div class="gs-dv">Each patch operation makes the system smarter for the next CVE</div>
+            </div>
+            <div class="gs-detail-item">
+              <div class="gs-dl" style="color:var(--green);">Storage</div>
+              <div class="gs-dv">Vector store for RAG, training records for model retraining</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      </div><!-- end TAB: Stages -->
+
+      <div class="guide-tab-panel" id="gtab_workflow">
+      <!-- ── Detailed Animated Workflow ── -->
+      <div class="guide-section-title">
+        <span class="gs-icon" style="background:linear-gradient(135deg,#1e293b,#475569);">&#9776;</span>
+        Detailed API Workflow &mdash; Communication &amp; Data Flow
+      </div>
+      <p style="font-size:13px; color:var(--text-secondary); line-height:1.6; margin-bottom:16px;">
+        Each step below shows which agent calls which API, what inputs are sent, and what outputs are returned. Data flows forward &mdash; outputs from one step become inputs to the next. The animated timeline shows the real execution order.
+      </p>
+
+      <div class="wf-timeline" id="wfTimeline">
+
+        <!-- ─── STEP 1: Console triggers flow ─── -->
+        <div class="wf-node">
+          <div class="wf-dot" style="background:var(--red); color:var(--red);"></div>
+          <div class="wf-card">
+            <div class="wf-card-head" style="background:linear-gradient(135deg,#fef2f2,#fee2e2); color:var(--red-dark);">
+              <span class="wf-step-label" style="background:var(--red); color:#fff;">STEP 1</span>
+              Console &rarr; Patch Manager: Initiate Flow
+            </div>
+            <div class="wf-card-body">
+              <div class="wf-arrow-row">
+                <span class="wf-ar-icon" style="background:var(--blue);">&#8594;</span>
+                <span class="wf-ar-label">POST /api/start</span>
+                <span class="wf-ar-detail">&mdash; User clicks "Start Patch Flow"</span>
+              </div>
+              <div class="wf-io">
+                <div class="wf-io-box" style="background:#fef2f2;">
+                  <div class="wf-io-label" style="color:var(--red);"><span class="wf-data-pulse" style="background:var(--red);"></span>Input</div>
+                  <div class="wf-io-val"><code>cve_id</code> e.g. <code>CVE-2026-31337</code></div>
+                </div>
+                <div class="wf-io-box" style="background:#ecfdf5;">
+                  <div class="wf-io-label" style="color:var(--green);"><span class="wf-data-pulse" style="background:var(--green);"></span>Output</div>
+                  <div class="wf-io-val">Thread spawned, <code>state.json</code> created with <code>status: in_progress</code>, A2A message broadcast</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ─── STEP 2: Fetch CVE from Insights ─── -->
+        <div class="wf-node">
+          <div class="wf-dot" style="background:var(--red); color:var(--red);"></div>
+          <div class="wf-card">
+            <div class="wf-card-head" style="background:linear-gradient(135deg,#fef2f2,#fee2e2); color:var(--red-dark);">
+              <span class="wf-step-label" style="background:var(--red); color:#fff;">STEP 2</span>
+              Patch Manager &rarr; Discovery Agent: Fetch CVE
+            </div>
+            <div class="wf-card-body">
+              <div class="wf-arrow-row">
+                <span class="wf-ar-icon" style="background:var(--blue);">&#8594;</span>
+                <span class="wf-ar-label">Red Hat Insights API</span>
+                <span class="wf-ar-detail">&mdash; via MCP server at <code>INSIGHTS_MCP_ENDPOINT</code></span>
+              </div>
+              <div class="wf-io">
+                <div class="wf-io-box" style="background:#fef2f2;">
+                  <div class="wf-io-label" style="color:var(--red);"><span class="wf-data-pulse" style="background:var(--red);"></span>Input</div>
+                  <div class="wf-io-val"><code>cve_id</code>, MCP credentials (<code>LIGHTSPEED_CLIENT_ID</code>, <code>LIGHTSPEED_CLIENT_SECRET</code>)</div>
+                </div>
+                <div class="wf-io-box" style="background:#ecfdf5;">
+                  <div class="wf-io-label" style="color:var(--green);"><span class="wf-data-pulse" style="background:var(--green);"></span>Output</div>
+                  <div class="wf-io-val"><code>cvss_score</code> (9.8), <code>description</code>, <code>affected_systems[]</code> (37 hosts with UUIDs, hostnames, first_reported dates)</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ─── STEP 3: Enrich operational context ─── -->
+        <div class="wf-node">
+          <div class="wf-dot" style="background:var(--red); color:var(--red);"></div>
+          <div class="wf-card">
+            <div class="wf-card-head" style="background:linear-gradient(135deg,#fef2f2,#fee2e2); color:var(--red-dark);">
+              <span class="wf-step-label" style="background:var(--red); color:#fff;">STEP 3</span>
+              Patch Manager &rarr; Risk Agent: Enrich Context
+            </div>
+            <div class="wf-card-body">
+              <div class="wf-arrow-row">
+                <span class="wf-ar-icon" style="background:var(--yellow);">&#9881;</span>
+                <span class="wf-ar-label">CMDB + ITSM Lookup</span>
+                <span class="wf-ar-detail">&mdash; enriches hosts with business metadata</span>
+              </div>
+              <div class="wf-io">
+                <div class="wf-io-box" style="background:#fef2f2;">
+                  <div class="wf-io-label" style="color:var(--red);"><span class="wf-data-pulse" style="background:var(--red);"></span>Input</div>
+                  <div class="wf-io-val"><code>affected_systems[]</code> from Step 2</div>
+                </div>
+                <div class="wf-io-box" style="background:#ecfdf5;">
+                  <div class="wf-io-label" style="color:var(--green);"><span class="wf-data-pulse" style="background:var(--green);"></span>Output</div>
+                  <div class="wf-io-val"><code>operational_context</code>: environment (Production), app (Payments), criticality (Tier 1), maintenance window, historical patch success (91%)</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ─── STEP 4: Risk scoring ─── -->
+        <div class="wf-node">
+          <div class="wf-dot" style="background:#d97706; color:#d97706;"></div>
+          <div class="wf-card">
+            <div class="wf-card-head" style="background:linear-gradient(135deg,#fffbeb,#fef3c7); color:#92400e;">
+              <span class="wf-step-label" style="background:#d97706; color:#fff;">STEP 4</span>
+              Patch Manager &rarr; Risk Agent: Score Hosts
+            </div>
+            <div class="wf-card-body">
+              <div class="wf-arrow-row">
+                <span class="wf-ar-icon" style="background:#d97706;">&#8594;</span>
+                <span class="wf-ar-label">RHOAI KServe Model</span>
+                <span class="wf-ar-detail">&mdash; ML inference at <code>RISK_URL</code></span>
+              </div>
+              <div class="wf-io">
+                <div class="wf-io-box" style="background:#fffbeb;">
+                  <div class="wf-io-label" style="color:#b45309;"><span class="wf-data-pulse" style="background:#d97706;"></span>Input (per host)</div>
+                  <div class="wf-io-val"><code>cvss</code> (9.8), <code>age_days</code>, <code>affected_count</code> (37), host metadata from CMDB</div>
+                </div>
+                <div class="wf-io-box" style="background:#ecfdf5;">
+                  <div class="wf-io-label" style="color:var(--green);"><span class="wf-data-pulse" style="background:var(--green);"></span>Output (per host)</div>
+                  <div class="wf-io-val"><code>risk_score</code> (0-100), <code>decision</code>: <code>review</code> (&gt;30) or <code>ok</code> (&le;30), failure probability 27%, risk class HIGH</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ─── STEP 5: RAG summaries ─── -->
+        <div class="wf-node">
+          <div class="wf-dot" style="background:#d97706; color:#d97706;"></div>
+          <div class="wf-card">
+            <div class="wf-card-head" style="background:linear-gradient(135deg,#fffbeb,#fef3c7); color:#92400e;">
+              <span class="wf-step-label" style="background:#d97706; color:#fff;">STEP 5</span>
+              Risk Agent: RAG Summaries for Review Hosts
+            </div>
+            <div class="wf-card-body">
+              <div class="wf-arrow-row">
+                <span class="wf-ar-icon" style="background:var(--blue);">&#8594;</span>
+                <span class="wf-ar-label">Llama Stack &rarr; Vector Store</span>
+                <span class="wf-ar-detail">&mdash; <code>LLAMA_STACK_URL</code> + <code>VECTOR_DB_ID</code></span>
+              </div>
+              <div class="wf-io">
+                <div class="wf-io-box" style="background:#fffbeb;">
+                  <div class="wf-io-label" style="color:#b45309;"><span class="wf-data-pulse" style="background:#d97706;"></span>Input</div>
+                  <div class="wf-io-val">12 hosts with <code>decision: review</code>, host names, prior patch IDs</div>
+                </div>
+                <div class="wf-io-box" style="background:#ecfdf5;">
+                  <div class="wf-io-label" style="color:var(--green);"><span class="wf-data-pulse" style="background:var(--green);"></span>Output</div>
+                  <div class="wf-io-val"><code>decision_support.summary</code> per host &mdash; e.g. "pay-app-07 has worst patch history, last failure: drain timeout only 30s vs required 120s"</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ─── STEP 6: LLM History Analysis ─── -->
+        <div class="wf-node">
+          <div class="wf-dot" style="background:var(--blue); color:var(--blue);"></div>
+          <div class="wf-card">
+            <div class="wf-card-head" style="background:linear-gradient(135deg,#eff6ff,#dbeafe); color:#1e40af;">
+              <span class="wf-step-label" style="background:var(--blue); color:#fff;">STEP 6</span>
+              Reason Agent: Analyze Patch History
+            </div>
+            <div class="wf-card-body">
+              <div class="wf-arrow-row">
+                <span class="wf-ar-icon" style="background:var(--blue);">&#8594;</span>
+                <span class="wf-ar-label">Llama Stack LLM + RAG</span>
+                <span class="wf-ar-detail">&mdash; searches vector store for similar past patches</span>
+              </div>
+              <div class="wf-io">
+                <div class="wf-io-box" style="background:#eff6ff;">
+                  <div class="wf-io-label" style="color:var(--blue);"><span class="wf-data-pulse" style="background:var(--blue);"></span>Input</div>
+                  <div class="wf-io-val">CVE details, scored hosts, operational context, vector DB search query</div>
+                </div>
+                <div class="wf-io-box" style="background:#ecfdf5;">
+                  <div class="wf-io-label" style="color:var(--green);"><span class="wf-data-pulse" style="background:var(--green);"></span>Output</div>
+                  <div class="wf-io-val"><code>patch_history[]</code> (3 similar records), <code>history_analysis</code> &mdash; "Friday patches fail more, drain timeout is critical, DBA must be present"</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ─── STEP 7: Generate Strategy ─── -->
+        <div class="wf-node">
+          <div class="wf-dot" style="background:var(--blue); color:var(--blue);"></div>
+          <div class="wf-card">
+            <div class="wf-card-head" style="background:linear-gradient(135deg,#eff6ff,#dbeafe); color:#1e40af;">
+              <span class="wf-step-label" style="background:var(--blue); color:#fff;">STEP 7</span>
+              Patch Manager &rarr; Automation Agent: Create Strategy
+            </div>
+            <div class="wf-card-body">
+              <div class="wf-arrow-row">
+                <span class="wf-ar-icon" style="background:var(--purple);">&#9881;</span>
+                <span class="wf-ar-label">Strategy Engine</span>
+                <span class="wf-ar-detail">&mdash; computes phased plan from risk scores + history</span>
+              </div>
+              <div class="wf-io">
+                <div class="wf-io-box" style="background:#eff6ff;">
+                  <div class="wf-io-label" style="color:var(--blue);"><span class="wf-data-pulse" style="background:var(--blue);"></span>Input</div>
+                  <div class="wf-io-val">25 <code>ok</code> hosts + 12 <code>review</code> hosts, history analysis, operational constraints</div>
+                </div>
+                <div class="wf-io-box" style="background:#ecfdf5;">
+                  <div class="wf-io-label" style="color:var(--green);"><span class="wf-data-pulse" style="background:var(--green);"></span>Output</div>
+                  <div class="wf-io-val"><code>patch_strategy.phases[]</code>: Phase 1 Test (25 hosts) &rarr; Phase 2 Canary (3 hosts) &rarr; Phase 3 Production (9 hosts)</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ─── STEP 8: Generate Playbook ─── -->
+        <div class="wf-node">
+          <div class="wf-dot" style="background:var(--blue); color:var(--blue);"></div>
+          <div class="wf-card">
+            <div class="wf-card-head" style="background:linear-gradient(135deg,#eff6ff,#dbeafe); color:#1e40af;">
+              <span class="wf-step-label" style="background:var(--blue); color:#fff;">STEP 8</span>
+              Automation Agent: Ansible Lightspeed Playbook
+            </div>
+            <div class="wf-card-body">
+              <div class="wf-arrow-row">
+                <span class="wf-ar-icon" style="background:var(--blue);">&#8594;</span>
+                <span class="wf-ar-label">Insights MCP &rarr; Lightspeed</span>
+                <span class="wf-ar-detail">&mdash; generates YAML playbook with drain procedure</span>
+              </div>
+              <div class="wf-io">
+                <div class="wf-io-box" style="background:#eff6ff;">
+                  <div class="wf-io-label" style="color:var(--blue);"><span class="wf-data-pulse" style="background:var(--blue);"></span>Input</div>
+                  <div class="wf-io-val"><code>cve_id</code>, <code>system_uuids[]</code> (up to 20), host risk profiles</div>
+                </div>
+                <div class="wf-io-box" style="background:#ecfdf5;">
+                  <div class="wf-io-label" style="color:var(--green);"><span class="wf-data-pulse" style="background:var(--green);"></span>Output</div>
+                  <div class="wf-io-val"><code>playbook_yaml</code> &mdash; includes connection drain (120s learned from history), kernel update, app restart, health check with retries</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ─── STEP 9: Publish to GitHub ─── -->
+        <div class="wf-node">
+          <div class="wf-dot" style="background:var(--purple); color:var(--purple);"></div>
+          <div class="wf-card">
+            <div class="wf-card-head" style="background:linear-gradient(135deg,#f5f3ff,#ede9fe); color:#6b21a8;">
+              <span class="wf-step-label" style="background:var(--purple); color:#fff;">STEP 9</span>
+              Automation Agent: Publish Playbook to GitHub
+            </div>
+            <div class="wf-card-body">
+              <div class="wf-arrow-row">
+                <span class="wf-ar-icon" style="background:#1f2937;">&#8594;</span>
+                <span class="wf-ar-label">GitHub API</span>
+                <span class="wf-ar-detail">&mdash; via git push or MCP at <code>GITHUB_MCP_ENDPOINT</code></span>
+              </div>
+              <div class="wf-io">
+                <div class="wf-io-box" style="background:#f5f3ff;">
+                  <div class="wf-io-label" style="color:var(--purple);"><span class="wf-data-pulse" style="background:var(--purple);"></span>Input</div>
+                  <div class="wf-io-val"><code>playbook_yaml</code>, <code>GITHUB_TOKEN</code>, repo (<code>GITHUB_REPO_OWNER/NAME</code>), branch</div>
+                </div>
+                <div class="wf-io-box" style="background:#ecfdf5;">
+                  <div class="wf-io-label" style="color:var(--green);"><span class="wf-data-pulse" style="background:var(--green);"></span>Output</div>
+                  <div class="wf-io-val"><code>playbook_path</code>: <code>playbooks/generated/CVE-2026-31337-remediation.yml</code>, push method (git or MCP)</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ─── STEP 10: Sync AAP + Create Templates ─── -->
+        <div class="wf-node">
+          <div class="wf-dot" style="background:var(--purple); color:var(--purple);"></div>
+          <div class="wf-card">
+            <div class="wf-card-head" style="background:linear-gradient(135deg,#f5f3ff,#ede9fe); color:#6b21a8;">
+              <span class="wf-step-label" style="background:var(--purple); color:#fff;">STEP 10</span>
+              Automation Agent: Sync AAP &amp; Create Templates
+            </div>
+            <div class="wf-card-body">
+              <div class="wf-arrow-row">
+                <span class="wf-ar-icon" style="background:var(--purple);">&#8594;</span>
+                <span class="wf-ar-label">AAP Controller API</span>
+                <span class="wf-ar-detail">&mdash; <code>AAP_BASE_URL</code> + <code>AAP_TOKEN</code></span>
+              </div>
+              <div class="wf-io">
+                <div class="wf-io-box" style="background:#f5f3ff;">
+                  <div class="wf-io-label" style="color:var(--purple);"><span class="wf-data-pulse" style="background:var(--purple);"></span>Input</div>
+                  <div class="wf-io-val"><code>playbook_path</code>, <code>cve_id</code>, AAP credentials, project sync trigger</div>
+                </div>
+                <div class="wf-io-box" style="background:#ecfdf5;">
+                  <div class="wf-io-label" style="color:var(--green);"><span class="wf-data-pulse" style="background:var(--green);"></span>Output</div>
+                  <div class="wf-io-val"><code>job_template_id</code> (98), <code>workflow_template_id</code> (99), template URLs, approval gate configured</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ─── STEP 11: Launch Workflow ─── -->
+        <div class="wf-node">
+          <div class="wf-dot" style="background:var(--purple); color:var(--purple);"></div>
+          <div class="wf-card">
+            <div class="wf-card-head" style="background:linear-gradient(135deg,#f5f3ff,#ede9fe); color:#6b21a8;">
+              <span class="wf-step-label" style="background:var(--purple); color:#fff;">STEP 11</span>
+              Patch Manager &rarr; Automation Agent: Launch Workflow
+            </div>
+            <div class="wf-card-body">
+              <div class="wf-arrow-row">
+                <span class="wf-ar-icon" style="background:var(--purple);">&#9654;</span>
+                <span class="wf-ar-label">AAP Workflow Launch</span>
+                <span class="wf-ar-detail">&mdash; starts workflow, pauses at approval node</span>
+              </div>
+              <div class="wf-io">
+                <div class="wf-io-box" style="background:#f5f3ff;">
+                  <div class="wf-io-label" style="color:var(--purple);"><span class="wf-data-pulse" style="background:var(--purple);"></span>Input</div>
+                  <div class="wf-io-val"><code>workflow_template_id</code> (99)</div>
+                </div>
+                <div class="wf-io-box" style="background:#ecfdf5;">
+                  <div class="wf-io-label" style="color:var(--green);"><span class="wf-data-pulse" style="background:var(--green);"></span>Output</div>
+                  <div class="wf-io-val"><code>workflow_job_id</code> (1001), <code>status: waiting</code>, <code>pending_approvals[]</code> (approval node ID 2001)</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ─── APPROVAL GATE ─── -->
+        <div class="wf-node">
+          <div class="wf-gate">
+            <div class="wf-dot" style="background:#d97706; color:#d97706;"></div>
+            <div style="font-size:14px; font-weight:800; color:#92400e; margin-bottom:4px;">&#9888; Human Approval Gate</div>
+            <div style="font-size:12px; color:#92400e; line-height:1.5;">
+              Workflow pauses here. Operator reviews risk scores, host analysis, and patch strategy in the UI, then clicks <strong>Approve</strong> or <strong>Deny</strong>.<br>
+              <span style="font-size:11px; opacity:0.8;">API: <code>POST /api/approve</code> &rarr; tries real <code>workflow_approval_action()</code> on AAP, falls back to local <code>run_post_approval()</code></span>
+            </div>
+          </div>
+        </div>
+
+        <!-- ─── STEP 12: Phased Execution ─── -->
+        <div class="wf-node">
+          <div class="wf-dot" style="background:var(--purple); color:var(--purple);"></div>
+          <div class="wf-card">
+            <div class="wf-card-head" style="background:linear-gradient(135deg,#f5f3ff,#ede9fe); color:#6b21a8;">
+              <span class="wf-step-label" style="background:var(--purple); color:#fff;">STEP 12</span>
+              Automation Agent: Phased Execution
+            </div>
+            <div class="wf-card-body">
+              <div style="display:flex; gap:8px; margin-bottom:8px; flex-wrap:wrap;">
+                <div style="flex:1; min-width:120px; padding:8px 10px; background:#eff6ff; border-radius:8px; text-align:center; border:1px solid rgba(37,99,235,0.15);">
+                  <div style="font-size:9px; font-weight:700; color:var(--blue); letter-spacing:0.5px;">PHASE 1</div>
+                  <div style="font-size:18px; font-weight:900; color:var(--blue);">25</div>
+                  <div style="font-size:10px; color:var(--text-secondary);">Test Systems</div>
+                </div>
+                <div style="display:flex; align-items:center; color:#d1d5db;">&#10132;</div>
+                <div style="flex:1; min-width:120px; padding:8px 10px; background:#fef3c7; border-radius:8px; text-align:center; border:1px solid rgba(217,119,6,0.15);">
+                  <div style="font-size:9px; font-weight:700; color:#b45309; letter-spacing:0.5px;">PHASE 2</div>
+                  <div style="font-size:18px; font-weight:900; color:#d97706;">3</div>
+                  <div style="font-size:10px; color:var(--text-secondary);">Canary Hosts</div>
+                </div>
+                <div style="display:flex; align-items:center; color:#d1d5db;">&#10132;</div>
+                <div style="flex:1; min-width:120px; padding:8px 10px; background:#f5f3ff; border-radius:8px; text-align:center; border:1px solid rgba(124,58,237,0.15);">
+                  <div style="font-size:9px; font-weight:700; color:var(--purple); letter-spacing:0.5px;">PHASE 3</div>
+                  <div style="font-size:18px; font-weight:900; color:var(--purple);">9</div>
+                  <div style="font-size:10px; color:var(--text-secondary);">Production</div>
+                </div>
+              </div>
+              <div class="wf-io">
+                <div class="wf-io-box" style="background:#f5f3ff;">
+                  <div class="wf-io-label" style="color:var(--purple);"><span class="wf-data-pulse" style="background:var(--purple);"></span>Per-host Execution</div>
+                  <div class="wf-io-val">AAP job template runs: drain connections (120s) &rarr; apply kernel patch &rarr; restart app &rarr; health check (retries: 5, delay: 10s)</div>
+                </div>
+                <div class="wf-io-box" style="background:#ecfdf5;">
+                  <div class="wf-io-label" style="color:var(--green);"><span class="wf-data-pulse" style="background:var(--green);"></span>Progress Tracking</div>
+                  <div class="wf-io-val"><code>exec_progress</code> updates state.json per phase: <code>{total, completed, status}</code> &mdash; UI polls and renders live</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ─── STEP 13: Failure & Auto-Rollback ─── -->
+        <div class="wf-node">
+          <div class="wf-failure-zone">
+            <div class="wf-dot" style="background:var(--red); color:var(--red);"></div>
+            <div style="font-size:13px; font-weight:800; color:var(--red-dark); margin-bottom:6px;">&#9888; STEP 13: Failure Detection &amp; Auto-Rollback</div>
+            <div style="font-size:12px; color:var(--red-dark); line-height:1.5; margin-bottom:8px;">
+              PAY-APP-07 post-patch health check fails &rarr; production rollout <strong>paused</strong> automatically
+            </div>
+            <div class="wf-io">
+              <div class="wf-io-box" style="background:#fff5f5;">
+                <div class="wf-io-label" style="color:var(--red);"><span class="wf-data-pulse" style="background:var(--red);"></span>Failure Signal</div>
+                <div class="wf-io-val">Health check <code>HTTP 503</code> after 5 retries &rarr; Automation Agent broadcasts <code>patch_failure</code> error event</div>
+              </div>
+              <div class="wf-io-box" style="background:#fff5f5;">
+                <div class="wf-io-label" style="color:var(--red);"><span class="wf-data-pulse" style="background:var(--red);"></span>Rollback</div>
+                <div class="wf-io-val">Ansible reverts kernel &rarr; restarts app &rarr; verifies health &rarr; <code>rollback_status: SUCCESS</code>, <code>app_status: HEALTHY</code></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ─── STEP 14: Diagnosis Agent ─── -->
+        <div class="wf-node">
+          <div class="wf-dot" style="background:var(--blue); color:var(--blue);"></div>
+          <div class="wf-card">
+            <div class="wf-card-head" style="background:linear-gradient(135deg,#eff6ff,#dbeafe); color:#1e40af;">
+              <span class="wf-step-label" style="background:var(--blue); color:#fff;">STEP 14</span>
+              Diagnosis Agent: Root Cause Analysis
+            </div>
+            <div class="wf-card-body">
+              <div class="wf-arrow-row">
+                <span class="wf-ar-icon" style="background:var(--blue);">&#8594;</span>
+                <span class="wf-ar-label">RAG Vector Store + LLM</span>
+                <span class="wf-ar-detail">&mdash; searches for similar failure patterns in history</span>
+              </div>
+              <div class="wf-io">
+                <div class="wf-io-box" style="background:#eff6ff;">
+                  <div class="wf-io-label" style="color:var(--blue);"><span class="wf-data-pulse" style="background:var(--blue);"></span>Input</div>
+                  <div class="wf-io-val">Failed host (PAY-APP-07), failure type (health check), app (Payments), CVE ID</div>
+                </div>
+                <div class="wf-io-box" style="background:#ecfdf5;">
+                  <div class="wf-io-label" style="color:var(--green);"><span class="wf-data-pulse" style="background:var(--green);"></span>Output</div>
+                  <div class="wf-io-val"><code>similar_records</code> (3 matches), <code>likely_cause</code>: drain timeout (30s vs 120s required), <code>recommendation</code>: increase to 120s</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ─── STEP 15: Remediation ─── -->
+        <div class="wf-node">
+          <div class="wf-dot" style="background:var(--purple); color:var(--purple);"></div>
+          <div class="wf-card">
+            <div class="wf-card-head" style="background:linear-gradient(135deg,#f5f3ff,#ede9fe); color:#6b21a8;">
+              <span class="wf-step-label" style="background:var(--purple); color:#fff;">STEP 15</span>
+              Automation Agent: Execute Remediation
+            </div>
+            <div class="wf-card-body">
+              <div class="wf-arrow-row">
+                <span class="wf-ar-icon" style="background:var(--purple);">&#9654;</span>
+                <span class="wf-ar-label">Retry with Fix</span>
+                <span class="wf-ar-detail">&mdash; applies AI-discovered fix, retries failed host</span>
+              </div>
+              <div class="wf-io">
+                <div class="wf-io-box" style="background:#f5f3ff;">
+                  <div class="wf-io-label" style="color:var(--purple);"><span class="wf-data-pulse" style="background:var(--purple);"></span>Input</div>
+                  <div class="wf-io-val">Remediation: drain timeout <code>30s &rarr; 120s</code>, target: PAY-APP-07, evidence count: 3 supporting records</div>
+                </div>
+                <div class="wf-io-box" style="background:#ecfdf5;">
+                  <div class="wf-io-label" style="color:var(--green);"><span class="wf-data-pulse" style="background:var(--green);"></span>Output</div>
+                  <div class="wf-io-val">PAY-APP-07 patched successfully with 120s drain &rarr; production rollout resumes &rarr; all 9/9 production hosts complete</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ─── STEP 16: Learning ─── -->
+        <div class="wf-node">
+          <div class="wf-success-zone">
+            <div class="wf-dot" style="background:var(--green); color:var(--green);"></div>
+            <div style="font-size:13px; font-weight:800; color:#065f46; margin-bottom:6px;">&#10003; STEP 16: Learn &amp; Close</div>
+            <div style="font-size:12px; color:#065f46; line-height:1.5; margin-bottom:8px;">
+              All 37 systems patched successfully &mdash; generating training records for future intelligence
+            </div>
+            <div class="wf-io">
+              <div class="wf-io-box" style="background:#f0fdf4;">
+                <div class="wf-io-label" style="color:var(--green);"><span class="wf-data-pulse" style="background:var(--green);"></span>Stored to Vector DB</div>
+                <div class="wf-io-val">37 host patch outcomes, 1 failure-remediation pair, drain timeout lesson (30s &rarr; 120s), Friday failure pattern</div>
+              </div>
+              <div class="wf-io-box" style="background:#f0fdf4;">
+                <div class="wf-io-label" style="color:var(--green);"><span class="wf-data-pulse" style="background:var(--green);"></span>Model Retraining</div>
+                <div class="wf-io-val">Training events exported for RHOAI model update &mdash; next CVE's PREDICT stage will score PAY-APP-07 higher automatically</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div><!-- end wf-timeline -->
+      </div><!-- end TAB: API Workflow -->
+
+      <div class="guide-tab-panel" id="gtab_integration">
+      <!-- ── Unified Mode ── -->
+      <div class="guide-section-title">
+        <span class="gs-icon" style="background:linear-gradient(135deg,#2563eb,#3b82f6);">&#8644;</span>
+        Unified Mode
+      </div>
+
+      <div class="guide-unified-box">
+        <p style="margin:0 0 12px; font-size:14px; font-weight:600; color:var(--text);">Every stage tries real APIs first, then falls back gracefully.</p>
+        <div class="gu-row">
+          <span class="gu-badge" style="background:#dcfce7; color:#059669;">LIVE</span>
+          <span class="gu-text">Real backend responded &mdash; using production data</span>
+        </div>
+        <div class="gu-row">
+          <span class="gu-badge" style="background:#fef3c7; color:#d97706;">FALLBACK</span>
+          <span class="gu-text">Backend unavailable &mdash; using built-in demo data with FIX hints</span>
+        </div>
+        <div class="gu-row" style="margin-top:8px;">
+          <span class="gu-text">Check the <strong>Server Log</strong> tab for per-stage LIVE/FALLBACK status. Configure backends in <strong>Settings</strong>.</span>
+        </div>
+      </div>
+
+      <!-- ── Agent Message Bus ── -->
+      <div class="guide-section-title">
+        <span class="gs-icon" style="background:linear-gradient(135deg,#d97706,#f59e0b);">&#9993;</span>
+        Agent Message Bus (A2A)
+      </div>
+
+      <p style="font-size:13px; color:var(--text-secondary); line-height:1.6; margin-bottom:12px;">The left sidebar shows real-time messages as agents coordinate during the patch flow.</p>
+
+      <div class="guide-msg-types">
+        <div class="guide-msg-chip" style="background:var(--blue-light); border-color:rgba(37,99,235,0.15);">
+          <span class="gm-dot" style="background:var(--blue); box-shadow:0 0 6px rgba(37,99,235,0.4);"></span>
+          <div>
+            <div class="gm-label" style="color:var(--blue);">Request</div>
+            <div class="gm-desc">Agent asking another to perform an action</div>
+          </div>
+        </div>
+        <div class="guide-msg-chip" style="background:var(--green-light); border-color:rgba(5,150,105,0.15);">
+          <span class="gm-dot" style="background:var(--green); box-shadow:0 0 6px rgba(5,150,105,0.4);"></span>
+          <div>
+            <div class="gm-label" style="color:var(--green);">Response</div>
+            <div class="gm-desc">Agent returning results</div>
+          </div>
+        </div>
+        <div class="guide-msg-chip" style="background:var(--yellow-light); border-color:rgba(217,119,6,0.15);">
+          <span class="gm-dot" style="background:var(--yellow); box-shadow:0 0 6px rgba(217,119,6,0.4);"></span>
+          <div>
+            <div class="gm-label" style="color:var(--yellow);">Event</div>
+            <div class="gm-desc">Broadcast status updates</div>
+          </div>
+        </div>
+        <div class="guide-msg-chip" style="background:var(--red-light); border-color:rgba(224,0,0,0.15);">
+          <span class="gm-dot" style="background:var(--red); box-shadow:0 0 6px rgba(224,0,0,0.4);"></span>
+          <div>
+            <div class="gm-label" style="color:var(--red);">Error</div>
+            <div class="gm-desc">Failure notifications</div>
+          </div>
+        </div>
+      </div>
+      </div><!-- end TAB: Integration -->
+
+      <div class="guide-tab-panel" id="gtab_quickstart">
+      <!-- ── Quick Start ── -->
+      <div class="guide-section-title">
+        <span class="gs-icon" style="background:linear-gradient(135deg,#cc0000,#e00000);">&#9889;</span>
+        Quick Start
+      </div>
+
+      <div class="guide-steps">
+        <div class="guide-step">
+          <span class="step-num">1</span>
+          <span class="step-text">Enter a CVE ID (e.g., <code style="background:#f3f4f6; padding:2px 6px; border-radius:4px; font-size:12px;">CVE-2026-31337</code>) or pick one from the <strong>CVEs</strong> tab</span>
+        </div>
+        <div class="guide-step">
+          <span class="step-num">2</span>
+          <span class="step-text">Click <strong>Start Patch Flow</strong> &mdash; watch stages light up in the pipeline bar above</span>
+        </div>
+        <div class="guide-step">
+          <span class="step-num">3</span>
+          <span class="step-text">Monitor agent-to-agent messages streaming in the left sidebar</span>
+        </div>
+        <div class="guide-step">
+          <span class="step-num">4</span>
+          <span class="step-text">Click any pipeline stage number to jump directly to its detail card</span>
+        </div>
+        <div class="guide-step">
+          <span class="step-num">5</span>
+          <span class="step-text">When the flow reaches the <strong>approval gate</strong>, click <strong>Approve</strong> to continue execution</span>
+        </div>
+        <div class="guide-step">
+          <span class="step-num">6</span>
+          <span class="step-text">Watch phased execution, automatic failure detection &amp; rollback, AI-driven remediation, and learning feedback</span>
+        </div>
+      </div>
+      </div><!-- end TAB: Quick Start -->
+
+    </div>
+  </div>
+
+  <!-- Analysis Modal -->
+  <div class="analysis-overlay" id="analysisOverlay" onclick="if(event.target===this)closeAnalysis()">
+    <div class="analysis-modal">
+      <div class="analysis-header">
+        <div>
+          <h3 id="analysisTitle">Analysis</h3>
+          <span class="analysis-badge" id="analysisBadge"></span>
+        </div>
+        <button class="analysis-close" onclick="closeAnalysis()">&times;</button>
+      </div>
+      <div class="analysis-body" id="analysisBody">
+        <div class="analysis-loading"><div class="spinner"></div><div>Analyzing with AI...</div></div>
+      </div>
+    </div>
+  </div>
+
+<script>
+/* ================================================================
+   HELPERS
+   ================================================================ */
+
+function esc(v) {
+  if (v === null || v === undefined || v === '') return '\u2014';
+  const s = String(v);
+  const el = document.createElement('span');
+  el.textContent = s;
+  return el.innerHTML;
+}
+
+function infoIcon(tip) {
+  return `<span class="info-icon">i<span class="info-tip">${tip}</span></span>`;
+}
+
+function severityBadge(cvss) {
+  const score = parseFloat(cvss);
+  if (score >= 9) return `<span class="badge badge-critical">Critical</span>`;
+  if (score >= 7) return `<span class="badge badge-high">High</span>`;
+  if (score >= 4) return `<span class="badge badge-review">Medium</span>`;
+  return `<span class="badge badge-ok">Low</span>`;
+}
+
+function scrollToStage(stage) {
+  const el = document.getElementById('stage_' + stage);
+  if (el) {
+    el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    el.style.boxShadow = '0 0 0 2px var(--red)';
+    setTimeout(() => { el.style.boxShadow = ''; }, 1500);
+  }
+}
+
+/* ================================================================
+   PIPELINE STAGE MAPPING
+   ================================================================ */
+
+const STAGE_MAP = {
+  'workflow_start': 'discover', 'loading_cve': 'discover', 'loading_cve_done': 'discover',
+  'enriching_context': 'predict',
+  'scoring_hosts': 'predict', 'scoring_hosts_done': 'predict',
+  'analyzing_history': 'reason', 'generating_strategy': 'reason',
+  'lightspeed_assist': 'execute', 'publishing_playbook': 'execute', 'syncing_aap_project': 'execute',
+  'creating_aap_templates': 'execute', 'launching_workflow': 'execute', 'awaiting_aap': 'execute',
+  'approved': 'execute', 'executing_test': 'execute', 'executing_test_mid': 'execute',
+  'test_complete': 'execute', 'executing_canary': 'execute', 'canary_complete': 'execute',
+  'executing_production': 'execute', 'executing_production_mid': 'execute',
+  'patch_failure': 'execute', 'rollback': 'execute',
+  'analyzing_failure': 'execute', 'remediation_proposed': 'execute', 'remediation_approved': 'execute',
+  'remediation_executing': 'execute', 'remediation_success': 'execute', 'rollout_complete': 'execute',
+  'workflow_complete': 'learn',
+};
+
+const PIPE_ORDER = ['discover', 'predict', 'reason', 'execute', 'learn'];
+
+function updatePipeline(flowStage, approvalState) {
+  const current = STAGE_MAP[flowStage] || null;
+  const currentIdx = current ? PIPE_ORDER.indexOf(current) : -1;
+  const isComplete = approvalState === 'approved_and_completed';
+  const isFailed = approvalState === 'flow_failed';
+
+  document.querySelectorAll('.pipe-stage').forEach(el => {
+    const stage = el.dataset.stage;
+    const idx = PIPE_ORDER.indexOf(stage);
+    el.classList.remove('active', 'done', 'failed');
+    if (isComplete) {
+      el.classList.add('done');
+    } else if (isFailed && idx <= currentIdx) {
+      el.classList.add(idx === currentIdx ? 'failed' : 'done');
+    } else if (idx < currentIdx) {
+      el.classList.add('done');
+    } else if (idx === currentIdx) {
+      el.classList.add('active');
+    }
+  });
+}
+
+/* ================================================================
+   HOST TABLE (shared by PREDICT and REASON)
+   ================================================================ */
+
+function renderHostTable(hosts, showActions) {
+  if (!hosts || !hosts.length) return '<div class="empty">Analyzing affected hosts...</div>';
+  const reviewHosts = hosts.filter(h => h.decision === 'review');
+  const okHosts = hosts.filter(h => h.decision !== 'review');
+
+  let html = '<table><thead><tr>';
+  html += '<th>Host</th>';
+  html += `<th>Risk Score ${infoIcon('Composite score from RHOAI ML model combining CVSS severity, host age, fleet size, and operational context. Higher = more risky. Threshold: 30 = requires review.')}</th>`;
+  html += '<th>Decision</th>';
+  html += '<th>Reason</th>';
+  if (showActions) html += '<th>Actions</th>';
+  html += '</tr></thead><tbody>';
+
+  for (const h of reviewHosts) {
+    html += '<tr>';
+    html += `<td class="mono">${esc(h.host)}</td>`;
+    html += `<td><strong style="color:var(--red)">${esc(h.risk_score?.toFixed?.(1) ?? h.risk_score)}</strong></td>`;
+    html += `<td><span class="badge badge-review">review</span></td>`;
+    html += `<td>${esc(h.reason)}</td>`;
+    if (showActions) {
+      html += `<td><button class="btn btn-secondary btn-small" onclick="showWhy('${esc(h.host)}')">Why?</button></td>`;
+    }
+    html += '</tr>';
+  }
+  for (const h of okHosts) {
+    html += '<tr>';
+    html += `<td class="mono">${esc(h.host)}</td>`;
+    html += `<td>${esc(h.risk_score?.toFixed?.(1) ?? h.risk_score)}</td>`;
+    html += `<td><span class="badge badge-ok">ok</span></td>`;
+    html += `<td>${esc(h.reason)}</td>`;
+    if (showActions) html += '<td></td>';
+    html += '</tr>';
+  }
+  html += '</tbody></table>';
+  return html;
+}
+
+function openAnalysis(title) {
+  document.getElementById('analysisTitle').textContent = title;
+  document.getElementById('analysisBadge').textContent = '';
+  document.getElementById('analysisBadge').className = 'analysis-badge';
+  document.getElementById('analysisBody').innerHTML = '<div class="analysis-loading"><div class="spinner"></div><div>Analyzing with AI...</div></div>';
+  document.getElementById('analysisOverlay').classList.add('open');
+}
+function closeAnalysis() {
+  document.getElementById('analysisOverlay').classList.remove('open');
+}
+
+function showWhy(hostname) {
+  openAnalysis('Why? \u2014 ' + hostname);
+  fetch('/api/why?host=' + encodeURIComponent(hostname))
+    .then(r => r.json())
+    .then(data => {
+      const badge = document.getElementById('analysisBadge');
+      badge.textContent = data.source === 'live' ? 'LIVE' : 'DEMO';
+      badge.className = 'analysis-badge ' + (data.source === 'live' ? 'badge-live' : 'badge-fallback');
+      let html = '';
+      if (data.host) {
+        html += '<div style="display:flex;gap:12px;margin-bottom:16px;">';
+        html += '<div class="stat-box" style="flex:1;text-align:center;"><div class="stat-value">' + esc(data.host.risk_score) + '</div><div class="stat-label">Risk Score</div></div>';
+        html += '<div class="stat-box" style="flex:1;text-align:center;"><div class="stat-value" style="text-transform:uppercase;">' + esc(data.host.decision) + '</div><div class="stat-label">Decision</div></div>';
+        html += '</div>';
+      }
+      for (const f of (data.factors || [])) {
+        html += '<div class="factor-card">';
+        html += '<div class="factor-icon">' + (f.icon || '') + '</div>';
+        html += '<div class="factor-content">';
+        html += '<div class="factor-head"><span class="factor-name">' + esc(f.name) + '</span><span class="factor-weight">' + esc(f.weight) + '</span></div>';
+        html += '<div class="factor-value">' + esc(f.value) + '</div>';
+        html += '<div class="factor-detail">' + esc(f.detail) + '</div>';
+        html += '</div></div>';
+      }
+      if (data.recommendation) {
+        html += '<div class="analysis-recommendation"><strong>Recommendation</strong><p>' + esc(data.recommendation) + '</p></div>';
+      }
+      document.getElementById('analysisBody').innerHTML = html;
+    })
+    .catch(e => {
+      document.getElementById('analysisBody').innerHTML = '<div style="color:var(--red);padding:24px;">Failed to load: ' + esc(String(e)) + '</div>';
+    });
+}
+
+/* ================================================================
+   RENDER: DISCOVER STAGE
+   ================================================================ */
+
+function renderDiscover(summary) {
+  let html = '<div class="card" id="stage_discover"><div class="card-header"><span class="stage-badge stage-discover">DISCOVER</span><h3>CVE Identification</h3></div><div class="card-body">';
+  if (!summary.cvss) {
+    html += `<div class="muted">${esc(summary.flow_message || 'Loading CVE from Insights...')}</div>`;
+  } else {
+    html += '<div class="stats-grid">';
+    html += `<div class="stat-box"><div class="stat-value">${esc(summary.cvss)}${infoIcon('CVSS v3 base score from NVD/Red Hat. Range 0-10. Provided by Red Hat Insights vulnerability data.')}</div><div class="stat-label">CVSS Score</div></div>`;
+    html += `<div class="stat-box"><div class="stat-value">${esc(summary.affected_count)}${infoIcon('Number of systems in your Insights inventory affected by this CVE.')}</div><div class="stat-label">Affected Systems</div></div>`;
+    html += '</div>';
+    if (summary.cve_summary) {
+      html += `<p style="margin:8px 0 0; line-height:1.5;">${esc(summary.cve_summary)}</p>`;
+    }
+  }
+  html += '</div></div>';
+  return html;
+}
+
+/* ================================================================
+   RENDER: PREDICT STAGE
+   ================================================================ */
+
+function renderPredict(summary, hosts) {
+  let html = '<div class="card" id="stage_predict"><div class="card-header"><span class="stage-badge stage-predict">PREDICT</span><h3>Risk Assessment</h3></div><div class="card-body">';
+
+  const ctx = summary.operational_context;
+  if (ctx) {
+    html += '<div class="stats-grid">';
+    html += `<div class="stat-box"><div class="stat-value">${esc(ctx.environment)}${infoIcon('Target environment classification from CMDB. Determines risk multiplier applied to patch scoring.')}</div><div class="stat-label">Environment</div></div>`;
+    html += `<div class="stat-box"><div class="stat-value">${esc(ctx.business_criticality)}${infoIcon('Business tier from ITSM. Tier 1 = revenue-critical, requires explicit approval for any changes.')}</div><div class="stat-label">Business Tier</div></div>`;
+    html += `<div class="stat-box"><div class="stat-value">${esc(ctx.historical_patch_success)}${infoIcon('Historical success rate for similar patches on this application cluster. Calculated from ITSM change records over the last 12 months.')}</div><div class="stat-label">Historical Success</div></div>`;
+    html += `<div class="stat-box"><div class="stat-value">${esc(ctx.similar_workload_success)}${infoIcon('Success rate for patches on workloads with similar resource profiles and configurations. Lower than overall because payment workloads have more complex drain procedures.')}</div><div class="stat-label">Similar Workload</div></div>`;
+    html += '</div>';
+  }
+
+  if (summary.failure_probability) {
+    html += '<div class="stats-grid">';
+    html += `<div class="stat-box"><div class="stat-value" style="color:var(--red)">${esc(summary.failure_probability)}%${infoIcon('RHOAI model prediction: probability that at least one host will fail post-patch health checks. Based on CVSS, host history, environment, and workload type.')}</div><div class="stat-label">Failure Probability</div></div>`;
+    html += `<div class="stat-box"><div class="stat-value" style="color:var(--orange)">${esc(summary.impact_probability)}%${infoIcon('RHOAI model prediction: probability of business impact if a failure occurs. Accounts for redundancy, failover capability, and maintenance window timing.')}</div><div class="stat-label">Impact Probability</div></div>`;
+    html += `<div class="stat-box"><div class="stat-value" style="color:var(--red)">${esc(summary.risk_classification)}${infoIcon('Overall risk classification combining failure probability, impact probability, and business criticality. HIGH = requires human approval before execution.')}</div><div class="stat-label">Risk Classification</div></div>`;
+    html += '</div>';
+  }
+
+  if (hosts && hosts.length) {
+    html += renderHostTable(hosts, false);
+  }
+
+  html += '</div></div>';
+  return html;
+}
+
+/* ================================================================
+   RENDER: REASON STAGE
+   ================================================================ */
+
+function renderReason(summary, hosts) {
+  let html = '<div class="card" id="stage_reason"><div class="card-header"><span class="stage-badge stage-reason">REASON</span><h3>LLM Analysis</h3>';
+  html += '<div class="actions"><button class="btn btn-secondary btn-small" onclick="showWhatIf()">What If?</button></div>';
+  html += '</div><div class="card-body">';
+
+  const analysis = summary.history_analysis;
+  if (analysis) {
+    html += '<div style="margin-bottom: 12px;">';
+    html += `<div><strong>Similar failures:</strong> ${esc(analysis.similar_failures)} ${infoIcon('Number of historically similar patch operations that resulted in failure. Identified by RAG search over patch history vector store.')}</div>`;
+    html += `<div><strong>Contextual risk:</strong> <span style="color:var(--red); font-weight:600;">${esc(analysis.contextual_risk)}</span></div>`;
+    if (analysis.patterns && analysis.patterns.length) {
+      html += '<div style="margin-top:8px;"><strong>Patterns identified:</strong></div><ul style="margin:4px 0;">';
+      for (const p of analysis.patterns) html += `<li>${esc(p)}</li>`;
+      html += '</ul>';
+    }
+    html += '</div>';
+  }
+
+  const history = summary.patch_history;
+  if (history && history.length) {
+    html += '<div style="margin-bottom: 8px;"><strong>Relevant patch history:</strong></div>';
+    html += '<table><thead><tr><th>Host</th><th>Patch</th><th>Result</th><th>Notes</th></tr></thead><tbody>';
+    for (const h of history) {
+      const color = h.result === 'FAILED' ? 'var(--red)' : 'var(--green)';
+      html += `<tr><td>${esc(h.host)}</td><td class="mono">${esc(h.patch)}</td><td style="color:${color};font-weight:600">${esc(h.result)}</td><td>${(h.notes || []).map(n => esc(n)).join(', ')}</td></tr>`;
+    }
+    html += '</tbody></table>';
+  }
+
+  if (hosts && hosts.length) {
+    const reviewHosts = hosts.filter(h => h.decision === 'review');
+    if (reviewHosts.length) {
+      html += '<div style="margin-top:16px;"><strong>Hosts requiring review:</strong></div>';
+      html += renderHostTable(hosts, true);
+    }
+  }
+
+  html += '</div></div>';
+  return html;
+}
+
+function showWhatIf() {
+  openAnalysis('What If? — Scenario Analysis');
+  fetch('/api/what-if')
+    .then(r => r.json())
+    .then(data => {
+      const badge = document.getElementById('analysisBadge');
+      badge.textContent = data.source === 'live' ? 'LIVE' : 'DEMO';
+      badge.className = 'analysis-badge ' + (data.source === 'live' ? 'badge-live' : 'badge-fallback');
+      const s = (lastState && lastState.summary) || {};
+      let html = '';
+      html += '<div style="display:flex;gap:12px;margin-bottom:18px;">';
+      html += '<div class="stat-box" style="flex:1;text-align:center;"><div class="stat-value" style="color:var(--red)">' + esc(s.risk_classification || 'N/A') + '</div><div class="stat-label">Current Risk</div></div>';
+      html += '<div class="stat-box" style="flex:1;text-align:center;"><div class="stat-value" style="color:var(--orange)">' + esc(s.failure_probability || 'N/A') + '%</div><div class="stat-label">Failure Probability</div></div>';
+      html += '</div>';
+      for (const sc of (data.scenarios || [])) {
+        const dir = sc.impact_direction === 'up' ? 'impact-up' : 'impact-down';
+        const arrow = sc.impact_direction === 'up' ? '↑' : '↓';
+        html += '<div class="scenario-card">';
+        html += '<div class="scenario-head">';
+        html += '<span class="scenario-icon">' + (sc.icon || '') + '</span>';
+        html += '<span class="scenario-title">' + esc(sc.title) + '</span>';
+        html += '<span class="scenario-impact ' + dir + '">' + arrow + ' ' + esc(sc.impact) + '</span>';
+        html += '</div>';
+        html += '<div class="scenario-change">' + esc(sc.change) + '</div>';
+        html += '<div class="scenario-detail">' + esc(sc.detail) + '</div>';
+        html += '<div class="scenario-meta">';
+        if (sc.confidence) html += '<span><strong>Confidence:</strong> ' + esc(sc.confidence) + '</span>';
+        if (sc.evidence) html += '<span><strong>Evidence:</strong> ' + esc(sc.evidence) + '</span>';
+        html += '</div></div>';
+      }
+      document.getElementById('analysisBody').innerHTML = html;
+    })
+    .catch(e => {
+      document.getElementById('analysisBody').innerHTML = '<div style="color:var(--red);padding:24px;">Failed to load: ' + esc(String(e)) + '</div>';
+    });
+}
+
+/* ================================================================
+   RENDER: EXECUTE STAGE
+   ================================================================ */
+
+function renderExecute(summary, aap) {
+  let html = '<div class="card" id="stage_execute"><div class="card-header"><span class="stage-badge stage-execute">EXECUTE</span><h3>Remediation</h3></div><div class="card-body">';
+
+  const strategy = summary.patch_strategy;
+  if (strategy && strategy.phases) {
+    html += '<div style="margin-bottom:12px;"><strong>Patch Strategy:</strong></div>';
+    html += '<div class="exec-phases">';
+    for (const phase of strategy.phases) {
+      html += `<div class="exec-phase"><h4>${esc(phase.name)}</h4><div class="count">${esc(phase.count)}</div><div class="muted">${esc(phase.status)}</div></div>`;
+    }
+    html += '</div>';
+  }
+
+  const ls = summary.lightspeed;
+  if (ls) {
+    html += `<div style="margin-bottom:8px;"><strong>Ansible Lightspeed:</strong> ${esc(ls.reason)}</div>`;
+    if (summary.playbook_path) {
+      html += `<div class="muted">Playbook: <span class="mono">${esc(summary.playbook_path)}</span></div>`;
+    }
+  }
+
+  const approvalState = summary.approval_state;
+  if (approvalState === 'pending_review') {
+    const wfJob = aap && aap.latest_workflow_job;
+    const wfJobId = wfJob ? wfJob.id : 1001;
+    html += '<div class="alert alert-warning" style="margin-top:12px;">';
+    html += '<strong>Awaiting Approval</strong> \u2014 Workflow is paused at the approval gate. Review the risk assessment and host analysis above.';
+    html += `<div style="margin-top:10px;"><button class="btn btn-green" onclick="submitApproval(${wfJobId}, 'approve')">Approve</button> <button class="btn btn-danger" onclick="submitApproval(${wfJobId}, 'deny')">Deny</button></div>`;
+    html += '</div>';
+  }
+
+  const exec = summary.exec_progress;
+  if (exec) {
+    html += '<div style="margin-top:12px;"><strong>Execution Progress:</strong></div>';
+    html += '<div class="exec-phases">';
+    for (const [key, phase] of Object.entries(exec)) {
+      const pct = phase.total ? Math.round(phase.completed / phase.total * 100) : 0;
+      const statusClass = phase.status === 'complete' ? 'complete' : phase.status === 'running' ? 'running' : phase.status === 'paused' ? 'paused' : '';
+      html += `<div class="exec-phase ${statusClass}"><h4>${key.charAt(0).toUpperCase() + key.slice(1)}</h4>`;
+      html += `<div class="count">${phase.completed}/${phase.total}</div>`;
+      html += `<div class="progress-bar" style="margin-top:6px;"><div class="progress-fill ${phase.status === 'complete' ? 'green' : 'blue'}" style="width:${pct}%"></div></div>`;
+      html += `<div class="muted" style="margin-top:4px;">${esc(phase.status)}</div></div>`;
+    }
+    html += '</div>';
+  }
+
+  const failure = summary.failure;
+  if (failure) {
+    html += '<div class="alert alert-danger">';
+    html += `<strong>ALERT:</strong> ${esc(failure.host)} \u2014 ${esc(failure.check)} ${esc(failure.status)}`;
+    if (failure.rollback_status) html += ` | Rollback: ${esc(failure.rollback_status)}`;
+    html += '</div>';
+  }
+
+  const fa = summary.failure_analysis;
+  if (fa) {
+    html += '<div class="alert alert-info">';
+    html += `<strong>Root Cause:</strong> ${esc(fa.likely_cause)}<br>`;
+    html += `<strong>Evidence:</strong> Failed drain: ${esc(fa.evidence?.failed_drain)}, Successful drain: ${esc(fa.evidence?.successful_drain)}<br>`;
+    html += `<strong>Recommendation:</strong> ${esc(fa.recommendation)}`;
+    html += '</div>';
+  }
+
+  const rem = summary.remediation;
+  if (rem) {
+    const color = rem.status === 'executing' ? 'var(--blue)' : rem.status === 'proposed' ? 'var(--yellow)' : 'var(--text)';
+    html += `<div style="margin-top:8px;"><strong>Remediation:</strong> <span style="color:${color};font-weight:600;">${esc(rem.proposed_change)}</span> (${esc(rem.from_value)} &rarr; ${esc(rem.to_value)})</div>`;
+  }
+
+  const rp = summary.remediation_progress;
+  if (rp) {
+    html += '<div style="margin-top:8px;"><strong>Remediation Steps:</strong></div><table><thead><tr><th>Step</th><th>Status</th></tr></thead><tbody>';
+    for (const step of (rp.steps || [])) {
+      const icon = step.status === 'complete' ? '\u2713' : '\u231B';
+      const color = step.status === 'complete' ? 'var(--green)' : 'var(--muted)';
+      html += `<tr><td>${esc(step.name)}</td><td style="color:${color}">${icon} ${esc(step.status)}</td></tr>`;
+    }
+    html += '</tbody></table>';
+    if (rp.result) html += `<div style="margin-top:6px;"><strong>Result:</strong> <span style="color:var(--green);font-weight:600;">${esc(rp.result)}</span></div>`;
+  }
+
+  if (approvalState === 'approved_and_completed') {
+    html += '<div class="alert alert-success" style="margin-top:12px;"><strong>Execution Complete</strong> \u2014 All phases finished successfully.</div>';
+  }
+
+  html += '</div></div>';
+  return html;
+}
+
+/* ================================================================
+   RENDER: LEARN STAGE
+   ================================================================ */
+
+function renderLearn(summary) {
+  const fs = summary.final_summary;
+  if (!fs) return '';
+  let html = '<div class="card" id="stage_learn"><div class="card-header"><span class="stage-badge stage-learn">LEARN</span><h3>Continuous Improvement</h3></div><div class="card-body">';
+  html += '<div class="stats-grid">';
+  html += `<div class="stat-box"><div class="stat-value" style="color:var(--green)">${esc(fs.systems_patched)}</div><div class="stat-label">Systems Patched</div></div>`;
+  html += `<div class="stat-box"><div class="stat-value">${esc(fs.initial_failure_prediction)}</div><div class="stat-label">Predicted Failure</div></div>`;
+  html += `<div class="stat-box"><div class="stat-value" style="color:var(--yellow)">${esc(fs.actual_failures)}</div><div class="stat-label">Actual Failures</div></div>`;
+  html += `<div class="stat-box"><div class="stat-value" style="color:var(--green)">${esc(fs.automatic_rollbacks)}</div><div class="stat-label">Auto Rollbacks</div></div>`;
+  html += `<div class="stat-box"><div class="stat-value">${esc(fs.training_events_generated)}</div><div class="stat-label">Training Events</div></div>`;
+  html += '</div>';
+  html += '</div></div>';
+  return html;
+}
+
+/* ================================================================
+   RENDER: FLOW STATUS BAR
+   ================================================================ */
+
+function renderFlowStatusBar(summary) {
+  const bar = document.getElementById('flow_status_bar');
+  const approval = summary.approval_state;
+  const msg = summary.flow_message || summary.flow_stage || '';
+  let cls = 'idle', text = 'Ready \u2014 enter a CVE ID to begin';
+
+  if (approval === 'flow_in_progress' || approval === 'approved_in_progress') {
+    cls = 'in-progress';
+    text = msg;
+  } else if (approval === 'pending_review') {
+    cls = 'waiting';
+    text = 'Awaiting human approval';
+  } else if (approval === 'approved_and_completed') {
+    cls = 'complete';
+    text = msg || 'Patch flow completed successfully';
+  } else if (approval === 'flow_failed') {
+    cls = 'failed';
+    text = 'Flow failed \u2014 ' + (summary.workflow_error || 'check server log');
+  } else if (summary.flow_stage) {
+    cls = 'in-progress';
+    text = msg;
+  }
+
+  bar.innerHTML = `<div class="flow-status ${cls}"><div class="status-dot"></div>${esc(text)}</div>`;
+}
+
+/* ================================================================
+   RENDER: MAIN FLOW
+   ================================================================ */
+
+let lastState = null;
+
+function renderFlow(data) {
+  lastState = data;
+  const summary = data.summary || {};
+  const hosts = data.hosts || [];
+  const aap = data.aap || {};
+  const approvalState = summary.approval_state;
+  const flowStage = summary.flow_stage;
+
+  updatePipeline(flowStage, approvalState);
+  renderFlowStatusBar(summary);
+
+  if (approvalState === 'idle' || !flowStage) {
+    document.getElementById('flow_content').innerHTML = '<div class="card"><div class="card-body empty">No active flow. Enter a CVE ID above and click Start Patch Flow.</div></div>';
+    return;
+  }
+
+  let html = '';
+  const pipeIdx = PIPE_ORDER.indexOf(STAGE_MAP[flowStage] || '');
+
+  if (summary.cvss || pipeIdx >= 0) html += renderDiscover(summary);
+  if (summary.operational_context || summary.failure_probability || (hosts.length && pipeIdx >= 1)) {
+    html += renderPredict(summary, hosts);
+  }
+  if (summary.history_analysis || summary.patch_history || pipeIdx >= 2) {
+    html += renderReason(summary, hosts);
+  }
+  if (summary.patch_strategy || summary.lightspeed || approvalState === 'pending_review' ||
+      approvalState === 'approved_in_progress' || approvalState === 'approved_and_completed' ||
+      summary.exec_progress || pipeIdx >= 3) {
+    html += renderExecute(summary, aap);
+  }
+  if (summary.final_summary) {
+    html += renderLearn(summary);
+  }
+
+  document.getElementById('flow_content').innerHTML = html;
+}
+
+/* ================================================================
+   A2A MESSAGES (sidebar)
+   ================================================================ */
+
+function renderA2AStream(stream) {
+  const container = document.getElementById('a2a_stream');
+  const countEl = document.getElementById('agentCount');
+  const dotEl = document.getElementById('agentDot');
+  const a2aMessages = (stream || []).filter(e => e.event === 'a2a_message');
+  countEl.textContent = a2aMessages.length + ' messages';
+
+  if (!a2aMessages.length) {
+    container.innerHTML = '<div class="empty" style="padding:12px; text-align:center;">No agent messages yet.<br>Start a patch flow to see A2A communication.</div>';
+    dotEl.style.background = 'var(--muted)';
+    return;
+  }
+  dotEl.style.background = 'var(--green)';
+  let html = '';
+  for (const msg of a2aMessages) {
+    const typeClass = msg.type || 'event';
+    const time = (msg.time || '').replace(/.*T/, '').replace('Z', '');
+    const route = msg.message ? msg.message.split(':')[0] : '';
+    const body = msg.message ? msg.message.split(':').slice(1).join(':').trim() : '';
+    html += `<div class="agent-msg ${typeClass}">`;
+    html += `<span class="msg-time">${esc(time)} \u2022 ${esc(typeClass)}</span>`;
+    if (route) html += `<span class="msg-route">${esc(route)}</span>`;
+    if (body) html += `<div style="margin-top:2px;">${esc(body)}</div>`;
+    html += '</div>';
+  }
+  container.innerHTML = html;
+  container.scrollTop = container.scrollHeight;
+}
+
+/* ================================================================
+   POLLING / REFRESH
+   ================================================================ */
+
+let activeTab = 'flow';
+let pollTimer = null;
+let pollMs = 3000;
+
+async function refresh() {
+  try {
+    const res = await fetch('/api/state');
+    const data = await res.json();
+    if (activeTab === 'flow') renderFlow(data);
+    renderA2AStream(data.stream);
+
+    const isActive = data.summary && (data.summary.approval_state === 'flow_in_progress' || data.summary.approval_state === 'approved_in_progress');
+    const nextPoll = isActive ? 2000 : 5000;
+    if (nextPoll !== pollMs) {
+      pollMs = nextPoll;
+      if (pollTimer) clearInterval(pollTimer);
+      pollTimer = setInterval(refresh, pollMs);
+    }
+  } catch (e) { /* ignore */ }
+}
+
+/* ================================================================
+   ACTIONS
+   ================================================================ */
+
+async function startPatch() {
+  const cve = document.getElementById('cve_input').value.trim();
+  if (!cve) return;
+  const btn = document.getElementById('start_btn');
+  const status = document.getElementById('launch_status');
+  btn.disabled = true;
+  status.textContent = `Starting ${cve}...`;
+  try {
+    const res = await fetch('/api/start', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({cve})
+    });
+    const data = await res.json();
+    status.textContent = data.ok ? `Started ${data.cve}` : 'Failed to start';
+    pollMs = 2000;
+    if (pollTimer) clearInterval(pollTimer);
+    pollTimer = setInterval(refresh, pollMs);
+  } catch (e) {
+    status.textContent = `Start failed: ${e}`;
+  } finally {
+    btn.disabled = false;
+  }
+  await refresh();
+}
+
+async function submitApproval(workflowJobId, action) {
+  const endpoint = action === 'approve' ? '/api/approve' : '/api/deny';
+  try {
+    const res = await fetch(endpoint, {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({workflow_job_id: workflowJobId, comment: `${action}d via AIP Console`})
+    });
+    const data = await res.json();
+    document.getElementById('launch_status').textContent =
+      data.ok ? `${action}d workflow ${workflowJobId}` : `${action} failed`;
+  } catch (e) {
+    document.getElementById('launch_status').textContent = `${action} failed: ${e}`;
+  }
+  pollMs = 2000;
+  if (pollTimer) clearInterval(pollTimer);
+  pollTimer = setInterval(refresh, pollMs);
+  await refresh();
+}
+
+/* ================================================================
+   CVE LIST
+   ================================================================ */
+
+let cveCatalog = [];
+let cvePageCache = {};
+let cvesLoaded = false;
+let cvePageOffset = 0;
+let cvePageSize = 20;
+let cveHasMore = false;
+
+function renderCveTable() {
+  const q = document.getElementById('cve_search').value.trim().toLowerCase();
+  const rows = q ? cveCatalog.filter(c => (c.id + ' ' + c.description).toLowerCase().includes(q)) : cveCatalog;
+  const body = document.getElementById('cves_table_body');
+  if (!rows.length) {
+    body.innerHTML = '<tr><td colspan="7" class="empty">No CVEs match.</td></tr>';
+    return;
+  }
+  body.innerHTML = rows.map(cve => `
+    <tr>
+      <td class="mono"><strong>${esc(cve.id)}</strong></td>
+      <td>${esc(cve.cvss)}</td>
+      <td>${severityBadge(cve.cvss)}</td>
+      <td>${esc(cve.systems_affected)}</td>
+      <td>${esc(cve.public_date)}</td>
+      <td style="max-width:300px;">${esc((cve.description || '').slice(0, 200))}</td>
+      <td><button class="btn btn-primary btn-small" onclick="startPatchForCve('${String(cve.id || '').replace(/'/g, "\\'")}')">Start</button></td>
+    </tr>`).join('');
+}
+
+function applyCvePage(data) {
+  cveCatalog = data.cves || [];
+  cvePageOffset = data.offset ?? cvePageOffset;
+  cvePageSize = data.limit ?? cvePageSize;
+  cveHasMore = !!data.has_more;
+  cvesLoaded = true;
+  renderCveTable();
+  document.getElementById('cve_prev_btn').disabled = cvePageOffset <= 0;
+  document.getElementById('cve_next_btn').disabled = !cveHasMore;
+  const from = cvePageOffset + 1;
+  const to = cvePageOffset + cveCatalog.length;
+  const source = data.source ? ` (${data.source})` : '';
+  document.getElementById('cve_load_status').textContent =
+    `${cveCatalog.length} CVE(s)${source} \u2014 showing ${from}\u2013${to}${cveHasMore ? ', more available' : ''}`;
+}
+
+async function loadCves(offset, forceRefresh) {
+  const status = document.getElementById('cve_load_status');
+  const nextOffset = typeof offset === 'number' ? Math.max(0, offset) : cvePageOffset;
+  if (!forceRefresh && cvePageCache[nextOffset]) {
+    applyCvePage(cvePageCache[nextOffset]);
+    return;
+  }
+  status.textContent = 'Loading CVEs...';
+  document.getElementById('cve_prev_btn').disabled = true;
+  document.getElementById('cve_next_btn').disabled = true;
+  try {
+    const params = new URLSearchParams({limit: String(cvePageSize), offset: String(nextOffset)});
+    if (forceRefresh) params.set('refresh', '1');
+    const res = await fetch(`/api/cves?${params.toString()}`);
+    const data = await res.json();
+    if (!data.ok) throw new Error(data.error || 'Failed');
+    cvePageCache[nextOffset] = data;
+    applyCvePage(data);
+  } catch (e) {
+    cvesLoaded = false;
+    status.textContent = `Load failed: ${e.message || e}`;
+  }
+}
+
+function startPatchForCve(cveId) {
+  document.getElementById('cve_input').value = cveId;
+  startPatch().then(() => {
+    const bar = document.getElementById('flow_status_bar');
+    if (bar) bar.scrollIntoView({behavior: 'smooth', block: 'start'});
+  });
+}
+
+/* ================================================================
+   SERVER LOG
+   ================================================================ */
+
+async function loadFlowLog() {
+  try {
+    const res = await fetch('/api/flow-log?lines=100');
+    const data = await res.json();
+    if (data.ok) {
+      const el = document.getElementById('flow_log_content');
+      el.textContent = (data.lines || []).join('\n') || 'Log is empty.';
+      el.scrollTop = el.scrollHeight;
+    }
+  } catch (e) {
+    document.getElementById('flow_log_content').textContent = 'Failed to load log: ' + e;
+  }
+}
+
+/* ================================================================
+   TABS
+   ================================================================ */
+
+function switchTab(name) {
+  activeTab = name;
+  document.querySelectorAll('.tab').forEach(t => t.classList.toggle('active', t.dataset.tab === name));
+  ['flow', 'log'].forEach(id => {
+    const el = document.getElementById('panel_' + id);
+    if (el) el.classList.toggle('active', id === name);
+  });
+  if (name === 'flow') refresh();
+  if (name === 'log') loadFlowLog();
+}
+
+/* ================================================================
+   SETTINGS
+   ================================================================ */
+
+const SETTINGS_SCHEMA = [
+  {section: 'AI Gateway (Llama Stack / OGX)', vars: [
+    {key: 'LLAMA_STACK_URL',         label: 'Llama Stack URL',       hint: 'URL of the Llama Stack server for LLM inference and tool routing'},
+    {key: 'DEFAULT_LLM_MODEL',      label: 'LLM Model',             hint: 'Model ID for LLM inference (e.g. vllm-inference/llama-scout-17b)'},
+    {key: 'VECTOR_DB_ID',           label: 'Vector DB ID',           hint: 'Llama Stack vector store ID for RAG patch history lookups'},
+  ]},
+  {section: 'Risk Model (RHOAI)', vars: [
+    {key: 'RISK_URL',               label: 'RHOAI Risk URL',        hint: 'KServe endpoint for the RHOAI risk prediction model'},
+  ]},
+  {section: 'Red Hat Insights', vars: [
+    {key: 'INSIGHTS_MCP_ENDPOINT',  label: 'Insights MCP',          hint: 'MCP server endpoint for Insights vulnerability and remediation data'},
+    {key: 'INSIGHTS_TOOLGROUP',     label: 'Tool Group',             hint: 'Llama Stack tool group ID for Insights MCP tools'},
+  ]},
+  {section: 'Ansible Automation Platform', vars: [
+    {key: 'AAP_BASE_URL',           label: 'AAP URL',               hint: 'Base URL for AAP Controller API'},
+    {key: 'AAP_TOKEN',              label: 'AAP Token',              hint: 'OAuth token for AAP Controller', secret: true},
+    {key: 'AAP_VERIFY_TLS',         label: 'Verify TLS',            hint: 'Verify TLS certificates for AAP connections'},
+  ]},
+  {section: 'GitHub', vars: [
+    {key: 'GITHUB_MCP_ENDPOINT',    label: 'GitHub MCP',            hint: 'MCP server endpoint for GitHub operations'},
+    {key: 'GITHUB_TOKEN',           label: 'GitHub Token',           hint: 'Personal access token for GitHub', secret: true},
+    {key: 'GITHUB_REPO_OWNER',     label: 'Repo Owner',             hint: 'GitHub repository owner'},
+    {key: 'GITHUB_REPO_NAME',      label: 'Repo Name',              hint: 'GitHub repository name'},
+    {key: 'PLAYBOOK_PUSH_METHOD',  label: 'Push Method',            hint: 'How to push playbooks: git or mcp'},
+  ]},
+  {section: 'Console', vars: [
+    {key: 'CVE_CONSOLE_HOST',       label: 'Host',                  hint: 'Network address to bind the console server to'},
+    {key: 'CVE_CONSOLE_PORT',       label: 'Port',                  hint: 'TCP port for the console UI (default 8787)'},
+    {key: 'CVE_FLOW_LOG_LEVEL',     label: 'Log Level',             hint: 'Python log level: DEBUG, INFO, WARNING, or ERROR'},
+  ]},
+];
+
+let settingsOriginal = {};
+
+function openSettings() {
+  document.getElementById('settingsOverlay').classList.add('open');
+  loadSettings();
+}
+function closeSettings() {
+  document.getElementById('settingsOverlay').classList.remove('open');
+}
+
+async function loadSettings() {
+  try {
+    const res = await fetch('/api/settings');
+    const data = await res.json();
+    settingsOriginal = data.ok ? (data.settings || {}) : {};
+  } catch (e) {
+    settingsOriginal = {};
+  }
+  renderSettingsForm();
+}
+
+function renderSettingsForm() {
+  let html = '';
+  for (const group of SETTINGS_SCHEMA) {
+    html += `<div class="setting-section">${esc(group.section)}</div>`;
+    for (const v of group.vars) {
+      const val = settingsOriginal[v.key] || '';
+      html += `<div class="setting-row">
+        <div class="setting-label">${esc(v.label)}</div>
+        <div style="flex:1;">
+          <input class="setting-input" data-key="${v.key}" type="${v.secret ? 'password' : 'text'}" value="${val.replace(/"/g, '&quot;')}" />
+          <div class="setting-hint">${esc(v.hint)}</div>
+        </div>
+      </div>`;
+    }
+  }
+  document.getElementById('settings_form').innerHTML = html;
+
+  document.querySelectorAll('.setting-input').forEach(el => {
+    el.addEventListener('input', () => {
+      el.classList.toggle('changed', el.value !== (settingsOriginal[el.dataset.key] || ''));
+    });
+  });
+}
+
+async function saveSettings() {
+  const msg = document.getElementById('settings_msg');
+  const updates = {};
+  document.querySelectorAll('.setting-input').forEach(el => {
+    const key = el.dataset.key;
+    const val = el.value.trim();
+    if (val !== (settingsOriginal[key] || '') && !val.includes('\u2022')) {
+      updates[key] = val;
+    }
+  });
+  if (!Object.keys(updates).length) {
+    msg.textContent = 'No changes to save.';
+    return;
+  }
+  try {
+    const res = await fetch('/api/settings', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({settings: updates}),
+    });
+    const data = await res.json();
+    if (data.ok) {
+      msg.textContent = 'Saved ' + Object.keys(updates).length + ' setting(s) to .env';
+      settingsOriginal = {...settingsOriginal, ...updates};
+      document.querySelectorAll('.setting-input.changed').forEach(el => el.classList.remove('changed'));
+      setTimeout(() => closeSettings(), 600);
+    } else {
+      msg.textContent = 'Error: ' + (data.error || 'unknown');
+    }
+  } catch (e) {
+    msg.textContent = 'Failed: ' + e.message;
+  }
+}
+
+function openGuide() { document.getElementById('guideOverlay').classList.add('open'); }
+function closeGuide() { document.getElementById('guideOverlay').classList.remove('open'); }
+
+document.querySelectorAll('.guide-tab').forEach(tab => {
+  tab.addEventListener('click', () => {
+    document.querySelectorAll('.guide-tab').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('.guide-tab-panel').forEach(p => p.classList.remove('active'));
+    tab.classList.add('active');
+    const panel = document.getElementById('gtab_' + tab.dataset.gtab);
+    if (panel) panel.classList.add('active');
+  });
+});
+
+/* ================================================================
+   INIT
+   ================================================================ */
+
+document.getElementById('start_btn').addEventListener('click', startPatch);
+document.getElementById('cve_search').addEventListener('input', renderCveTable);
+document.getElementById('cve_reload_btn').addEventListener('click', () => { delete cvePageCache[cvePageOffset]; loadCves(cvePageOffset, true); });
+document.getElementById('cve_prev_btn').addEventListener('click', () => loadCves(Math.max(0, cvePageOffset - cvePageSize)));
+document.getElementById('cve_next_btn').addEventListener('click', () => loadCves(cvePageOffset + cvePageSize));
+document.querySelectorAll('.tab').forEach(tab => {
+  tab.addEventListener('click', () => switchTab(tab.dataset.tab));
+});
+
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape') {
+    closeSettings();
+    closeGuide();
+    closeAnalysis();
+  }
+});
+
+refresh();
+pollTimer = setInterval(refresh, pollMs);
+loadCves(0);
+</script>
+</body>
+</html>

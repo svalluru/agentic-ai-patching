@@ -986,6 +986,239 @@ def refresh_aap_state_during_flow() -> dict:
     return state
 
 
+FALLBACK_CVES = [
+    {'id': 'CVE-2024-21626', 'label': 'CVE-2024-21626 | affected: 37 — runc container breakout via fd leak', 'description': 'runc container breakout via fd leak', 'systems_affected': 37, 'cvss': 8.6, 'public_date': '2024-01-31'},
+    {'id': 'CVE-2024-3094',  'label': 'CVE-2024-3094 | affected: 37 — XZ Utils backdoor (liblzma)', 'description': 'XZ Utils backdoor (liblzma)', 'systems_affected': 37, 'cvss': 10.0, 'public_date': '2024-03-29'},
+    {'id': 'CVE-2024-6387',  'label': 'CVE-2024-6387 | affected: 37 — OpenSSH regreSSHion RCE', 'description': 'OpenSSH regreSSHion RCE', 'systems_affected': 37, 'cvss': 8.1, 'public_date': '2024-07-01'},
+    {'id': 'CVE-2023-44487', 'label': 'CVE-2023-44487 | affected: 37 — HTTP/2 Rapid Reset DDoS', 'description': 'HTTP/2 Rapid Reset DDoS attack vector', 'systems_affected': 37, 'cvss': 7.5, 'public_date': '2023-10-10'},
+    {'id': 'CVE-2024-1086',  'label': 'CVE-2024-1086 | affected: 37 — Linux kernel nf_tables use-after-free LPE', 'description': 'Linux kernel nf_tables use-after-free local privilege escalation', 'systems_affected': 37, 'cvss': 7.8, 'public_date': '2024-01-31'},
+    {'id': 'CVE-2023-38545', 'label': 'CVE-2023-38545 | affected: 37 — curl SOCKS5 heap overflow', 'description': 'curl SOCKS5 heap buffer overflow', 'systems_affected': 37, 'cvss': 9.8, 'public_date': '2023-10-11'},
+    {'id': 'CVE-2024-4577',  'label': 'CVE-2024-4577 | affected: 37 — PHP CGI argument injection RCE', 'description': 'PHP CGI argument injection RCE', 'systems_affected': 37, 'cvss': 9.8, 'public_date': '2024-06-09'},
+    {'id': 'CVE-2023-4911',  'label': 'CVE-2023-4911 | affected: 37 — glibc Looney Tunables buffer overflow', 'description': 'glibc ld.so Looney Tunables buffer overflow', 'systems_affected': 37, 'cvss': 7.8, 'public_date': '2023-10-03'},
+    {'id': 'CVE-2024-0132',  'label': 'CVE-2024-0132 | affected: 37 — NVIDIA Container Toolkit escape', 'description': 'NVIDIA Container Toolkit container escape', 'systems_affected': 37, 'cvss': 9.0, 'public_date': '2024-09-26'},
+    {'id': 'CVE-2026-31337', 'label': 'CVE-2026-31337 | affected: 37 — RHEL kernel networking buffer overflow', 'description': 'Critical buffer overflow in RHEL kernel networking subsystem', 'systems_affected': 37, 'cvss': 9.8, 'public_date': '2026-03-15'},
+]
+
+EMPTY_STATE = {
+    'workflow': {'name': '', 'cve': '', 'status': 'idle', 'last_updated': None, 'polling': 'local_only'},
+    'summary': {'approval_state': 'idle', 'last_workflow_status': 'not_started', 'last_job_status': 'not_started'},
+    'hosts': [], 'stream': [],
+    'aap': {'enabled': False, 'base_url': None, 'latest_workflow_job': None, 'latest_job': None},
+    'runs': [],
+}
+
+SETTINGS_KEYS = [
+    'LLAMA_STACK_URL', 'RISK_URL', 'VECTOR_DB_ID', 'DEFAULT_LLM_MODEL',
+    'INSIGHTS_MCP_ENDPOINT', 'INSIGHTS_TOOLGROUP',
+    'AAP_BASE_URL', 'AAP_TOKEN', 'AAP_VERIFY_TLS',
+    'GITHUB_MCP_ENDPOINT', 'GITHUB_TOKEN',
+    'GITHUB_REPO_OWNER', 'GITHUB_REPO_NAME', 'GITHUB_REPO_BRANCH',
+    'PLAYBOOK_PUSH_METHOD',
+    'CVE_CONSOLE_HOST', 'CVE_CONSOLE_PORT', 'CVE_CONSOLE_POLL_SECONDS',
+    'CVE_FLOW_LOG_LEVEL',
+]
+SECRET_KEYS = {'AAP_TOKEN', 'GITHUB_TOKEN', 'LIGHTSPEED_CLIENT_SECRET'}
+
+
+def read_env_file() -> dict:
+    vals: dict[str, str] = {}
+    if DOTENV_FILE.exists():
+        for raw in DOTENV_FILE.read_text().splitlines():
+            line = raw.strip()
+            if not line or line.startswith('#') or '=' not in line:
+                continue
+            k, v = line.split('=', 1)
+            vals[k.strip()] = v.strip().strip('"').strip("'")
+    return vals
+
+
+def write_env_file(updates: dict) -> None:
+    existing = read_env_file()
+    existing.update(updates)
+    STATE_DIR.mkdir(parents=True, exist_ok=True)
+    lines = [f'{k}={v}' for k, v in sorted(existing.items()) if v]
+    DOTENV_FILE.write_text('\n'.join(lines) + '\n')
+
+
+def start_unified_flow(cve_id: str) -> dict:
+    import cve_flow_demo
+    LOG.info('TRIGGER unified flow cve=%s', cve_id)
+    if STATE_FILE.exists():
+        STATE_FILE.unlink()
+    threading.Thread(
+        target=cve_flow_demo.run_unified_flow,
+        args=(cve_id,),
+        daemon=True,
+        name=f'unified-flow-{cve_id}',
+    ).start()
+    return {'ok': True, 'cve': cve_id, 'mode': 'unified'}
+
+
+def unified_approve(workflow_job_id: int) -> dict:
+    try:
+        result = workflow_approval_action(workflow_job_id, 'approve', 'Approved via AIP Console')
+        if result.get('ok'):
+            return result
+    except Exception:
+        pass
+    import cve_flow_demo
+    threading.Thread(
+        target=cve_flow_demo.run_post_approval,
+        daemon=True,
+        name='post-approval',
+    ).start()
+    return {'ok': True, 'mode': 'fallback_approval', 'message': 'Approval simulated locally'}
+
+
+def _llm_inference(prompt: str, system_msg: str = '') -> str:
+    llama_url = os.environ.get('LLAMA_STACK_URL', 'http://127.0.0.1:8321')
+    model = os.environ.get('DEFAULT_LLM_MODEL', 'vllm-inference/llama-scout-17b')
+    messages = []
+    if system_msg:
+        messages.append({'role': 'system', 'content': system_msg})
+    messages.append({'role': 'user', 'content': prompt})
+    body = json.dumps({'model': model, 'messages': messages, 'max_tokens': 1024}).encode()
+    req = urllib.request.Request(
+        f'{llama_url}/v1/chat/completions',
+        data=body,
+        headers={'Content-Type': 'application/json'},
+        method='POST',
+    )
+    ctx = ssl.create_default_context()
+    ctx.check_hostname = False
+    ctx.verify_mode = ssl.CERT_NONE
+    with urllib.request.urlopen(req, timeout=30, context=ctx) as resp:
+        data = json.loads(resp.read())
+    return data['choices'][0]['message']['content']
+
+
+FALLBACK_WHATIF = {
+    'source': 'fallback',
+    'scenarios': [
+        {
+            'title': 'Change maintenance window',
+            'icon': '\U0001f550',
+            'change': 'Move from Friday 18:00 → Tuesday 10:00',
+            'impact': '-15%',
+            'impact_direction': 'down',
+            'detail': 'Tuesday morning patches historically have 15% lower failure rate — more staff available for rollback, and workload is lower.',
+            'confidence': 'HIGH',
+            'evidence': '47 similar patches analyzed over 12 months',
+        },
+        {
+            'title': 'Increase drain timeout',
+            'icon': '⏱️',
+            'change': 'Increase from 30s → 120s',
+            'impact': '-40%',
+            'impact_direction': 'down',
+            'detail': '3 of 5 historical failures on this cluster were caused by incomplete connection draining. Longer timeout allows graceful shutdown.',
+            'confidence': 'HIGH',
+            'evidence': '3 similar failure records in vector store',
+        },
+        {
+            'title': 'Confirm DBA availability',
+            'icon': '\U0001f464',
+            'change': 'DBA on-call confirmed for patch window',
+            'impact': '-25%',
+            'impact_direction': 'down',
+            'detail': '2 past failures required emergency DBA intervention for connection pool recovery. Pre-arranged DBA reduces MTTR.',
+            'confidence': 'MEDIUM',
+            'evidence': '2 incident records with DBA escalation',
+        },
+        {
+            'title': 'Skip canary phase',
+            'icon': '⚠️',
+            'change': 'Remove canary validation, patch all at once',
+            'impact': '+60%',
+            'impact_direction': 'up',
+            'detail': 'Removing canary eliminates early failure detection. If the patch causes issues, all production systems are affected simultaneously.',
+            'confidence': 'HIGH',
+            'evidence': 'Canary caught 4 of 6 recent failures before production impact',
+        },
+    ],
+}
+
+FALLBACK_WHY = {
+    'source': 'fallback',
+    'factors': [
+        {'name': 'CVSS Base Score', 'icon': '\U0001f534', 'value': 'Critical (9.8)', 'weight': '30%', 'detail': 'Network-exploitable with no authentication required. Attack complexity is low.'},
+        {'name': 'Host Age & Patch Lag', 'icon': '\U0001f4c5', 'value': '47 days since last patch', 'weight': '20%', 'detail': 'This host has not been patched in 47 days. Hosts with patch lag >30 days have 2.3x higher failure rates.'},
+        {'name': 'Operational Context', 'icon': '\U0001f3e2', 'value': 'Tier 1 / Production', 'weight': '25%', 'detail': 'Business-critical production workload. Historical success rate for similar patches: 82%. Below the 90% auto-approve threshold.'},
+        {'name': 'Historical Pattern Match', 'icon': '\U0001f4ca', 'value': '3 similar failures found', 'weight': '15%', 'detail': 'RAG search found 3 historically similar patch operations that resulted in failure. Common root cause: connection pool exhaustion during rolling restart.'},
+        {'name': 'Workload Sensitivity', 'icon': '⚡', 'value': 'High memory pressure', 'weight': '10%', 'detail': 'Current memory utilization at 78%. Kernel patches requiring reboot on high-memory hosts have 1.8x higher failure rate.'},
+    ],
+    'recommendation': 'REVIEW recommended. The combination of critical CVSS score, Tier 1 production environment, and 3 similar historical failures exceeds the auto-approve threshold. Human judgment needed for drain procedure timing.',
+}
+
+
+def handle_whatif(state: dict) -> dict:
+    summary = state.get('summary', {})
+    hosts = state.get('hosts', [])
+    ctx = summary.get('operational_context', {})
+    try:
+        prompt = (
+            f"You are a patch risk analyst. Given this CVE patch scenario, generate exactly 4 what-if scenarios.\n\n"
+            f"CVE: {summary.get('cve_id', 'unknown')}\n"
+            f"CVSS: {summary.get('cvss', 'N/A')}\n"
+            f"Risk classification: {summary.get('risk_classification', 'N/A')}\n"
+            f"Failure probability: {summary.get('failure_probability', 'N/A')}%\n"
+            f"Affected systems: {len(hosts)}\n"
+            f"Environment: {ctx.get('environment', 'N/A')}\n"
+            f"Business tier: {ctx.get('business_criticality', 'N/A')}\n"
+            f"Maintenance window: {ctx.get('maintenance_window', 'N/A')}\n"
+            f"Historical success rate: {ctx.get('historical_patch_success', 'N/A')}\n\n"
+            f"For each scenario, provide a JSON object with fields: title, icon (single emoji), change, impact (e.g. '-15%' or '+20%'), "
+            f"impact_direction ('up' for risk increase, 'down' for reduction), detail (2-3 sentences), confidence (HIGH/MEDIUM/LOW), evidence.\n"
+            f"Return ONLY a JSON array of 4 scenario objects, no markdown."
+        )
+        raw = _llm_inference(prompt, 'You are a concise patch risk analyst. Return only valid JSON.')
+        clean = raw.strip()
+        if clean.startswith('```'):
+            clean = clean.split('\n', 1)[1].rsplit('```', 1)[0].strip()
+        scenarios = json.loads(clean)
+        return {'ok': True, 'source': 'live', 'scenarios': scenarios}
+    except Exception as exc:
+        LOG.info('  FALLBACK: what-if LLM failed (%s). Using demo data.', exc)
+        return {'ok': True, **FALLBACK_WHATIF}
+
+
+def handle_why(state: dict, hostname: str) -> dict:
+    summary = state.get('summary', {})
+    host = None
+    for h in state.get('hosts', []):
+        if h.get('host') == hostname:
+            host = h
+            break
+    if not host:
+        host = {'host': hostname, 'risk_score': 'N/A', 'decision': 'N/A'}
+    ctx = summary.get('operational_context', {})
+    try:
+        prompt = (
+            f"You are a patch risk explainer. Explain why this host received its risk score and decision.\n\n"
+            f"Host: {host.get('host')}\n"
+            f"Risk score: {host.get('risk_score')}\n"
+            f"Decision: {host.get('decision')}\n"
+            f"Reason: {host.get('reason', 'N/A')}\n"
+            f"CVE: {summary.get('cve_id', 'unknown')}, CVSS: {summary.get('cvss', 'N/A')}\n"
+            f"Environment: {ctx.get('environment', 'N/A')}\n"
+            f"Business tier: {ctx.get('business_criticality', 'N/A')}\n"
+            f"Historical success: {ctx.get('historical_patch_success', 'N/A')}\n\n"
+            f"Return a JSON object with:\n"
+            f"- factors: array of objects with fields: name, icon (emoji), value, weight (percentage), detail (1-2 sentences)\n"
+            f"- recommendation: a 2-3 sentence summary recommendation\n"
+            f"Return ONLY valid JSON, no markdown."
+        )
+        raw = _llm_inference(prompt, 'You are a concise risk explainer. Return only valid JSON.')
+        clean = raw.strip()
+        if clean.startswith('```'):
+            clean = clean.split('\n', 1)[1].rsplit('```', 1)[0].strip()
+        result = json.loads(clean)
+        return {'ok': True, 'source': 'live', 'host': host, **result}
+    except Exception as exc:
+        LOG.info('  FALLBACK: why LLM failed (%s). Using demo data.', exc)
+        return {'ok': True, 'host': host, **FALLBACK_WHY}
+
+
 def start_patch_process(cve_id: str) -> dict:
     env = os.environ.copy()
     triggered_at = now_iso()
@@ -1678,6 +1911,9 @@ class Handler(BaseHTTPRequestHandler):
         parsed = urlparse(self.path)
         path = parsed.path.rstrip('/') or '/'
         if path == '/api/state':
+            if not STATE_FILE.exists():
+                self.respond(200, 'application/json', json.dumps(EMPTY_STATE).encode())
+                return
             with _API_STATE_LOCK:
                 state = refresh_aap_state(load_state())
             self.respond(200, 'application/json', json.dumps(state).encode())
@@ -1687,14 +1923,52 @@ class Handler(BaseHTTPRequestHandler):
                 query = parse_qs(parsed.query or '')
                 limit = int((query.get('limit') or [str(CVE_LIST_PAGE_SIZE)])[0])
                 offset = int((query.get('offset') or ['0'])[0])
-                refresh = (query.get('refresh') or ['0'])[0].lower() in {'1', 'true', 'yes'}
-                if refresh:
+                refresh_flag = (query.get('refresh') or ['0'])[0].lower() in {'1', 'true', 'yes'}
+                if refresh_flag:
                     clear_cve_page_cache()
-                payload = fetch_cve_page(limit=limit, offset=offset, use_cache=not refresh)
+                payload = fetch_cve_page(limit=limit, offset=offset, use_cache=not refresh_flag)
+                if not payload.get('ok', True):
+                    raise RuntimeError(payload.get('error', 'fetch failed'))
                 self.respond(200, 'application/json', json.dumps(payload).encode())
+            except Exception:
+                fallback = {'ok': True, 'cves': FALLBACK_CVES, 'count': len(FALLBACK_CVES),
+                            'offset': 0, 'limit': len(FALLBACK_CVES), 'has_more': False, 'source': 'fallback'}
+                self.respond(200, 'application/json', json.dumps(fallback).encode())
+            return
+        if path == '/api/settings':
+            env = read_env_file()
+            masked = {}
+            for k in SETTINGS_KEYS:
+                v = env.get(k, '')
+                if k in SECRET_KEYS and v:
+                    masked[k] = v[:4] + '****'
+                else:
+                    masked[k] = v
+            self.respond(200, 'application/json', json.dumps({'ok': True, 'settings': masked}).encode())
+            return
+        if path == '/api/flow-log':
+            lines: list[str] = []
+            if FLOW_LOG.exists():
+                lines = FLOW_LOG.read_text().splitlines()[-200:]
+            self.respond(200, 'application/json', json.dumps({'ok': True, 'lines': lines}).encode())
+            return
+        if path == '/api/what-if':
+            try:
+                state = load_state()
+                result = handle_whatif(state)
+                self.respond(200, 'application/json', json.dumps(result).encode())
             except Exception as exc:
-                body = json.dumps({'ok': False, 'cves': [], 'count': 0, 'error': str(exc)}).encode()
-                self.respond(500, 'application/json', body)
+                self.respond(500, 'application/json', json.dumps({'ok': False, 'error': str(exc)}).encode())
+            return
+        if path == '/api/why':
+            try:
+                query = parse_qs(parsed.query or '')
+                hostname = (query.get('host') or [''])[0]
+                state = load_state()
+                result = handle_why(state, hostname)
+                self.respond(200, 'application/json', json.dumps(result).encode())
+            except Exception as exc:
+                self.respond(500, 'application/json', json.dumps({'ok': False, 'error': str(exc)}).encode())
             return
         if path == '/api/approval-targets':
             try:
@@ -1721,7 +1995,11 @@ class Handler(BaseHTTPRequestHandler):
                 self.respond(500, 'application/json', json.dumps({'ok': False, 'error': str(e)}).encode())
                 return
         if path == '/' or path == '/index.html':
-            self.respond(200, 'text/html; charset=utf-8', HTML.encode())
+            static_file = WORKSPACE / 'static' / 'index.html'
+            if static_file.exists():
+                self.respond(200, 'text/html; charset=utf-8', static_file.read_bytes())
+            else:
+                self.respond(200, 'text/html; charset=utf-8', HTML.encode())
             return
         if path == '/healthz':
             self.respond(200, 'text/plain; charset=utf-8', b'ok')
@@ -1740,11 +2018,23 @@ class Handler(BaseHTTPRequestHandler):
                 cve = payload.get('cve')
                 if not cve:
                     raise ValueError('Missing cve')
-                result = start_patch_process(cve)
+                result = start_unified_flow(cve)
                 self.respond(200, 'application/json', json.dumps(result).encode())
                 return
             except Exception as e:
                 LOG.exception('POST /api/start failed cve=%s', cve)
+                self.respond(500, 'application/json', json.dumps({'ok': False, 'error': str(e)}).encode())
+                return
+        if parsed.path == '/api/settings':
+            length = int(self.headers.get('Content-Length', '0') or '0')
+            raw = self.rfile.read(length) if length else b'{}'
+            try:
+                payload = json.loads(raw.decode() or '{}')
+                updates = {k: v for k, v in payload.items() if k in SETTINGS_KEYS and v}
+                write_env_file(updates)
+                self.respond(200, 'application/json', json.dumps({'ok': True}).encode())
+                return
+            except Exception as e:
                 self.respond(500, 'application/json', json.dumps({'ok': False, 'error': str(e)}).encode())
                 return
         if parsed.path in {'/api/approve', '/api/deny'}:
@@ -1761,7 +2051,10 @@ class Handler(BaseHTTPRequestHandler):
                     raise ValueError('Missing workflow_job_id and no latest workflow job in state')
                 action = 'approve' if parsed.path == '/api/approve' else 'deny'
                 comment = str(payload.get('comment') or '').strip()
-                result = workflow_approval_action(int(workflow_job_id), action, comment)
+                if action == 'approve':
+                    result = unified_approve(int(workflow_job_id))
+                else:
+                    result = workflow_approval_action(int(workflow_job_id), action, comment)
                 self.respond(200, 'application/json', json.dumps(result).encode())
                 return
             except Exception as e:
@@ -1782,8 +2075,10 @@ class Handler(BaseHTTPRequestHandler):
 
 
 if __name__ == '__main__':
-    state = load_state()
-    refresh_aap_state(state)
+    if STATE_FILE.exists():
+        STATE_FILE.unlink()
+        LOG.info('Cleaned previous state on startup')
+    LOG.info('Unified mode — tries real APIs first, falls back to demo data')
     server = ThreadingHTTPServer((HOST, PORT), Handler)
     LOG.info('CVE console listening on http://%s:%s', HOST, PORT)
     server.serve_forever()
