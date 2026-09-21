@@ -162,7 +162,8 @@
     .pipe-stages {
       display: flex;
       align-items: center;
-      flex-shrink: 0;
+      flex: 3;
+      justify-content: space-between;
     }
     .pipe-stage {
       display: flex;
@@ -170,7 +171,7 @@
       gap: 6px;
       cursor: pointer;
       position: relative;
-      padding: 6px 10px;
+      padding: 6px 12px;
       border-radius: 8px;
       transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
       user-select: none;
@@ -191,8 +192,10 @@
     .pipe-stage.active { background: rgba(224,0,0,0.05); }
     .pipe-stage.active .pipe-num { background: var(--red); color: #fff; box-shadow: 0 2px 10px var(--red-glow), 0 0 20px var(--red-glow); transform: scale(1.1); }
     .pipe-stage.active .pipe-label { color: var(--red); }
-    .pipe-stage.done .pipe-num { background: var(--green); color: #fff; box-shadow: 0 2px 8px rgba(5,150,105,0.2); }
-    .pipe-stage.done .pipe-label { color: var(--green); }
+    .pipe-stage.done .pipe-num { background: #1a1a1a; color: #fff; box-shadow: 0 2px 8px rgba(0,0,0,0.2); }
+    .pipe-stage.done .pipe-label { color: #1a1a1a; }
+    .pipe-stage.waiting .pipe-num { background: #d97706; color: #fff; box-shadow: 0 2px 10px rgba(217,119,6,0.4), 0 0 20px rgba(217,119,6,0.2); animation: pulse 2s ease-in-out infinite; }
+    .pipe-stage.waiting .pipe-label { color: #d97706; }
     .pipe-stage.failed .pipe-num { background: var(--red-dark); color: #fff; box-shadow: 0 2px 8px rgba(185,28,28,0.3); }
     .pipe-stage.failed .pipe-label { color: var(--red-dark); }
     .pipe-arrow {
@@ -202,7 +205,7 @@
     .pipe-status {
       flex: 1;
       min-width: 0;
-      margin-left: 12px;
+      margin-left: auto;
       padding-left: 16px;
       border-left: 1px solid var(--border);
     }
@@ -1243,6 +1246,113 @@
     .ds-faq-q { font-size: 13px; font-weight: 700; color: var(--text); margin-bottom: 6px; }
     .ds-faq-a { font-size: 12px; color: var(--text-secondary); line-height: 1.6; }
 
+    /* ── ROI Dashboard ── */
+    .roi-card {
+      border-radius: 16px; overflow: hidden; margin-bottom: 16px;
+      border: 1px solid rgba(5,150,105,0.2);
+      box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+      animation: roiFadeIn 0.6s ease;
+    }
+    @keyframes roiFadeIn { from { opacity:0; transform:translateY(12px); } to { opacity:1; transform:translateY(0); } }
+    .roi-hero {
+      background: linear-gradient(135deg, #064e3b 0%, #065f46 40%, #047857 100%);
+      color: #fff; padding: 28px 32px; text-align: center; position: relative; overflow: hidden;
+    }
+    .roi-hero::before {
+      content: ''; position: absolute; top: -60%; right: -20%; width: 400px; height: 400px;
+      background: radial-gradient(circle, rgba(16,185,129,0.15) 0%, transparent 70%); border-radius: 50%;
+    }
+    .roi-hero-eyebrow { font-size: 10px; letter-spacing: 2px; text-transform: uppercase; opacity: 0.7; margin-bottom: 6px; position: relative; }
+    .roi-hero-value { font-size: 48px; font-weight: 900; letter-spacing: -2px; position: relative; }
+    .roi-hero-label { font-size: 13px; font-weight: 600; opacity: 0.8; margin-top: 2px; position: relative; }
+    .roi-hero-chips {
+      display: flex; justify-content: center; gap: 16px; margin-top: 20px; position: relative;
+    }
+    .roi-chip {
+      background: rgba(255,255,255,0.12); backdrop-filter: blur(4px);
+      border: 1px solid rgba(255,255,255,0.2); border-radius: 10px;
+      padding: 10px 18px; text-align: center; min-width: 80px;
+    }
+    .roi-chip-val { font-size: 22px; font-weight: 900; }
+    .roi-chip-label { font-size: 9px; font-weight: 600; letter-spacing: 1px; text-transform: uppercase; opacity: 0.75; margin-top: 2px; }
+
+    .roi-body { padding: 24px; background: var(--white); }
+    .roi-section { margin-bottom: 24px; }
+    .roi-section:last-child { margin-bottom: 0; }
+    .roi-section-title {
+      font-size: 12px; font-weight: 800; letter-spacing: 1px; text-transform: uppercase;
+      color: var(--muted); margin-bottom: 12px; display: flex; align-items: center; gap: 8px;
+    }
+    .roi-section-title::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+
+    /* Dimension bars */
+    .roi-dim { display: flex; align-items: center; gap: 12px; margin-bottom: 10px; }
+    .roi-dim-label { width: 130px; font-size: 11px; font-weight: 600; color: var(--text-secondary); text-align: right; flex-shrink: 0; }
+    .roi-dim-bar-bg { flex: 1; height: 28px; background: #f3f4f6; border-radius: 8px; overflow: hidden; position: relative; }
+    .roi-dim-bar {
+      height: 100%; border-radius: 8px; display: flex; align-items: center; justify-content: flex-end;
+      padding-right: 10px; font-size: 11px; font-weight: 800; color: #fff;
+      transition: width 1.2s ease; min-width: 50px;
+    }
+    .roi-dim-bar.anim { animation: barGrow 1.2s ease forwards; }
+    @keyframes barGrow { from { width: 0; } }
+
+    /* Timeline comparison */
+    .roi-timeline { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+    .roi-tl-col { background: #f9fafb; border-radius: 12px; padding: 16px; border: 1px solid var(--border); }
+    .roi-tl-col h4 { margin: 0 0 12px; font-size: 12px; font-weight: 800; letter-spacing: 0.5px; }
+    .roi-tl-row { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; }
+    .roi-tl-time { font-size: 10px; font-weight: 700; color: var(--muted); width: 40px; font-family: monospace; }
+    .roi-tl-event { font-size: 11px; color: var(--text-secondary); }
+    .roi-tl-bar { height: 4px; border-radius: 2px; flex-shrink: 0; }
+    .roi-tl-total {
+      margin-top: 10px; padding-top: 10px; border-top: 1px solid var(--border);
+      font-size: 20px; font-weight: 900; text-align: center;
+    }
+
+    /* Cost per system */
+    .roi-cost-compare {
+      display: flex; justify-content: center; align-items: center; gap: 32px;
+      padding: 16px; text-align: center;
+    }
+    .roi-cost-box { padding: 16px 24px; border-radius: 12px; min-width: 120px; }
+    .roi-cost-val { font-size: 32px; font-weight: 900; }
+    .roi-cost-label { font-size: 10px; font-weight: 700; letter-spacing: 0.5px; text-transform: uppercase; margin-top: 4px; }
+    .roi-cost-arrow { font-size: 28px; color: var(--green); font-weight: 900; }
+
+    /* AI contributions */
+    .roi-contrib-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+    .roi-contrib-item {
+      background: #f9fafb; border-radius: 10px; padding: 10px 14px;
+      border: 1px solid var(--border); text-align: center;
+    }
+    .roi-contrib-val { font-size: 20px; font-weight: 900; color: var(--text); }
+    .roi-contrib-label { font-size: 9px; font-weight: 600; color: var(--muted); letter-spacing: 0.3px; margin-top: 2px; }
+
+    /* Benchmarks */
+    .roi-bench { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+    .roi-bench-item {
+      padding: 12px 14px; border-radius: 10px; border: 1px solid var(--border);
+      background: linear-gradient(135deg, #f9fafb, #fff);
+    }
+    .roi-bench-metric { font-size: 11px; font-weight: 600; color: var(--text); margin-bottom: 4px; }
+    .roi-bench-val { font-size: 18px; font-weight: 900; color: var(--green); }
+    .roi-bench-source { font-size: 9px; color: var(--muted); margin-top: 2px; font-style: italic; }
+
+    /* Value shift */
+    .roi-shift { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+    .roi-shift-col { padding: 14px; border-radius: 12px; }
+    .roi-shift-title { font-size: 11px; font-weight: 800; letter-spacing: 0.5px; margin-bottom: 10px; }
+    .roi-shift-bar { height: 8px; border-radius: 4px; margin-bottom: 8px; }
+    .roi-shift-items { font-size: 11px; line-height: 2; color: var(--text-secondary); }
+
+    /* Qualification */
+    .roi-qual {
+      font-size: 10px; color: var(--muted); text-align: center; padding: 12px 16px;
+      background: #f9fafb; border-radius: 8px; margin-top: 16px; line-height: 1.6;
+      border: 1px solid var(--border); font-style: italic;
+    }
+
     .guide-diagram {
       background: #1e293b; color: #e2e8f0; border: none; border-radius: 12px;
       padding: 20px; margin: 16px 0; font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
@@ -1436,6 +1546,11 @@
         <span class="pipe-num">5</span>
         <span class="pipe-label">LEARN</span>
       </div>
+      <div class="pipe-arrow">&#9655;</div>
+      <div class="pipe-stage" data-stage="roi" onclick="scrollToStage('roi')">
+        <span class="pipe-num">$</span>
+        <span class="pipe-label">ROI</span>
+      </div>
     </div>
     <div class="pipe-status" id="flow_status_bar"></div>
   </div>
@@ -1520,8 +1635,8 @@
         <h2>Autonomous Intelligent Patching</h2>
         <p>From zero-day to fully patched in minutes, not weeks. Six AI agents discover vulnerabilities, predict risk, reason about history, execute phased rollouts, self-heal on failure, and learn from every outcome &mdash; closing the loop so each patch cycle makes the next one smarter.</p>
         <div class="guide-hero-stats">
-          <div class="ghs"><span class="ghs-num">6</span><span class="ghs-label">AI Agents</span></div>
-          <div class="ghs"><span class="ghs-num">5</span><span class="ghs-label">Pipeline Stages</span></div>
+          <div class="ghs"><span class="ghs-num">7</span><span class="ghs-label">AI Agents</span></div>
+          <div class="ghs"><span class="ghs-num">6</span><span class="ghs-label">Pipeline Stages</span></div>
           <div class="ghs"><span class="ghs-num">A2A</span><span class="ghs-label">Message Bus</span></div>
           <div class="ghs"><span class="ghs-num">&infin;</span><span class="ghs-label">Feedback Loop</span></div>
         </div>
@@ -1689,6 +1804,24 @@
                     <div class="aip-learn-conn"><div class="aip-learn-conn-line"></div></div>
                     <div class="aip-learn-box" style="background:#ecfdf5; color:#065f46; border-color:rgba(5,150,105,0.2);">&#9889; KServe Deploy</div>
                     <div class="aip-learn-feedback">&#8634; Replaces PREDICT model &mdash; continuous improvement loop</div>
+                  </div>
+                </div>
+
+                <!-- ROI -->
+                <div class="aip-stage">
+                  <div class="aip-stage-head" style="background:linear-gradient(135deg,#064e3b,#065f46);">
+                    <div class="aip-stage-num">$</div> ROI
+                  </div>
+                  <div class="aip-stage-body">
+                    <div class="aip-agent" style="background:#ecfdf5; color:#065f46; border-color:rgba(5,150,105,0.2);">
+                      <div class="aip-agent-name">ROI Agent</div>
+                      <ul class="aip-steps">
+                        <li><span class="step-n">17</span> Calculate economics</li>
+                        <li><span class="step-n">18</span> Load benchmarks</li>
+                      </ul>
+                    </div>
+                    <div class="aip-backend" style="background:#ecfdf5; color:#065f46;">Value Dashboard</div>
+                    <div class="aip-backend" style="background:#d1fae5; color:#064e3b; margin-top:4px; font-size:9px;">Forrester &bull; IDC &bull; Red Hat/PT &bull; ABB</div>
                   </div>
                 </div>
 
@@ -1866,6 +1999,35 @@
             <div class="gs-detail-item">
               <div class="gs-dl" style="color:var(--green);">Feedback Loop</div>
               <div class="gs-dv">Each patch cycle makes future risk predictions more accurate</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <!-- Stage 6 -->
+      <div class="guide-stage-card">
+        <div class="guide-stage-head" style="background:linear-gradient(135deg,#ecfdf5,#d1fae5);">
+          <span class="gs-num" style="background:#064e3b;">$</span>
+          <span class="gs-title" style="color:#064e3b;">ROI</span>
+          <span class="gs-badge" style="background:#d1fae5; color:#064e3b;">ROI Agent</span>
+        </div>
+        <div class="guide-stage-body">
+          <p>Calculates the financial value created by the patch run. Compares manual vs. AI-assisted effort across four economic dimensions: engineering effort avoided, reduced exposure window, automation reuse, and faster recovery. All calculations use <strong>configurable assumptions</strong> and reference published industry benchmarks.</p>
+          <div class="gs-detail-grid">
+            <div class="gs-detail-item">
+              <div class="gs-dl" style="color:#064e3b;">Dimensions</div>
+              <div class="gs-dv">Engineering effort, reduced exposure, automation reuse, faster recovery &mdash; with animated value bars</div>
+            </div>
+            <div class="gs-detail-item">
+              <div class="gs-dl" style="color:#064e3b;">Benchmarks</div>
+              <div class="gs-dv">Forrester TEI, Red Hat/Principled Technologies, IDC, ABB case study &mdash; each cited with source</div>
+            </div>
+            <div class="gs-detail-item">
+              <div class="gs-dl" style="color:#064e3b;">Time Machine</div>
+              <div class="gs-dv">Side-by-side timeline comparing manual (full day) vs. AI-assisted (25 minutes) remediation</div>
+            </div>
+            <div class="gs-detail-item">
+              <div class="gs-dl" style="color:#064e3b;">Transparency</div>
+              <div class="gs-dv">Configurable labor rate, per-host costs, and explicit assumptions disclaimer</div>
             </div>
           </div>
         </div>
@@ -2087,6 +2249,126 @@
         </div>
       </div>
 
+      <!-- Scene 8: ROI — Hero -->
+      <div class="ds-scene ds-scene-highlight">
+        <div class="ds-scene-head">
+          <span class="ds-scene-num" style="background:#065f46;">8a</span>
+          <span class="ds-scene-title">ROI &mdash; Hero Banner</span>
+          <span class="ds-scene-time">~20s</span>
+        </div>
+        <div class="ds-scene-body">
+          <div class="ds-watch"><strong>Watch for:</strong> ROI pipeline stage ($) lights up green. A dark green hero banner appears at the top with a large dollar figure, plus four stat chips: cost reduction %, hours saved, systems count, and cost-per-host comparison.</div>
+          <div class="ds-say">&ldquo;Now let's talk about the money. The ROI Agent just calculated what this single patch run was worth. That headline number is the total labor value created &mdash; computed from your engineer labor rate times the hours recovered. The four chips below break it down: we cut cost per system from $36 to $6 &mdash; that's a 83% reduction. And we saved over 15 hours of engineering time across these systems. All of these numbers come from configurable assumptions you can tune in Settings.&rdquo;</div>
+          <div class="ds-tip"><strong>Tip:</strong> The dollar value and percentages are dynamically calculated from system count, labor rate ($72/hr default), and per-host remediation times (30 min manual vs 5 min AI). Point this out &mdash; it's not a canned number.</div>
+        </div>
+      </div>
+
+      <!-- Scene 8b: Value Breakdown -->
+      <div class="ds-scene">
+        <div class="ds-scene-head">
+          <span class="ds-scene-num" style="background:#065f46;">8b</span>
+          <span class="ds-scene-title">ROI &mdash; Value Breakdown Bars</span>
+          <span class="ds-scene-time">~25s</span>
+        </div>
+        <div class="ds-scene-body">
+          <div class="ds-watch"><strong>Watch for:</strong> Four horizontal animated bars showing value allocation across four economic dimensions. Bars grow from left to right when the section renders.</div>
+          <div class="ds-say">&ldquo;The value breaks down into four dimensions. <strong>Reduced Exposure</strong> is the biggest chunk &mdash; 44% of the value &mdash; because every hour your systems sit unpatched is an hour of risk. <strong>Engineering Effort</strong> at 35% is the direct labor savings &mdash; engineer hours that aren't spent on manual investigation, scripting, and validation. <strong>Automation Reuse</strong> at 13% captures the compounding value of playbooks and templates that get reused across future CVEs. And <strong>Faster Recovery</strong> at 8% reflects the reduced incident cost from automatic rollback and AI-driven remediation instead of a war room.&rdquo;</div>
+          <div class="ds-tip"><strong>Tip:</strong> These percentages are configurable in Settings &rarr; ROI Agent. If your audience cares more about risk exposure than labor cost, you can increase the Exposure % to emphasize that dimension.</div>
+        </div>
+      </div>
+
+      <!-- Scene 8c: Time Machine -->
+      <div class="ds-scene">
+        <div class="ds-scene-head">
+          <span class="ds-scene-num" style="background:#065f46;">8c</span>
+          <span class="ds-scene-title">ROI &mdash; Time Machine Comparison</span>
+          <span class="ds-scene-time">~30s</span>
+        </div>
+        <div class="ds-scene-body">
+          <div class="ds-watch"><strong>Watch for:</strong> Side-by-side timeline columns. Left (red) shows a full-day manual process from 9am to 11:30pm. Right (green) shows the same work done between 9:00 and 9:25am. Each step has a proportional bar showing duration.</div>
+          <div class="ds-say">&ldquo;This is the time machine. On the left: what manual remediation looks like &mdash; discovery at 9am, then investigation, risk analysis, change approval, script writing, patching, validation, failure investigation, and recovery. You're done at 11:30pm. That's a full-day incident. On the right: the AI-assisted flow. Discovery at 9:00, risk scored by 9:03, approved by 9:08, canaries at 9:09, production by 9:14, failure diagnosed and recovered by 9:21, complete at 9:25. Twenty-five minutes versus fourteen hours. Same CVE, same fleet, same outcome &mdash; completely different experience for your team.&rdquo;</div>
+          <div class="ds-tip"><strong>Tip:</strong> This is the most visually compelling ROI section. Let the contrast sink in. Point to specific steps: &ldquo;Look &mdash; risk analysis alone took three hours manually. The AI did it in two minutes.&rdquo;</div>
+        </div>
+      </div>
+
+      <!-- Scene 8d: Cost Per System -->
+      <div class="ds-scene">
+        <div class="ds-scene-head">
+          <span class="ds-scene-num" style="background:#065f46;">8d</span>
+          <span class="ds-scene-title">ROI &mdash; Cost Per System</span>
+          <span class="ds-scene-time">~15s</span>
+        </div>
+        <div class="ds-scene-body">
+          <div class="ds-watch"><strong>Watch for:</strong> Two boxes side-by-side &mdash; red ($36 Manual) and green ($6 AI-Assisted) &mdash; with an arrow between them.</div>
+          <div class="ds-say">&ldquo;Here's the unit economics. Manual remediation costs $36 per system &mdash; that's 30 minutes at $72 an hour. AI-assisted: $6 per system. Five minutes of automated work. At scale, this is transformational. If you patch a thousand systems a month, that's $30,000 in labor savings per month just on patching.&rdquo;</div>
+          <div class="ds-tip"><strong>Tip:</strong> Adjust the labor rate in Settings to match your audience's geography. $72/hr is a US average &mdash; set it to $50 for a cost-conscious audience or $120 for financial services.</div>
+        </div>
+      </div>
+
+      <!-- Scene 8e: AI Contributions -->
+      <div class="ds-scene">
+        <div class="ds-scene-head">
+          <span class="ds-scene-num" style="background:#065f46;">8e</span>
+          <span class="ds-scene-title">ROI &mdash; AI Contributions Grid</span>
+          <span class="ds-scene-time">~20s</span>
+        </div>
+        <div class="ds-scene-body">
+          <div class="ds-watch"><strong>Watch for:</strong> A 3&times;3 grid of counters: Systems Analyzed, Remediation Decisions, Risk Assessments, Historical Correlations, A2A Handoffs, Health Checks, Failure Diagnosed, Rollback Executed, Human Approval. Below: &ldquo;Human effort was concentrated where judgment mattered.&rdquo;</div>
+          <div class="ds-say">&ldquo;This grid shows everything the AI did autonomously. It analyzed every system, made every remediation decision, ran risk assessments, correlated historical records, coordinated agent handoffs, ran health checks, diagnosed a failure, and executed a rollback. The one human action? Clicking Approve. That's the point &mdash; AI handles the operational load, humans make the judgment calls.&rdquo;</div>
+          <div class="ds-tip"><strong>Tip:</strong> The A2A Handoffs counter is pulled live from the actual message stream &mdash; it matches the agent messages in the sidebar. Point this out to show it's real data, not a mock.</div>
+        </div>
+      </div>
+
+      <!-- Scene 8f: Value Chain Shift -->
+      <div class="ds-scene">
+        <div class="ds-scene-head">
+          <span class="ds-scene-num" style="background:#065f46;">8f</span>
+          <span class="ds-scene-title">ROI &mdash; Value Chain Shift</span>
+          <span class="ds-scene-time">~20s</span>
+        </div>
+        <div class="ds-scene-body">
+          <div class="ds-watch"><strong>Watch for:</strong> Two side-by-side panels. Left (red): &ldquo;BEFORE &mdash; Engineer Does Everything&rdquo; with a full-width bar and a long list of tasks. Right (green): &ldquo;AFTER &mdash; Engineer Focuses on Judgment&rdquo; with a 25% bar and just four items: Policy, Approval, Exceptions, Architecture.</div>
+          <div class="ds-say">&ldquo;This is the story for leadership. Before: your engineers spend their days on discovery, scripting, execution, validation, investigation, recovery. After: AI and automation handle all of that. Engineers focus on the 25% that actually requires human judgment &mdash; setting policy, approving changes, handling exceptions, making architecture decisions. You're not replacing engineers. You're giving them back the time to do high-value work.&rdquo;</div>
+          <div class="ds-tip"><strong>Tip:</strong> This visual resonates strongly with CTO/VP audiences. The bar width comparison (100% vs 25%) tells the story at a glance. Linger here for executive audiences.</div>
+        </div>
+      </div>
+
+      <!-- Scene 8g: Industry Benchmarks -->
+      <div class="ds-scene">
+        <div class="ds-scene-head">
+          <span class="ds-scene-num" style="background:#065f46;">8g</span>
+          <span class="ds-scene-title">ROI &mdash; Industry Benchmarks</span>
+          <span class="ds-scene-time">~25s</span>
+        </div>
+        <div class="ds-scene-body">
+          <div class="ds-watch"><strong>Watch for:</strong> A grid of benchmark cards, each showing a metric, a bold value, and an italic source citation. Seven benchmarks from five published studies.</div>
+          <div class="ds-say">&ldquo;These aren't our numbers &mdash; they're from published, independently validated studies. Forrester found 146% ROI and $1.03 million NPV for Ansible Tower. Red Hat and Principled Technologies measured 91% less time for vulnerability remediation with Insights. IDC found 540% ROI over three years for RHEL, Insights, and Satellite. ABB saved 1,800 hours a month with Ansible Automation Platform. And Red Hat's own IT team cut a legacy patching process from 10 days to 6 hours. Every number has a source you can point to.&rdquo;</div>
+          <div class="ds-tip"><strong>Tip:</strong> The benchmarks are:<br>
+            &bull; <strong>91% remediation time reduction</strong> &mdash; Red Hat / Principled Technologies<br>
+            &bull; <strong>80% security-update effort reduction</strong> &mdash; Forrester TEI (Ansible Tower)<br>
+            &bull; <strong>88% patch-status tracking reduction</strong> &mdash; Red Hat / Principled Technologies<br>
+            &bull; <strong>10 days &rarr; 6 hours</strong> &mdash; Red Hat IT case study<br>
+            &bull; <strong>1,800+ hrs/month saved</strong> &mdash; ABB case study (AAP)<br>
+            &bull; <strong>146% ROI / $1.03M NPV</strong> &mdash; Forrester TEI study<br>
+            &bull; <strong>540% ROI over 3 years</strong> &mdash; IDC study (RHEL + Insights + Satellite)
+          </div>
+        </div>
+      </div>
+
+      <!-- Scene 8h: Assumptions -->
+      <div class="ds-scene">
+        <div class="ds-scene-head">
+          <span class="ds-scene-num" style="background:#065f46;">8h</span>
+          <span class="ds-scene-title">ROI &mdash; Assumptions &amp; Transparency</span>
+          <span class="ds-scene-time">~10s</span>
+        </div>
+        <div class="ds-scene-body">
+          <div class="ds-watch"><strong>Watch for:</strong> A gray disclaimer box at the bottom showing the configurable assumptions: labor rate, manual minutes per host, AI minutes per host.</div>
+          <div class="ds-say">&ldquo;One more thing &mdash; we're transparent about how these numbers are calculated. The assumptions are right here: labor rate, per-host remediation time, value allocation percentages. All configurable in Settings. Plug in your own numbers and the dashboard recalculates. We're not selling a magic number &mdash; we're giving you a framework to model your own economics.&rdquo;</div>
+          <div class="ds-tip"><strong>Tip:</strong> Proactively showing the assumptions builds credibility, especially with finance and procurement audiences. If anyone asks &ldquo;where does this number come from?&rdquo;, point to this box and to the Settings &rarr; ROI Agent section.</div>
+        </div>
+      </div>
+
       <!-- Closing -->
       <div class="ds-scene ds-scene-opening">
         <div class="ds-scene-head">
@@ -2095,7 +2377,7 @@
           <span class="ds-scene-time">~20s</span>
         </div>
         <div class="ds-scene-body">
-          <div class="ds-say">&ldquo;What you just saw was a critical CVE go from discovery to fully remediated with one click and one approval. Six agents coordinated autonomously, the system self-healed when something went wrong, and every outcome made the next patch cycle smarter. This is what Autonomous Intelligent Patching looks like.&rdquo;</div>
+          <div class="ds-say">&ldquo;What you just saw was a critical CVE go from discovery to fully remediated &mdash; with the financial story told &mdash; all with one click and one approval. Seven agents coordinated autonomously, the system self-healed when something went wrong, every outcome made the next patch cycle smarter, and the ROI dashboard showed you exactly what it was worth. This is what Autonomous Intelligent Patching looks like.&rdquo;</div>
           <div class="ds-tip"><strong>Tip:</strong> Good time for the &ldquo;What If&rdquo; and &ldquo;Why&rdquo; buttons on host cards &mdash; show the audience that operators can interrogate the AI's decisions at any point.</div>
         </div>
       </div>
@@ -2201,9 +2483,10 @@ const STAGE_MAP = {
   'analyzing_failure': 'execute', 'remediation_proposed': 'execute', 'remediation_approved': 'execute',
   'remediation_executing': 'execute', 'remediation_success': 'execute', 'rollout_complete': 'execute',
   'workflow_complete': 'learn',
+  'roi_calculating': 'roi', 'roi_complete': 'roi',
 };
 
-const PIPE_ORDER = ['discover', 'predict', 'reason', 'execute', 'learn'];
+const PIPE_ORDER = ['discover', 'predict', 'reason', 'execute', 'learn', 'roi'];
 
 function updatePipeline(flowStage, approvalState) {
   const current = STAGE_MAP[flowStage] || null;
@@ -2211,14 +2494,18 @@ function updatePipeline(flowStage, approvalState) {
   const isComplete = approvalState === 'approved_and_completed';
   const isFailed = approvalState === 'flow_failed';
 
+  const isWaiting = approvalState === 'pending_review';
+
   document.querySelectorAll('.pipe-stage').forEach(el => {
     const stage = el.dataset.stage;
     const idx = PIPE_ORDER.indexOf(stage);
-    el.classList.remove('active', 'done', 'failed');
+    el.classList.remove('active', 'done', 'failed', 'waiting');
     if (isComplete) {
       el.classList.add('done');
     } else if (isFailed && idx <= currentIdx) {
       el.classList.add(idx === currentIdx ? 'failed' : 'done');
+    } else if (isWaiting && idx === currentIdx) {
+      el.classList.add('waiting');
     } else if (idx < currentIdx) {
       el.classList.add('done');
     } else if (idx === currentIdx) {
@@ -2566,6 +2853,130 @@ function renderLearn(summary) {
 }
 
 /* ================================================================
+   RENDER: ROI DASHBOARD
+   ================================================================ */
+
+function renderROI(summary) {
+  const roi = summary.roi;
+  if (!roi) return '';
+
+  const dims = roi.dimensions;
+  const totalVal = roi.total_value;
+  const maxDim = Math.max(dims.engineering_effort, dims.reduced_exposure, dims.automation_reuse, dims.faster_recovery);
+
+  function dimBar(label, val, color) {
+    const pct = Math.round((val / maxDim) * 100);
+    return `<div class="roi-dim">
+      <div class="roi-dim-label">${label}</div>
+      <div class="roi-dim-bar-bg">
+        <div class="roi-dim-bar anim" style="width:${pct}%; background:${color};">$${val.toLocaleString()}</div>
+      </div>
+    </div>`;
+  }
+
+  let html = '<div class="roi-card" id="stage_roi">';
+
+  // Hero
+  html += `<div class="roi-hero">
+    <div class="roi-hero-eyebrow">AI Operations ROI</div>
+    <div class="roi-hero-value">$${totalVal.toLocaleString()}</div>
+    <div class="roi-hero-label">value created this run</div>
+    <div class="roi-hero-chips">
+      <div class="roi-chip"><div class="roi-chip-val">${roi.cost_reduction_pct}%</div><div class="roi-chip-label">Cost Reduction</div></div>
+      <div class="roi-chip"><div class="roi-chip-val">${roi.hours_saved}</div><div class="roi-chip-label">Hours Saved</div></div>
+      <div class="roi-chip"><div class="roi-chip-val">${roi.systems}</div><div class="roi-chip-label">Systems</div></div>
+      <div class="roi-chip"><div class="roi-chip-val">$${roi.manual_cost_per_host}</div><div class="roi-chip-label">&rarr; $${roi.ai_cost_per_host} / host</div></div>
+    </div>
+  </div>`;
+
+  html += '<div class="roi-body">';
+
+  // Value breakdown
+  html += '<div class="roi-section"><div class="roi-section-title">Value Breakdown</div>';
+  html += dimBar('Engineering Effort', dims.engineering_effort, '#059669');
+  html += dimBar('Reduced Exposure', dims.reduced_exposure, '#2563eb');
+  html += dimBar('Automation Reuse', dims.automation_reuse, '#d97706');
+  html += dimBar('Faster Recovery', dims.faster_recovery, '#7c3aed');
+  html += '</div>';
+
+  // Time comparison
+  html += '<div class="roi-section"><div class="roi-section-title">Time Machine</div>';
+  html += '<div class="roi-timeline">';
+
+  // Manual column
+  html += '<div class="roi-tl-col"><h4 style="color:var(--red);">Manual Remediation</h4>';
+  for (const step of roi.timeline_manual) {
+    const barW = Math.max(8, Math.min(step.duration_min / 2, 80));
+    html += `<div class="roi-tl-row"><span class="roi-tl-time">${esc(step.time)}</span><span class="roi-tl-bar" style="width:${barW}px; background:var(--red);"></span><span class="roi-tl-event">${esc(step.event)}</span></div>`;
+  }
+  html += `<div class="roi-tl-total" style="color:var(--red);">${roi.manual_hours} hours</div></div>`;
+
+  // AI column
+  html += '<div class="roi-tl-col"><h4 style="color:var(--green);">AI-Assisted</h4>';
+  for (const step of roi.timeline_ai) {
+    const barW = Math.max(4, Math.min(step.duration_min * 3, 40));
+    html += `<div class="roi-tl-row"><span class="roi-tl-time">${esc(step.time)}</span><span class="roi-tl-bar" style="width:${barW}px; background:var(--green);"></span><span class="roi-tl-event">${esc(step.event)}</span></div>`;
+  }
+  html += `<div class="roi-tl-total" style="color:var(--green);">${roi.ai_hours} hours</div></div>`;
+  html += '</div></div>';
+
+  // Cost per system
+  html += '<div class="roi-section"><div class="roi-section-title">Cost Per System</div>';
+  html += '<div class="roi-cost-compare">';
+  html += `<div class="roi-cost-box" style="background:#fef2f2;"><div class="roi-cost-val" style="color:var(--red);">$${roi.manual_cost_per_host}</div><div class="roi-cost-label" style="color:#991b1b;">Manual</div></div>`;
+  html += '<div class="roi-cost-arrow">&rarr;</div>';
+  html += `<div class="roi-cost-box" style="background:#ecfdf5;"><div class="roi-cost-val" style="color:var(--green);">$${roi.ai_cost_per_host}</div><div class="roi-cost-label" style="color:#065f46;">AI-Assisted</div></div>`;
+  html += '</div></div>';
+
+  // AI Contributions
+  html += '<div class="roi-section"><div class="roi-section-title">AI Contributions</div>';
+  html += '<div class="roi-contrib-grid">';
+  const c = roi.ai_contributions;
+  const contribs = [
+    [c.systems_analyzed, 'Systems Analyzed'], [c.remediation_decisions, 'Remediation Decisions'],
+    [c.risk_assessments, 'Risk Assessments'], [c.historical_correlations, 'Historical Correlations'],
+    [c.a2a_handoffs, 'A2A Handoffs'], [c.health_checks, 'Health Checks'],
+    [c.failures_diagnosed, 'Failure Diagnosed'], [c.rollbacks_executed, 'Rollback Executed'],
+    [c.human_approvals, 'Human Approval'],
+  ];
+  for (const [v, l] of contribs) {
+    html += `<div class="roi-contrib-item"><div class="roi-contrib-val">${v}</div><div class="roi-contrib-label">${l}</div></div>`;
+  }
+  html += '</div>';
+  html += '<div style="text-align:center; font-size:11px; color:var(--muted); margin-top:10px; font-weight:600;">Human effort was concentrated where judgment mattered.</div>';
+  html += '</div>';
+
+  // Value chain shift
+  html += '<div class="roi-section"><div class="roi-section-title">Value Chain Shift</div>';
+  html += '<div class="roi-shift">';
+  html += '<div class="roi-shift-col" style="background:#fef2f2;">';
+  html += '<div class="roi-shift-title" style="color:#991b1b;">BEFORE &mdash; Engineer Does Everything</div>';
+  html += '<div class="roi-shift-bar" style="background:var(--red); width:100%;"></div>';
+  html += '<div class="roi-shift-items">Discovery &bull; Analysis &bull; Scripts &bull; Execution &bull; Validation &bull; Investigation &bull; Recovery</div>';
+  html += '</div>';
+  html += '<div class="roi-shift-col" style="background:#ecfdf5;">';
+  html += '<div class="roi-shift-title" style="color:#065f46;">AFTER &mdash; Engineer Focuses on Judgment</div>';
+  html += '<div class="roi-shift-bar" style="background:var(--green); width:25%;"></div>';
+  html += '<div class="roi-shift-items">Policy &bull; Approval &bull; Exceptions &bull; Architecture</div>';
+  html += '</div>';
+  html += '</div></div>';
+
+  // Benchmarks
+  html += '<div class="roi-section"><div class="roi-section-title">Industry Benchmarks</div>';
+  html += '<div class="roi-bench">';
+  for (const b of roi.benchmarks) {
+    html += `<div class="roi-bench-item"><div class="roi-bench-metric">${esc(b.metric)}</div><div class="roi-bench-val">${esc(b.value)}</div><div class="roi-bench-source">${esc(b.source)}</div></div>`;
+  }
+  html += '</div></div>';
+
+  // Assumptions / qualification
+  html += `<div class="roi-qual">Illustrative calculations based on configurable assumptions: $${roi.assumptions.labor_rate}/hr labor rate, ${roi.assumptions.manual_min_per_host} min/host manual, ${roi.assumptions.ai_min_per_host} min/host automated. Benchmark data from published Red Hat, Forrester, IDC, and Principled Technologies studies. Not universal claims.</div>`;
+
+  html += '</div></div>';
+  return html;
+}
+
+/* ================================================================
    RENDER: FLOW STATUS BAR
    ================================================================ */
 
@@ -2635,8 +3046,18 @@ function renderFlow(data) {
   if (summary.final_summary) {
     html += renderLearn(summary);
   }
+  const existingROI = document.getElementById('stage_roi');
+  const savedROI = existingROI ? existingROI.parentNode.removeChild(existingROI) : null;
+
+  if (summary.roi && !savedROI) {
+    html += renderROI(summary);
+  }
 
   document.getElementById('flow_content').innerHTML = html;
+
+  if (savedROI) {
+    document.getElementById('flow_content').appendChild(savedROI);
+  }
 }
 
 /* ================================================================
@@ -2686,12 +3107,25 @@ async function refresh() {
     renderFlow(data);
     renderA2AStream(data.stream);
 
-    const isActive = data.summary && (data.summary.approval_state === 'flow_in_progress' || data.summary.approval_state === 'approved_in_progress');
-    const nextPoll = isActive ? 2000 : 5000;
-    if (nextPoll !== pollMs) {
-      pollMs = nextPoll;
-      if (pollTimer) clearInterval(pollTimer);
-      pollTimer = setInterval(refresh, pollMs);
+    const approvalState = data.summary && data.summary.approval_state;
+    const isActive = approvalState === 'flow_in_progress' || approvalState === 'approved_in_progress';
+    const isWaiting = approvalState === 'pending_review';
+    if (isActive) {
+      const nextPoll = 2000;
+      if (nextPoll !== pollMs) {
+        pollMs = nextPoll;
+        if (pollTimer) clearInterval(pollTimer);
+        pollTimer = setInterval(refresh, pollMs);
+      }
+    } else if (isWaiting) {
+      const nextPoll = 5000;
+      if (nextPoll !== pollMs) {
+        pollMs = nextPoll;
+        if (pollTimer) clearInterval(pollTimer);
+        pollTimer = setInterval(refresh, pollMs);
+      }
+    } else if (approvalState === 'approved_and_completed') {
+      if (pollTimer) { clearInterval(pollTimer); pollTimer = null; }
     }
   } catch (e) { /* ignore */ }
 }
@@ -2927,6 +3361,17 @@ const SETTINGS_SCHEMA = [
     {key: 'GITHUB_REPO_NAME',      label: 'Repo Name',              hint: 'GitHub repository name'},
     {key: 'PLAYBOOK_PUSH_METHOD',  label: 'Push Method',            hint: 'How to push playbooks: git or mcp'},
   ]},
+  {section: 'ROI Agent', vars: [
+    {key: 'ROI_LABOR_RATE',             label: 'Labor Rate ($/hr)',       hint: 'Engineer hourly labor rate for cost calculations', defaultVal: '72'},
+    {key: 'ROI_MANUAL_MIN_PER_HOST',    label: 'Manual Min/Host',         hint: 'Minutes per host for manual remediation', defaultVal: '30'},
+    {key: 'ROI_AI_MIN_PER_HOST',        label: 'AI Min/Host',             hint: 'Minutes per host for AI-assisted remediation', defaultVal: '5'},
+    {key: 'ROI_EXPOSURE_MANUAL_FACTOR', label: 'Exposure Factor (Manual)', hint: 'Multiplier for manual exposure window vs patch time', defaultVal: '1.4'},
+    {key: 'ROI_EXPOSURE_AI_FACTOR',     label: 'Exposure Factor (AI)',     hint: 'Multiplier for AI exposure window vs patch time', defaultVal: '0.6'},
+    {key: 'ROI_DIM_ENGINEERING_PCT',    label: 'Engineering %',            hint: 'Value allocation to engineering effort avoided', defaultVal: '35'},
+    {key: 'ROI_DIM_EXPOSURE_PCT',       label: 'Exposure %',               hint: 'Value allocation to reduced exposure window', defaultVal: '44'},
+    {key: 'ROI_DIM_REUSE_PCT',          label: 'Reuse %',                  hint: 'Value allocation to automation reuse value', defaultVal: '13'},
+    {key: 'ROI_DIM_RECOVERY_PCT',       label: 'Recovery %',               hint: 'Value allocation to faster recovery', defaultVal: '8'},
+  ]},
   {section: 'Console', vars: [
     {key: 'CVE_CONSOLE_HOST',       label: 'Host',                  hint: 'Network address to bind the console server to'},
     {key: 'CVE_CONSOLE_PORT',       label: 'Port',                  hint: 'TCP port for the console UI (default 8787)'},
@@ -2960,7 +3405,7 @@ function renderSettingsForm() {
   for (const group of SETTINGS_SCHEMA) {
     html += `<div class="setting-section">${esc(group.section)}</div>`;
     for (const v of group.vars) {
-      const val = settingsOriginal[v.key] || '';
+      const val = settingsOriginal[v.key] || v.defaultVal || '';
       html += `<div class="setting-row">
         <div class="setting-label">${esc(v.label)}</div>
         <div style="flex:1;">
@@ -3044,8 +3489,9 @@ document.addEventListener('keydown', (e) => {
   }
 });
 
-refresh();
-pollTimer = setInterval(refresh, pollMs);
+refresh().then(() => {
+  if (!pollTimer) pollTimer = setInterval(refresh, pollMs);
+});
 loadCves(0);
 </script>
 </body>

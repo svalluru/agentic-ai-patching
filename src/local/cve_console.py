@@ -1016,6 +1016,9 @@ SETTINGS_KEYS = [
     'PLAYBOOK_PUSH_METHOD',
     'CVE_CONSOLE_HOST', 'CVE_CONSOLE_PORT', 'CVE_CONSOLE_POLL_SECONDS',
     'CVE_FLOW_LOG_LEVEL',
+    'ROI_LABOR_RATE', 'ROI_MANUAL_MIN_PER_HOST', 'ROI_AI_MIN_PER_HOST',
+    'ROI_EXPOSURE_MANUAL_FACTOR', 'ROI_EXPOSURE_AI_FACTOR',
+    'ROI_DIM_ENGINEERING_PCT', 'ROI_DIM_EXPOSURE_PCT', 'ROI_DIM_REUSE_PCT', 'ROI_DIM_RECOVERY_PCT',
 ]
 SECRET_KEYS = {'AAP_TOKEN', 'GITHUB_TOKEN', 'LIGHTSPEED_CLIENT_SECRET'}
 
@@ -2069,6 +2072,8 @@ class Handler(BaseHTTPRequestHandler):
                 payload = json.loads(raw.decode() or '{}')
                 updates = {k: v for k, v in payload.items() if k in SETTINGS_KEYS and v}
                 write_env_file(updates)
+                for k, v in updates.items():
+                    os.environ[k] = v
                 self.respond(200, 'application/json', json.dumps({'ok': True}).encode())
                 return
             except Exception as e:
@@ -2111,10 +2116,36 @@ class Handler(BaseHTTPRequestHandler):
             LOG.info('HTTP %s', msg)
 
 
+SETTINGS_DEFAULTS = {
+    'ROI_LABOR_RATE': '72',
+    'ROI_MANUAL_MIN_PER_HOST': '30',
+    'ROI_AI_MIN_PER_HOST': '5',
+    'ROI_EXPOSURE_MANUAL_FACTOR': '1.4',
+    'ROI_EXPOSURE_AI_FACTOR': '0.6',
+    'ROI_DIM_ENGINEERING_PCT': '35',
+    'ROI_DIM_EXPOSURE_PCT': '44',
+    'ROI_DIM_REUSE_PCT': '13',
+    'ROI_DIM_RECOVERY_PCT': '8',
+}
+
+
+def seed_defaults():
+    """Write default settings to .env for keys that have no value yet."""
+    STATE_DIR.mkdir(parents=True, exist_ok=True)
+    existing = read_env_file()
+    missing = {k: v for k, v in SETTINGS_DEFAULTS.items() if not existing.get(k)}
+    if missing:
+        write_env_file(missing)
+        for k, v in missing.items():
+            os.environ.setdefault(k, v)
+        LOG.info('Seeded %d default settings: %s', len(missing), ', '.join(sorted(missing)))
+
+
 if __name__ == '__main__':
     if STATE_FILE.exists():
         STATE_FILE.unlink()
         LOG.info('Cleaned previous state on startup')
+    seed_defaults()
     LOG.info('Unified mode — tries real APIs first, falls back to demo data')
     server = ThreadingHTTPServer((HOST, PORT), Handler)
     LOG.info('CVE console listening on http://%s:%s', HOST, PORT)

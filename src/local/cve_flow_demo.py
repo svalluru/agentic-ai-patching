@@ -25,55 +25,52 @@ DEMO_DESCRIPTION = (
 )
 
 DEMO_HOSTS = [
-    {'host': 'pay-app-03.acme.internal',   'system_uuid': 'uuid-pay-03', 'age_days': 12, 'risk_score': 67.20, 'decision': 'review', 'reason': 'Tier-1 payment application — kernel update requires explicit approval.',
+    {'host': 'pay-app-03.acme.internal',   'system_uuid': 'uuid-pay-03', 'age_days': 365, 'risk_score': 67.20, 'decision': 'review', 'reason': 'Tier-1 payment application — kernel update requires explicit approval.',
      'decision_support': {'summary': 'Previous patching of pay-app-03 failed twice (RHSA-2025-1842, RHSA-2025-3190). Root cause: application was not fully drained before restart. DBA intervention was required in both cases. Successful patches used a 120-second drain period with DBA present. Friday evening windows have a higher failure rate for this host.'}},
-    {'host': 'pay-app-05.acme.internal',   'system_uuid': 'uuid-pay-05', 'age_days': 12, 'risk_score': 58.40, 'decision': 'review', 'reason': 'Tier-1 payment application — kernel update requires explicit approval.',
+    {'host': 'pay-app-05.acme.internal',   'system_uuid': 'uuid-pay-05', 'age_days': 210, 'risk_score': 58.40, 'decision': 'review', 'reason': 'Tier-1 payment application — kernel update requires explicit approval.',
      'decision_support': {'summary': 'pay-app-05 was successfully patched 3 times in the last 6 months. All successful executions used application draining (120s) and had DBA availability confirmed. No rollbacks recorded. Risk is moderate due to workload similarity with pay-app-03.'}},
-    {'host': 'pay-app-07.acme.internal',   'system_uuid': 'uuid-pay-07', 'age_days': 12, 'risk_score': 72.80, 'decision': 'review', 'reason': 'Tier-1 payment application — highest risk score in fleet.',
+    {'host': 'pay-app-07.acme.internal',   'system_uuid': 'uuid-pay-07', 'age_days': 540, 'risk_score': 72.80, 'decision': 'review', 'reason': 'Tier-1 payment application — highest risk score in fleet.',
      'decision_support': {'summary': 'pay-app-07 has the worst patch history in the payment cluster. Last patch (RHSA-2025-3190) failed on a Friday at 18:32 — DBA was unavailable, manual restart required. Drain timeout was only 30 seconds vs. the required 120 seconds. Recommend scheduling outside Friday windows and confirming DBA availability.'}},
-    {'host': 'pay-app-09.acme.internal',   'system_uuid': 'uuid-pay-09', 'age_days': 12, 'risk_score': 45.10, 'decision': 'review', 'reason': 'Tier-1 payment application — kernel update requires explicit approval.',
+    {'host': 'pay-app-09.acme.internal',   'system_uuid': 'uuid-pay-09', 'age_days': 150, 'risk_score': 45.10, 'decision': 'review', 'reason': 'Tier-1 payment application — kernel update requires explicit approval.',
      'decision_support': {'summary': 'pay-app-09 patching history is clean — 4 successful patches, zero rollbacks. Application drain procedure is automated. Low operational risk but flagged due to Tier-1 classification.'}},
-    {'host': 'pay-db-01.acme.internal',    'system_uuid': 'uuid-db-01',  'age_days': 12, 'risk_score': 61.50, 'decision': 'review', 'reason': 'Production database server — requires DBA coordination.',
+    {'host': 'pay-db-01.acme.internal',    'system_uuid': 'uuid-db-01',  'age_days': 420, 'risk_score': 61.50, 'decision': 'review', 'reason': 'Production database server — requires DBA coordination.',
      'decision_support': {'summary': 'pay-db-01 is the primary PostgreSQL database for payment processing. Previous kernel patches required a coordinated failover to the replica (pay-db-02). Patching without failover caused a 4-minute outage in Q1 2026. Always coordinate with DBA team and verify replica is in sync before patching.'}},
-    {'host': 'pay-db-02.acme.internal',    'system_uuid': 'uuid-db-02',  'age_days': 12, 'risk_score': 38.90, 'decision': 'review', 'reason': 'Production database replica — must stay available during primary patch.',
+    {'host': 'pay-db-02.acme.internal',    'system_uuid': 'uuid-db-02',  'age_days': 180, 'risk_score': 38.90, 'decision': 'review', 'reason': 'Production database replica — must stay available during primary patch.',
      'decision_support': {'summary': 'pay-db-02 is the streaming replica. Should be patched AFTER pay-db-01 is confirmed healthy post-patch. No independent failure history.'}},
-    {'host': 'api-gw-01.acme.internal',    'system_uuid': 'uuid-gw-01',  'age_days': 12, 'risk_score': 52.30, 'decision': 'review', 'reason': 'Production API gateway — serves external traffic.',
+    {'host': 'api-gw-01.acme.internal',    'system_uuid': 'uuid-gw-01',  'age_days': 90, 'risk_score': 52.30, 'decision': 'review', 'reason': 'Production API gateway — serves external traffic.',
      'decision_support': {'summary': 'api-gw-01 runs the external-facing API gateway (nginx + custom modules). Previous kernel updates required a rolling restart coordinated with the load balancer. Two incidents in 2025 where connections were dropped during patching due to missing connection drain.'}},
-    {'host': 'api-gw-02.acme.internal',    'system_uuid': 'uuid-gw-02',  'age_days': 12, 'risk_score': 48.70, 'decision': 'review', 'reason': 'Production API gateway — redundant pair.',
+    {'host': 'api-gw-02.acme.internal',    'system_uuid': 'uuid-gw-02',  'age_days': 75, 'risk_score': 48.70, 'decision': 'review', 'reason': 'Production API gateway — redundant pair.',
      'decision_support': {'summary': 'api-gw-02 is the secondary API gateway. Can be patched while api-gw-01 handles traffic. Clean patch history — 5 successful patches with zero downtime.'}},
-    {'host': 'batch-proc-01.acme.internal', 'system_uuid': 'uuid-bp-01', 'age_days': 12, 'risk_score': 41.60, 'decision': 'review', 'reason': 'Production batch processing — nightly settlement jobs.',
+    {'host': 'batch-proc-01.acme.internal', 'system_uuid': 'uuid-bp-01', 'age_days': 280, 'risk_score': 41.60, 'decision': 'review', 'reason': 'Production batch processing — nightly settlement jobs.',
      'decision_support': {'summary': 'batch-proc-01 runs nightly settlement processing (02:00-04:00 UTC). Must not be patched during batch window. All historical patches applied during 10:00-14:00 UTC were successful.'}},
-    {'host': 'monitor-01.acme.internal',   'system_uuid': 'uuid-mon-01', 'age_days': 12, 'risk_score': 33.20, 'decision': 'review', 'reason': 'Production monitoring — Prometheus + Grafana stack.',
-     'decision_support': {'summary': 'monitor-01 is the observability stack. Patching is straightforward but temporarily blinds alerting. Coordinate with oncall to acknowledge the monitoring gap.'}},
-    {'host': 'web-prod-01.acme.internal',  'system_uuid': 'uuid-web-01', 'age_days': 12, 'risk_score': 35.40, 'decision': 'review', 'reason': 'Production web frontend.',
-     'decision_support': {'summary': 'Standard RHEL web server. Clean history, no issues.'}},
-    {'host': 'web-prod-02.acme.internal',  'system_uuid': 'uuid-web-02', 'age_days': 12, 'risk_score': 34.80, 'decision': 'review', 'reason': 'Production web frontend.',
-     'decision_support': {'summary': 'Standard RHEL web server. Clean history, no issues.'}},
-    {'host': 'test-app-01.acme.internal',  'system_uuid': 'uuid-tst-01', 'age_days': 12, 'risk_score': 18.50, 'decision': 'ok', 'reason': 'Below risk threshold.'},
-    {'host': 'test-app-02.acme.internal',  'system_uuid': 'uuid-tst-02', 'age_days': 12, 'risk_score': 18.50, 'decision': 'ok', 'reason': 'Below risk threshold.'},
-    {'host': 'test-app-03.acme.internal',  'system_uuid': 'uuid-tst-03', 'age_days': 12, 'risk_score': 17.90, 'decision': 'ok', 'reason': 'Below risk threshold.'},
-    {'host': 'test-db-01.acme.internal',   'system_uuid': 'uuid-tst-db', 'age_days': 12, 'risk_score': 19.20, 'decision': 'ok', 'reason': 'Below risk threshold.'},
-    {'host': 'test-gw-01.acme.internal',   'system_uuid': 'uuid-tst-gw', 'age_days': 12, 'risk_score': 16.80, 'decision': 'ok', 'reason': 'Below risk threshold.'},
-    {'host': 'test-batch-01.acme.internal','system_uuid': 'uuid-tst-bt', 'age_days': 12, 'risk_score': 15.40, 'decision': 'ok', 'reason': 'Below risk threshold.'},
-    {'host': 'test-web-01.acme.internal',  'system_uuid': 'uuid-tst-w1', 'age_days': 12, 'risk_score': 14.90, 'decision': 'ok', 'reason': 'Below risk threshold.'},
-    {'host': 'test-web-02.acme.internal',  'system_uuid': 'uuid-tst-w2', 'age_days': 12, 'risk_score': 14.90, 'decision': 'ok', 'reason': 'Below risk threshold.'},
-    {'host': 'test-web-03.acme.internal',  'system_uuid': 'uuid-tst-w3', 'age_days': 12, 'risk_score': 14.60, 'decision': 'ok', 'reason': 'Below risk threshold.'},
-    {'host': 'test-web-04.acme.internal',  'system_uuid': 'uuid-tst-w4', 'age_days': 12, 'risk_score': 14.20, 'decision': 'ok', 'reason': 'Below risk threshold.'},
-    {'host': 'test-web-05.acme.internal',  'system_uuid': 'uuid-tst-w5', 'age_days': 12, 'risk_score': 13.80, 'decision': 'ok', 'reason': 'Below risk threshold.'},
-    {'host': 'test-monitor-01.acme.internal','system_uuid':'uuid-tst-mn','age_days': 12, 'risk_score': 12.10, 'decision': 'ok', 'reason': 'Below risk threshold.'},
-    {'host': 'test-ci-01.acme.internal',   'system_uuid': 'uuid-tst-ci', 'age_days': 12, 'risk_score': 11.50, 'decision': 'ok', 'reason': 'Below risk threshold.'},
-    {'host': 'dev-app-01.acme.internal',   'system_uuid': 'uuid-dev-01', 'age_days': 12, 'risk_score': 8.20,  'decision': 'ok', 'reason': 'Below risk threshold.'},
-    {'host': 'dev-app-02.acme.internal',   'system_uuid': 'uuid-dev-02', 'age_days': 12, 'risk_score': 8.10,  'decision': 'ok', 'reason': 'Below risk threshold.'},
-    {'host': 'dev-app-03.acme.internal',   'system_uuid': 'uuid-dev-03', 'age_days': 12, 'risk_score': 7.90,  'decision': 'ok', 'reason': 'Below risk threshold.'},
-    {'host': 'dev-db-01.acme.internal',    'system_uuid': 'uuid-dev-db', 'age_days': 12, 'risk_score': 9.40,  'decision': 'ok', 'reason': 'Below risk threshold.'},
-    {'host': 'dev-web-01.acme.internal',   'system_uuid': 'uuid-dev-w1', 'age_days': 12, 'risk_score': 6.80,  'decision': 'ok', 'reason': 'Below risk threshold.'},
-    {'host': 'dev-web-02.acme.internal',   'system_uuid': 'uuid-dev-w2', 'age_days': 12, 'risk_score': 6.50,  'decision': 'ok', 'reason': 'Below risk threshold.'},
-    {'host': 'dev-web-03.acme.internal',   'system_uuid': 'uuid-dev-w3', 'age_days': 12, 'risk_score': 6.20,  'decision': 'ok', 'reason': 'Below risk threshold.'},
-    {'host': 'dev-ci-01.acme.internal',    'system_uuid': 'uuid-dev-ci', 'age_days': 12, 'risk_score': 5.90,  'decision': 'ok', 'reason': 'Below risk threshold.'},
-    {'host': 'dev-sandbox-01.acme.internal','system_uuid':'uuid-dev-sb', 'age_days': 12, 'risk_score': 5.10,  'decision': 'ok', 'reason': 'Below risk threshold.'},
-    {'host': 'dev-sandbox-02.acme.internal','system_uuid':'uuid-dev-s2', 'age_days': 12, 'risk_score': 4.80,  'decision': 'ok', 'reason': 'Below risk threshold.'},
-    {'host': 'dev-sandbox-03.acme.internal','system_uuid':'uuid-dev-s3', 'age_days': 12, 'risk_score': 4.50,  'decision': 'ok', 'reason': 'Below risk threshold.'},
-    {'host': 'dev-test-runner.acme.internal','system_uuid':'uuid-dev-tr','age_days': 12, 'risk_score': 4.20,  'decision': 'ok', 'reason': 'Below risk threshold.'},
+    {'host': 'monitor-01.acme.internal',   'system_uuid': 'uuid-mon-01', 'age_days': 45, 'risk_score': 27.40, 'decision': 'ok', 'reason': 'Monitoring stack — low complexity, clean history.'},
+    {'host': 'web-prod-01.acme.internal',  'system_uuid': 'uuid-web-01', 'age_days': 30, 'risk_score': 24.80, 'decision': 'ok', 'reason': 'Standard web frontend — no special dependencies.'},
+    {'host': 'web-prod-02.acme.internal',  'system_uuid': 'uuid-web-02', 'age_days': 18, 'risk_score': 22.60, 'decision': 'ok', 'reason': 'Standard web frontend — recently provisioned.'},
+    {'host': 'test-app-01.acme.internal',  'system_uuid': 'uuid-tst-01', 'age_days': 8,   'risk_score': 21.30, 'decision': 'ok', 'reason': 'Test environment — no production impact.'},
+    {'host': 'test-app-02.acme.internal',  'system_uuid': 'uuid-tst-02', 'age_days': 15,  'risk_score': 19.70, 'decision': 'ok', 'reason': 'Test environment — standard RHEL instance.'},
+    {'host': 'test-app-03.acme.internal',  'system_uuid': 'uuid-tst-03', 'age_days': 22,  'risk_score': 17.20, 'decision': 'ok', 'reason': 'Test environment — isolated network.'},
+    {'host': 'test-db-01.acme.internal',   'system_uuid': 'uuid-tst-db', 'age_days': 60,  'risk_score': 26.10, 'decision': 'ok', 'reason': 'Test database — no production data.'},
+    {'host': 'test-gw-01.acme.internal',   'system_uuid': 'uuid-tst-gw', 'age_days': 10,  'risk_score': 14.50, 'decision': 'ok', 'reason': 'Test gateway — mirrors prod config.'},
+    {'host': 'test-batch-01.acme.internal','system_uuid': 'uuid-tst-bt', 'age_days': 5,   'risk_score': 11.80, 'decision': 'ok', 'reason': 'Test batch — no settlement data.'},
+    {'host': 'test-web-01.acme.internal',  'system_uuid': 'uuid-tst-w1', 'age_days': 35,  'risk_score': 16.40, 'decision': 'ok', 'reason': 'Test web tier — clean history.'},
+    {'host': 'test-web-02.acme.internal',  'system_uuid': 'uuid-tst-w2', 'age_days': 7,   'risk_score': 8.90,  'decision': 'ok', 'reason': 'Test web — recently rebuilt.'},
+    {'host': 'test-web-03.acme.internal',  'system_uuid': 'uuid-tst-w3', 'age_days': 42,  'risk_score': 23.50, 'decision': 'ok', 'reason': 'Test web — older instance, stable.'},
+    {'host': 'test-web-04.acme.internal',  'system_uuid': 'uuid-tst-w4', 'age_days': 14,  'risk_score': 12.70, 'decision': 'ok', 'reason': 'Test web — low utilization.'},
+    {'host': 'test-web-05.acme.internal',  'system_uuid': 'uuid-tst-w5', 'age_days': 3,   'risk_score': 5.60,  'decision': 'ok', 'reason': 'Test web — freshly deployed.'},
+    {'host': 'test-monitor-01.acme.internal','system_uuid':'uuid-tst-mn','age_days': 28,  'risk_score': 19.80, 'decision': 'ok', 'reason': 'Test monitoring — standalone.'},
+    {'host': 'test-ci-01.acme.internal',   'system_uuid': 'uuid-tst-ci', 'age_days': 20,  'risk_score': 10.20, 'decision': 'ok', 'reason': 'CI runner — ephemeral workloads.'},
+    {'host': 'dev-app-01.acme.internal',   'system_uuid': 'uuid-dev-01', 'age_days': 90,  'risk_score': 15.30, 'decision': 'ok', 'reason': 'Dev environment — shared app server.'},
+    {'host': 'dev-app-02.acme.internal',   'system_uuid': 'uuid-dev-02', 'age_days': 12,  'risk_score': 7.40,  'decision': 'ok', 'reason': 'Dev — personal dev instance.'},
+    {'host': 'dev-app-03.acme.internal',   'system_uuid': 'uuid-dev-03', 'age_days': 180, 'risk_score': 28.90, 'decision': 'ok', 'reason': 'Dev — legacy app testing, older kernel.'},
+    {'host': 'dev-db-01.acme.internal',    'system_uuid': 'uuid-dev-db', 'age_days': 55,  'risk_score': 13.60, 'decision': 'ok', 'reason': 'Dev database — synthetic data only.'},
+    {'host': 'dev-web-01.acme.internal',   'system_uuid': 'uuid-dev-w1', 'age_days': 6,   'risk_score': 3.20,  'decision': 'ok', 'reason': 'Dev web — minimal footprint.'},
+    {'host': 'dev-web-02.acme.internal',   'system_uuid': 'uuid-dev-w2', 'age_days': 25,  'risk_score': 9.80,  'decision': 'ok', 'reason': 'Dev web — shared frontend testing.'},
+    {'host': 'dev-web-03.acme.internal',   'system_uuid': 'uuid-dev-w3', 'age_days': 75,  'risk_score': 20.10, 'decision': 'ok', 'reason': 'Dev web — integration test target.'},
+    {'host': 'dev-ci-01.acme.internal',    'system_uuid': 'uuid-dev-ci', 'age_days': 40,  'risk_score': 6.50,  'decision': 'ok', 'reason': 'Dev CI — disposable runner.'},
+    {'host': 'dev-sandbox-01.acme.internal','system_uuid':'uuid-dev-sb', 'age_days': 2,   'risk_score': 2.40,  'decision': 'ok', 'reason': 'Sandbox — throwaway environment.'},
+    {'host': 'dev-sandbox-02.acme.internal','system_uuid':'uuid-dev-s2', 'age_days': 120, 'risk_score': 17.80, 'decision': 'ok', 'reason': 'Sandbox — long-running experiment.'},
+    {'host': 'dev-sandbox-03.acme.internal','system_uuid':'uuid-dev-s3', 'age_days': 8,   'risk_score': 4.10,  'decision': 'ok', 'reason': 'Sandbox — recently spun up.'},
+    {'host': 'dev-test-runner.acme.internal','system_uuid':'uuid-dev-tr','age_days': 15,  'risk_score': 11.30, 'decision': 'ok', 'reason': 'Test runner — stateless workloads.'},
 ]
 
 DEMO_PLAYBOOK_PATH = f'playbooks/generated/{DEMO_CVE}-v3-demo.yml'
@@ -205,7 +202,7 @@ DEMO_STAGES_AGENTIC = [
     }),
     ('scoring_hosts_done',    'Risk assessment: 27% failure probability, HIGH risk',   3, {
         '_add_hosts_full': True,
-        '_a2a': [{'from': 'risk', 'to': 'patch_manager', 'action': 'score_hosts', 'type': 'response', 'message': 'Risk Agent → Patch Manager: 12 hosts require review, 27% failure probability, HIGH risk'}],
+        '_a2a': [{'from': 'risk', 'to': 'patch_manager', 'action': 'score_hosts', 'type': 'response', 'message': 'Risk Agent → Patch Manager: 9 hosts require review, 24% failure probability, HIGH risk'}],
     }),
     ('analyzing_history',     'LLM analyzing historical patch records via RAG',        6, {
         '_add_history': True,
@@ -868,6 +865,118 @@ def run_post_approval(state=None, speed=1.0):
         }),
     ]
 
+    # ── ROI Agent stages (after workflow_complete) ──
+    # All values configurable via Settings → ROI Agent
+    labor_rate = float(os.environ.get('ROI_LABOR_RATE', '72'))
+    manual_min_per_host = float(os.environ.get('ROI_MANUAL_MIN_PER_HOST', '30'))
+    ai_min_per_host = float(os.environ.get('ROI_AI_MIN_PER_HOST', '5'))
+    exposure_manual_factor = float(os.environ.get('ROI_EXPOSURE_MANUAL_FACTOR', '1.4'))
+    exposure_ai_factor = float(os.environ.get('ROI_EXPOSURE_AI_FACTOR', '0.6'))
+    dim_engineering_pct = float(os.environ.get('ROI_DIM_ENGINEERING_PCT', '35')) / 100
+    dim_exposure_pct = float(os.environ.get('ROI_DIM_EXPOSURE_PCT', '44')) / 100
+    dim_reuse_pct = float(os.environ.get('ROI_DIM_REUSE_PCT', '13')) / 100
+    dim_recovery_pct = float(os.environ.get('ROI_DIM_RECOVERY_PCT', '8')) / 100
+
+    total_systems = T + C + P
+    manual_hours = round(total_systems * manual_min_per_host / 60, 1)
+    ai_hours = round(total_systems * ai_min_per_host / 60, 1)
+    hours_saved = round(manual_hours - ai_hours, 1)
+    labor_saved = round(hours_saved * labor_rate)
+    manual_cost_per_host = round(manual_min_per_host * labor_rate / 60)
+    ai_cost_per_host = round(ai_min_per_host * labor_rate / 60)
+    cost_reduction_pct = round((1 - ai_cost_per_host / max(manual_cost_per_host, 1)) * 100)
+    exposure_manual_hrs = round(manual_hours * exposure_manual_factor, 1)
+    exposure_ai_hrs = round(ai_hours * exposure_ai_factor, 1)
+
+    roi_data = {
+        'assumptions': {
+            'labor_rate': labor_rate,
+            'manual_min_per_host': manual_min_per_host,
+            'ai_min_per_host': ai_min_per_host,
+            'exposure_manual_factor': exposure_manual_factor,
+            'exposure_ai_factor': exposure_ai_factor,
+            'dim_pcts': {'engineering': round(dim_engineering_pct * 100), 'exposure': round(dim_exposure_pct * 100), 'reuse': round(dim_reuse_pct * 100), 'recovery': round(dim_recovery_pct * 100)},
+        },
+        'systems': total_systems,
+        'manual_hours': manual_hours,
+        'ai_hours': ai_hours,
+        'hours_saved': hours_saved,
+        'labor_saved': labor_saved,
+        'manual_cost_per_host': manual_cost_per_host,
+        'ai_cost_per_host': ai_cost_per_host,
+        'cost_reduction_pct': cost_reduction_pct,
+        'exposure_manual_hrs': exposure_manual_hrs,
+        'exposure_ai_hrs': exposure_ai_hrs,
+        'dimensions': {
+            'engineering_effort': round(hours_saved * labor_rate * dim_engineering_pct),
+            'reduced_exposure': round(hours_saved * labor_rate * dim_exposure_pct),
+            'automation_reuse': round(hours_saved * labor_rate * dim_reuse_pct),
+            'faster_recovery': round(hours_saved * labor_rate * dim_recovery_pct),
+        },
+        'total_value': round(hours_saved * labor_rate),
+        'ai_contributions': {
+            'systems_analyzed': total_systems,
+            'remediation_decisions': total_systems,
+            'risk_assessments': sum(1 for h in (state.get('hosts') or []) if h.get('decision') == 'review'),
+            'historical_correlations': 8,
+            'a2a_handoffs': len([e for e in state.get('stream', []) if e.get('event') == 'a2a_message']),
+            'health_checks': 3,
+            'failures_diagnosed': 1,
+            'rollbacks_executed': 1,
+            'human_approvals': 1,
+        },
+        'benchmarks': [
+            {'metric': 'Vulnerability remediation time reduction', 'value': '91%', 'source': 'Red Hat / Principled Technologies'},
+            {'metric': 'Manual security-update effort reduction', 'value': '80%', 'source': 'Forrester TEI — Ansible Tower'},
+            {'metric': 'Patch-status tracking reduction', 'value': '88%', 'source': 'Red Hat / Principled Technologies'},
+            {'metric': 'Legacy system patching acceleration', 'value': '10 days → 6 hrs', 'source': 'Red Hat IT case study'},
+            {'metric': 'Automation labor savings', 'value': '1,800+ hrs/mo', 'source': 'ABB case study — AAP'},
+            {'metric': 'Ansible Tower ROI', 'value': '146% / $1.03M NPV', 'source': 'Forrester TEI study'},
+            {'metric': 'RHEL + Insights + Satellite ROI', 'value': '540% over 3 yrs', 'source': 'IDC study'},
+        ],
+        'timeline_manual': [
+            {'time': '09:00', 'event': 'Discovery', 'duration_min': 80},
+            {'time': '10:20', 'event': 'Investigation', 'duration_min': 115},
+            {'time': '12:15', 'event': 'Risk analysis', 'duration_min': 105},
+            {'time': '14:00', 'event': 'Change approval', 'duration_min': 150},
+            {'time': '16:30', 'event': 'Script preparation', 'duration_min': 90},
+            {'time': '18:00', 'event': 'Patch execution', 'duration_min': 165},
+            {'time': '20:45', 'event': 'Validation', 'duration_min': 85},
+            {'time': '22:10', 'event': 'Failure investigation', 'duration_min': 80},
+            {'time': '23:30', 'event': 'Recovery', 'duration_min': 60},
+        ],
+        'timeline_ai': [
+            {'time': '09:00', 'event': 'Discovery', 'duration_min': 3},
+            {'time': '09:03', 'event': 'Risk assessment', 'duration_min': 2},
+            {'time': '09:05', 'event': 'Change request', 'duration_min': 3},
+            {'time': '09:08', 'event': 'Approval', 'duration_min': 1},
+            {'time': '09:09', 'event': 'Canary', 'duration_min': 5},
+            {'time': '09:14', 'event': 'Production', 'duration_min': 3},
+            {'time': '09:17', 'event': 'Failure', 'duration_min': 1},
+            {'time': '09:18', 'event': 'Diagnosis', 'duration_min': 3},
+            {'time': '09:21', 'event': 'Recovery', 'duration_min': 4},
+            {'time': '09:25', 'event': 'Complete', 'duration_min': 0},
+        ],
+    }
+
+    roi_stages = [
+        ('roi_calculating', 'ROI Agent analyzing patch economics', 3, {
+            'roi': roi_data,
+            '_a2a': [
+                {'from': 'patch_manager', 'to': 'roi', 'action': 'calculate_roi', 'type': 'request', 'message': f'Patch Manager → ROI Agent: calculate value created for {total_systems} systems patched'},
+                {'from': 'roi', 'to': 'roi', 'action': 'benchmark_lookup', 'type': 'event', 'message': 'ROI Agent: loading industry benchmarks — Forrester TEI, Red Hat/PT, IDC studies'},
+            ],
+        }),
+        ('roi_complete', f'ROI: ${labor_saved:,} saved — {hours_saved} hours recovered — {cost_reduction_pct}% cost reduction', 2, {
+            'roi': roi_data,
+            '_a2a': [
+                {'from': 'roi', 'to': 'patch_manager', 'action': 'roi_complete', 'type': 'response', 'message': f'ROI Agent → Patch Manager: ${labor_saved:,} value created — {hours_saved} hours recovered vs manual remediation'},
+                {'from': 'roi', 'to': 'console', 'action': 'roi_dashboard', 'type': 'event', 'message': f'ROI Agent → Console: dashboard ready — {cost_reduction_pct}% cost reduction per system (${manual_cost_per_host} → ${ai_cost_per_host})'},
+            ],
+        }),
+    ]
+    post_approval_stages.extend(roi_stages)
+
     for stage_key, message, delay, updates in post_approval_stages:
         ts = now_iso()
         log(f'STEP {stage_key} — {message}')
@@ -931,6 +1040,8 @@ def run_post_approval(state=None, speed=1.0):
             state['summary']['remediation_progress'] = updates['remediation_progress']
         if 'final_summary' in updates:
             state['summary']['final_summary'] = updates['final_summary']
+        if 'roi' in updates:
+            state['summary']['roi'] = updates['roi']
         if 'slack' in updates:
             state['summary']['latest_slack'] = updates['slack']
 
