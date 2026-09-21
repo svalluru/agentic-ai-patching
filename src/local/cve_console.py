@@ -2117,6 +2117,21 @@ class Handler(BaseHTTPRequestHandler):
 
 
 SETTINGS_DEFAULTS = {
+    'LLAMA_STACK_URL': 'http://127.0.0.1:8321',
+    'DEFAULT_LLM_MODEL': 'vllm-inference/llama-scout-17b',
+    'VECTOR_DB_ID': 'patch_history',
+    'RISK_URL': 'http://risk-model.apps.ocp.example.com/v2/models/patch-risk/infer',
+    'INSIGHTS_MCP_ENDPOINT': 'http://127.0.0.1:8400',
+    'INSIGHTS_TOOLGROUP': 'insights_mcp',
+    'AAP_BASE_URL': 'https://aap-controller.apps.ocp.example.com',
+    'AAP_VERIFY_TLS': 'false',
+    'GITHUB_MCP_ENDPOINT': 'http://127.0.0.1:8401',
+    'GITHUB_REPO_OWNER': 'svalluru',
+    'GITHUB_REPO_NAME': 'agentic-ai-patching',
+    'PLAYBOOK_PUSH_METHOD': 'git',
+    'CVE_CONSOLE_HOST': '127.0.0.1',
+    'CVE_CONSOLE_PORT': '8787',
+    'CVE_FLOW_LOG_LEVEL': 'INFO',
     'ROI_LABOR_RATE': '72',
     'ROI_MANUAL_MIN_PER_HOST': '30',
     'ROI_AI_MIN_PER_HOST': '5',

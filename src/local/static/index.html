@@ -3338,28 +3338,28 @@ function toggleLogPanel() {
 
 const SETTINGS_SCHEMA = [
   {section: 'AI Gateway (Llama Stack / OGX)', vars: [
-    {key: 'LLAMA_STACK_URL',         label: 'Llama Stack URL',       hint: 'URL of the Llama Stack server for LLM inference and tool routing'},
-    {key: 'DEFAULT_LLM_MODEL',      label: 'LLM Model',             hint: 'Model ID for LLM inference (e.g. vllm-inference/llama-scout-17b)'},
-    {key: 'VECTOR_DB_ID',           label: 'Vector DB ID',           hint: 'Llama Stack vector store ID for RAG patch history lookups'},
+    {key: 'LLAMA_STACK_URL',         label: 'Llama Stack URL',       hint: 'URL of the Llama Stack server for LLM inference and tool routing', defaultVal: 'http://127.0.0.1:8321'},
+    {key: 'DEFAULT_LLM_MODEL',      label: 'LLM Model',             hint: 'Model ID for LLM inference (e.g. vllm-inference/llama-scout-17b)', defaultVal: 'vllm-inference/llama-scout-17b'},
+    {key: 'VECTOR_DB_ID',           label: 'Vector DB ID',           hint: 'Llama Stack vector store ID for RAG patch history lookups', defaultVal: 'patch_history'},
   ]},
   {section: 'Risk Model (RHOAI)', vars: [
-    {key: 'RISK_URL',               label: 'RHOAI Risk URL',        hint: 'KServe endpoint for the RHOAI risk prediction model'},
+    {key: 'RISK_URL',               label: 'RHOAI Risk URL',        hint: 'KServe endpoint for the RHOAI risk prediction model', defaultVal: 'http://risk-model.apps.ocp.example.com/v2/models/patch-risk/infer'},
   ]},
   {section: 'Red Hat Insights', vars: [
-    {key: 'INSIGHTS_MCP_ENDPOINT',  label: 'Insights MCP',          hint: 'MCP server endpoint for Insights vulnerability and remediation data'},
-    {key: 'INSIGHTS_TOOLGROUP',     label: 'Tool Group',             hint: 'Llama Stack tool group ID for Insights MCP tools'},
+    {key: 'INSIGHTS_MCP_ENDPOINT',  label: 'Insights MCP',          hint: 'MCP server endpoint for Insights vulnerability and remediation data', defaultVal: 'http://127.0.0.1:8400'},
+    {key: 'INSIGHTS_TOOLGROUP',     label: 'Tool Group',             hint: 'Llama Stack tool group ID for Insights MCP tools', defaultVal: 'insights_mcp'},
   ]},
   {section: 'Ansible Automation Platform', vars: [
-    {key: 'AAP_BASE_URL',           label: 'AAP URL',               hint: 'Base URL for AAP Controller API'},
+    {key: 'AAP_BASE_URL',           label: 'AAP URL',               hint: 'Base URL for AAP Controller API', defaultVal: 'https://aap-controller.apps.ocp.example.com'},
     {key: 'AAP_TOKEN',              label: 'AAP Token',              hint: 'OAuth token for AAP Controller', secret: true},
-    {key: 'AAP_VERIFY_TLS',         label: 'Verify TLS',            hint: 'Verify TLS certificates for AAP connections'},
+    {key: 'AAP_VERIFY_TLS',         label: 'Verify TLS',            hint: 'Verify TLS certificates for AAP connections', defaultVal: 'false'},
   ]},
   {section: 'GitHub', vars: [
-    {key: 'GITHUB_MCP_ENDPOINT',    label: 'GitHub MCP',            hint: 'MCP server endpoint for GitHub operations'},
+    {key: 'GITHUB_MCP_ENDPOINT',    label: 'GitHub MCP',            hint: 'MCP server endpoint for GitHub operations', defaultVal: 'http://127.0.0.1:8401'},
     {key: 'GITHUB_TOKEN',           label: 'GitHub Token',           hint: 'Personal access token for GitHub', secret: true},
-    {key: 'GITHUB_REPO_OWNER',     label: 'Repo Owner',             hint: 'GitHub repository owner'},
-    {key: 'GITHUB_REPO_NAME',      label: 'Repo Name',              hint: 'GitHub repository name'},
-    {key: 'PLAYBOOK_PUSH_METHOD',  label: 'Push Method',            hint: 'How to push playbooks: git or mcp'},
+    {key: 'GITHUB_REPO_OWNER',     label: 'Repo Owner',             hint: 'GitHub repository owner', defaultVal: 'svalluru'},
+    {key: 'GITHUB_REPO_NAME',      label: 'Repo Name',              hint: 'GitHub repository name', defaultVal: 'agentic-ai-patching'},
+    {key: 'PLAYBOOK_PUSH_METHOD',  label: 'Push Method',            hint: 'How to push playbooks: git or mcp', defaultVal: 'git'},
   ]},
   {section: 'ROI Agent', vars: [
     {key: 'ROI_LABOR_RATE',             label: 'Labor Rate ($/hr)',       hint: 'Engineer hourly labor rate for cost calculations', defaultVal: '72'},
@@ -3373,9 +3373,9 @@ const SETTINGS_SCHEMA = [
     {key: 'ROI_DIM_RECOVERY_PCT',       label: 'Recovery %',               hint: 'Value allocation to faster recovery', defaultVal: '8'},
   ]},
   {section: 'Console', vars: [
-    {key: 'CVE_CONSOLE_HOST',       label: 'Host',                  hint: 'Network address to bind the console server to'},
-    {key: 'CVE_CONSOLE_PORT',       label: 'Port',                  hint: 'TCP port for the console UI (default 8787)'},
-    {key: 'CVE_FLOW_LOG_LEVEL',     label: 'Log Level',             hint: 'Python log level: DEBUG, INFO, WARNING, or ERROR'},
+    {key: 'CVE_CONSOLE_HOST',       label: 'Host',                  hint: 'Network address to bind the console server to', defaultVal: '127.0.0.1'},
+    {key: 'CVE_CONSOLE_PORT',       label: 'Port',                  hint: 'TCP port for the console UI (default 8787)', defaultVal: '8787'},
+    {key: 'CVE_FLOW_LOG_LEVEL',     label: 'Log Level',             hint: 'Python log level: DEBUG, INFO, WARNING, or ERROR', defaultVal: 'INFO'},
   ]},
 ];
 
